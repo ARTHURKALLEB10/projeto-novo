@@ -83,6 +83,20 @@ async function startWA() {
 
   sock.ev.on('creds.update', saveCreds)
 
+  // Carrega lista de chats existentes quando conecta
+  sock.ev.on('chats.set', ({ chats: chatList }) => {
+    chatList.forEach(chat => {
+      const jid = chat.id
+      if (!jid || jid.endsWith('@g.us') || jid.endsWith('@broadcast')) return
+      const phone = jid.replace('@s.whatsapp.net','')
+      if (!contacts[jid]) {
+        contacts[jid] = { jid, name: chat.name || `+${phone}`, phone, lastMsg: '', lastTs: '' }
+      }
+    })
+    if (Object.keys(contacts).length) io.emit('contacts-update', Object.values(contacts))
+    console.log(`📋 ${Object.keys(contacts).length} contatos carregados`)
+  })
+
   // Mensagens recebidas e enviadas
   sock.ev.on('messages.upsert', async ({ messages: msgs, type }) => {
     if (type !== 'notify') return

@@ -110,30 +110,57 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
 .kk-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-top:5px}
 .kan-add{width:100%;background:none;border:1px dashed var(--border);color:var(--muted);border-radius:7px;padding:7px;cursor:pointer;font-size:12px;transition:all .15s;margin-top:2px}
 .kan-add:hover{border-color:var(--accent);color:var(--accent)}
-/* CHAT */
-.chat-lay{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;height:calc(100vh-138px)}
-.cl{width:265px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.cl-h{padding:13px 15px;border-bottom:1px solid var(--border);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
-.cl-srch{padding:9px 11px;border-bottom:1px solid var(--border)}
-.cl-list{overflow-y:auto;flex:1}
-.ci{padding:11px 13px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:9px;align-items:flex-start;transition:background .1s}
-.ci:hover,.ci.on{background:var(--s2)}
-.ci-av{width:37px;height:37px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
-.ci-nm{font-size:13px;font-weight:700} .ci-pv{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:145px}
-.ci-tm{font-size:10px;color:var(--muted);white-space:nowrap}
-.ci-unr{width:17px;height:17px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
-.cw{flex:1;display:flex;flex-direction:column;min-width:0}
-.cw-h{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;flex-shrink:0}
-.cm{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:9px}
-.msg{max-width:65%} .msg.rx{align-self:flex-start} .msg.tx{align-self:flex-end}
-.mb{padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.55}
-.msg.rx .mb{background:var(--s2);border-radius:3px 10px 10px 10px}
-.msg.tx .mb{background:var(--accent);color:#fff;border-radius:10px 3px 10px 10px}
-.mt{font-size:10px;color:var(--muted);margin-top:3px} .msg.tx .mt{text-align:right}
-.ti-ind{font-size:11px;color:var(--muted);padding:0 15px 5px;min-height:20px}
-.ci-bar{padding:11px 15px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.ci-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit;resize:none;transition:border-color .15s}
-.ci-in:focus{border-color:var(--accent)}
+/* CHAT - WhatsApp Web Style */
+.content:has(#pg-chat.on){padding:0!important;overflow:hidden}
+#pg-chat.on{display:flex!important;flex-direction:column;height:calc(100vh - 58px)}
+.wa-root{display:flex;height:100%;overflow:hidden}
+/* left */
+.wa-left{width:380px;background:#111b21;border-right:1px solid #2a3942;display:flex;flex-direction:column;flex-shrink:0;position:relative}
+.wa-lhd{height:59px;background:#202c33;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.wa-srch-wrap{padding:8px 12px;background:#111b21;flex-shrink:0}
+.wa-srch-i{display:flex;align-items:center;gap:8px;background:#202c33;border-radius:8px;padding:8px 12px;height:35px}
+.wa-srch-i input{background:none;border:none;outline:none;color:#e9edef;font-size:13px;flex:1}
+.wa-srch-i input::placeholder{color:#8696a0}
+.wa-list{overflow-y:auto;flex:1}
+.wa-ci{display:flex;align-items:center;padding:10px 13px;gap:13px;cursor:pointer;border-bottom:1px solid #1a2026;transition:background .1s;min-height:72px}
+.wa-ci:hover{background:#202c33}.wa-ci.on{background:#2a3942}
+.wa-av{width:49px;height:49px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0}
+.wa-ci-info{flex:1;min-width:0}
+.wa-ci-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.wa-ci-nm{font-size:15px;font-weight:400;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.wa-ci-ts{font-size:11px;color:#8696a0;flex-shrink:0}
+.wa-ci-bot{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.wa-ci-pv{font-size:13px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.wa-ci-unr{min-width:20px;height:20px;background:#00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#111b21;flex-shrink:0;padding:0 5px}
+.wa-fab{position:absolute;bottom:16px;right:16px;width:56px;height:56px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(0,168,132,.45);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.wa-fab:hover{background:#06cf9c;transform:scale(1.06)}
+/* right */
+.wa-right{flex:1;display:flex;flex-direction:column;min-width:0;background:#0b141a}
+.wa-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b141a;text-align:center;padding:40px}
+.wa-rhd{height:59px;background:#202c33;display:flex;align-items:center;padding:0 16px;gap:13px;flex-shrink:0}
+.wa-rhd-info{flex:1;min-width:0}
+.wa-rhd-nm{font-size:15px;color:#e9edef;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-rhd-st{font-size:12px;color:#8696a0}
+.wa-ic-btn{width:40px;height:40px;border-radius:50%;background:none;border:none;color:#aebac1;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.wa-ic-btn:hover{background:rgba(255,255,255,.08)}
+.wa-msgs{flex:1;overflow-y:auto;padding:20px 8%;display:flex;flex-direction:column;gap:1px;background:#0b141a}
+.wa-msg{max-width:65%;display:flex;flex-direction:column;margin-bottom:2px}
+.wa-msg.rx{align-self:flex-start}.wa-msg.tx{align-self:flex-end}
+.wa-mb{padding:6px 7px 8px 9px;border-radius:7.5px;font-size:14.2px;line-height:1.5;color:#e9edef;word-wrap:break-word;position:relative}
+.wa-msg.rx .wa-mb{background:#202c33;border-radius:0 7.5px 7.5px 7.5px}
+.wa-msg.tx .wa-mb{background:#005c4b;border-radius:7.5px 7.5px 0 7.5px}
+.wa-msg.rx .wa-mb::before{content:'';position:absolute;left:-8px;top:0;border-top:8px solid #202c33;border-left:8px solid transparent}
+.wa-msg.tx .wa-mb::after{content:'';position:absolute;right:-8px;top:0;border-top:8px solid #005c4b;border-right:8px solid transparent}
+.wa-mt{display:flex;align-items:center;gap:3px;justify-content:flex-end;margin-top:1px;padding:0 2px}
+.wa-mt span{font-size:11px;color:#8696a0}
+.wa-mt .ck{color:#53bdeb}
+.wa-foot{background:#202c33;display:flex;align-items:flex-end;padding:10px 16px;gap:10px;flex-shrink:0}
+.wa-inp{flex:1;background:#2a3942;border:none;border-radius:8px;padding:11px 14px;color:#e9edef;font-size:15px;outline:none;font-family:inherit;resize:none;max-height:100px;min-height:42px;line-height:1.4}
+.wa-inp::placeholder{color:#8696a0}
+.wa-send-btn{width:52px;height:52px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.wa-send-btn:hover{background:#06cf9c}
+/* status bar */
+.wa-stbar{padding:7px 16px;font-size:12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
 /* EMPTY */
 .empty{text-align:center;padding:65px 20px}
 .e-ic{font-size:52px;margin-bottom:12px;opacity:.3}
@@ -295,51 +322,59 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
 
   <!-- ══ CHAT ══ -->
   <div class="pg" id="pg-chat">
-    <!-- Banner WhatsApp -->
-    <div id="wa-banner" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:12px">
-      <div id="wa-led" style="width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0;box-shadow:0 0 0 3px rgba(100,116,139,.15)"></div>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:700" id="wa-status-txt">WhatsApp desconectado</div>
-        <div style="font-size:11px;color:var(--muted)" id="wa-phone-txt">Conecte para receber e enviar mensagens reais</div>
+    <div class="wa-root">
+      <!-- ── Painel Esquerdo ── -->
+      <div class="wa-left">
+        <div class="wa-lhd">
+          <div class="wa-av" style="width:40px;height:40px;font-size:14px;background:#2a3942;cursor:pointer" id="wa-my-av">AK</div>
+          <div style="flex:1"></div>
+          <button class="wa-ic-btn" title="Nova conversa" onclick="openM('nova-conversa',null)" style="font-size:20px">✏</button>
+          <button class="wa-ic-btn" id="wa-connect-btn" onclick="openQR()" title="Conectar WhatsApp">📱</button>
+          <button class="wa-ic-btn" id="wa-disconnect-btn" onclick="waLogout()" title="Desconectar" style="display:none;color:#ef4444">⏻</button>
+        </div>
+        <div class="wa-stbar" id="wa-status-bar" style="background:#1a2026;border-bottom:1px solid #2a3942">
+          <div id="wa-led" style="width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0"></div>
+          <span id="wa-status-txt" style="color:#8696a0">Desconectado</span>
+          <span id="wa-phone-txt" style="color:#00a884;margin-left:auto;font-weight:600"></span>
+        </div>
+        <div class="wa-srch-wrap">
+          <div class="wa-srch-i">
+            <span style="color:#8696a0;font-size:14px">🔍</span>
+            <input type="text" placeholder="Buscar ou começar nova conversa" oninput="filterChats(this.value)"/>
+          </div>
+        </div>
+        <div class="wa-list" id="cl-list"></div>
+        <button class="wa-fab" onclick="openM('nova-conversa',null)" title="Nova conversa">✏</button>
       </div>
-      <button class="btn bp" id="wa-connect-btn" onclick="openQR()" style="font-size:12px">📱 Conectar WhatsApp</button>
-      <button class="btn br" id="wa-disconnect-btn" onclick="waLogout()" style="font-size:12px;display:none">Desconectar</button>
-    </div>
-
-    <div class="chat-lay" style="height:calc(100vh - 205px)">
-      <div class="cl">
-        <div class="cl-h">
-          <span>Conversas</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="bx" id="chat-count">0</span>
-            <button class="bic" style="width:28px;height:28px;font-size:14px" title="Nova conversa" onclick="openM('nova-conversa',null)">✏</button>
-          </div>
+      <!-- ── Painel Direito ── -->
+      <div class="wa-right">
+        <!-- Tela vazia -->
+        <div class="wa-empty" id="wa-empty-screen">
+          <div style="font-size:72px;opacity:.15;margin-bottom:24px">💬</div>
+          <h2 style="font-size:28px;font-weight:300;color:#e9edef;margin-bottom:10px">ABA Edu Chat</h2>
+          <p style="font-size:14px;color:#8696a0;max-width:360px;line-height:1.7">Envie e receba mensagens reais do WhatsApp pelo sistema. Selecione uma conversa ou inicie uma nova.</p>
+          <button style="margin-top:22px;padding:10px 28px;background:#00a884;border:none;border-radius:24px;color:#111b21;font-size:14px;font-weight:700;cursor:pointer" onclick="openM('nova-conversa',null)">✏ Nova Conversa</button>
         </div>
-        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar..." oninput="filterChats(this.value)"/></div></div>
-        <div class="cl-list" id="cl-list"></div>
-      </div>
-      <div class="cw">
-        <div class="cw-h">
-          <div class="ci-av ava" id="cav">?</div>
-          <div>
-            <div style="font-size:14px;font-weight:800" id="cnm">Selecione uma conversa</div>
-            <div style="font-size:11px;color:var(--muted)" id="cst">—</div>
+        <!-- Chat ativo -->
+        <div id="wa-chat-panel" style="display:none;flex-direction:column;height:100%">
+          <div class="wa-rhd">
+            <div class="wa-av" style="width:40px;height:40px;font-size:14px" id="cav">?</div>
+            <div class="wa-rhd-info">
+              <div class="wa-rhd-nm" id="cnm">—</div>
+              <div class="wa-rhd-st" id="cst">—</div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="wa-ic-btn" onclick="openM('aluno',null)" title="Matricular" style="font-size:13px;color:#00a884">+ Matricular</button>
+              <button class="wa-ic-btn">⋮</button>
+            </div>
           </div>
-          <div style="margin-left:auto;display:flex;gap:7px">
-            <button class="btn bg" style="font-size:12px" onclick="openM('aluno',null)">+ Matricular</button>
+          <div class="wa-msgs" id="msgs"></div>
+          <div id="typing" style="font-size:12px;color:#8696a0;padding:2px 16px;min-height:16px;background:#0b141a"></div>
+          <div class="wa-foot">
+            <button class="wa-ic-btn" style="flex-shrink:0">😊</button>
+            <textarea class="wa-inp" id="minput" rows="1" placeholder="Digite uma mensagem" onkeydown="sendMsg(event)"></textarea>
+            <button class="wa-send-btn" onclick="sendMsg({key:'Enter'})">➤</button>
           </div>
-        </div>
-        <div class="cm" id="msgs">
-          <div style="text-align:center;padding:60px 20px">
-            <div style="font-size:40px;margin-bottom:12px;opacity:.3">💬</div>
-            <div style="color:var(--muted);font-size:13px;margin-bottom:10px">Selecione uma conversa ao lado</div>
-            <div style="color:var(--muted);font-size:12px">ou clique em ✏ para iniciar uma nova</div>
-          </div>
-        </div>
-        <div class="ti-ind" id="typing"></div>
-        <div class="ci-bar">
-          <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter envia)" onkeydown="sendMsg(event)"></textarea>
-          <button class="btn bp" onclick="sendMsg({key:'Enter'})">➤ Enviar</button>
         </div>
       </div>
     </div>
@@ -1005,32 +1040,37 @@ let activeChat=null;
 const autoReplies=['Obrigado! Vou pensar e entro em contato.','Qual a forma de pagamento?','Posso visitar antes de matricular?','Tem vaga para o mês que vem?','Vocês aceitam plano de saúde?','Perfeito, me manda mais detalhes.'];
 let rIdx=0;
 function renderChatList(){
-  document.getElementById('cl-list').innerHTML=chats.map((c,i)=>`
-    <div class="ci ${i===0?'on':''}" onclick="selChat(${i},this)">
-      <div class="ci-av ${c.av}">${c.ini}</div>
-      <div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div>
-        ${c.unread?`<div class="ci-unr">${c.unread}</div>`:''}
+  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
+  document.getElementById('cl-list').innerHTML=chats.map((c,i)=>{
+    const col=avC[(c.nm.charCodeAt(0)||0)%avC.length];
+    const last=c.msgs[c.msgs.length-1];
+    return `<div class="wa-ci" onclick="selChat(${i},this)">
+      <div class="wa-av" style="background:${col}">${c.ini}</div>
+      <div class="wa-ci-info">
+        <div class="wa-ci-top"><span class="wa-ci-nm">${c.nm}</span><span class="wa-ci-ts">${last.ts}</span></div>
+        <div class="wa-ci-bot"><span class="wa-ci-pv">${last.t}</span></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+  document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent=chats.length);
 }
-function selChat(i,el){
-  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'));
-  if(el)el.classList.add('on');
-  activeChat=i;
-  const c=chats[i];
-  c.unread=0;
-  document.getElementById('cav').className='ci-av '+c.av;
-  document.getElementById('cav').textContent=c.ini;
+function selChat(idx,el){
+  document.querySelectorAll('.wa-ci').forEach(c=>c.classList.remove('on'));
+  if(el) el.classList.add('on');
+  activeChat=idx; activeJid=null;
+  const c=chats[idx]; if(!c) return;
+  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
+  const col=avC[(c.nm.charCodeAt(0)||0)%avC.length];
+  const cavEl=document.getElementById('cav');
+  cavEl.textContent=c.ini; cavEl.style.background=col;
   document.getElementById('cnm').textContent=c.nm;
-  const st=document.getElementById('cst');
-  st.style.color=c.st==='online'?'var(--green)':'var(--muted)';
-  st.textContent=c.st==='online'?'● Online':'● Offline';
+  document.getElementById('cst').textContent='Demo';
+  document.getElementById('cst').style.color='#8696a0';
+  document.getElementById('wa-empty-screen').style.display='none';
+  document.getElementById('wa-chat-panel').style.display='flex';
   const msgs=document.getElementById('msgs');
-  msgs.innerHTML=c.msgs.map(m=>`<div class="msg ${m.rx?'rx':'tx'}"><div class="mb">${m.t}</div><div class="mt">${m.ts}${!m.rx?' ✓✓':''}</div></div>`).join('');
+  msgs.innerHTML=c.msgs.map(m=>`<div class="wa-msg ${m.rx?'rx':'tx'}"><div class="wa-mb">${m.t}<div class="wa-mt"><span>${m.ts}</span>${!m.rx?'<span class="ck">✓✓</span>':''}</div></div></div>`).join('');
   msgs.scrollTop=msgs.scrollHeight;
-  renderChatList();
 }
 function sendMsg(e){
   if(e.key!=='Enter'||e.shiftKey)return;
@@ -1069,9 +1109,10 @@ function sendMsg(e){
 }
 function appendChatMsg(rx,text,ts){
   const msgs=document.getElementById('msgs');
-  const m=document.createElement('div');m.className='msg '+(rx?'rx':'tx');
-  m.innerHTML=`<div class="mb">${text}</div><div class="mt">${ts}${!rx?' ✓✓':''}</div>`;
-  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
+  const d=document.createElement('div');
+  d.className='wa-msg '+(rx?'rx':'tx');
+  d.innerHTML=`<div class="wa-mb">${text}<div class="wa-mt"><span>${ts}</span>${!rx?'<span class="ck">✓✓</span>':''}</div></div>`;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
 }
 
 // ════════════════════════════════
@@ -1165,11 +1206,11 @@ function initSocket(){
       const cBtn = document.getElementById('wa-connect-btn')
       const dBtn = document.getElementById('wa-disconnect-btn')
       if(connected){
-        led.style.background   = 'var(--green)'
-        led.style.boxShadow    = '0 0 0 4px rgba(16,185,129,.2)'
-        stxt.textContent       = '● WhatsApp Conectado'
-        stxt.style.color       = 'var(--green)'
-        ptxt.textContent       = phone ? `+${phone}` : 'Conectado'
+        led.style.background   = '#00a884'
+        led.style.boxShadow    = '0 0 0 3px rgba(0,168,132,.25)'
+        stxt.textContent       = 'Conectado'
+        stxt.style.color       = '#00a884'
+        ptxt.textContent       = phone ? `+${phone}` : ''
         cBtn.style.display     = 'none'
         dBtn.style.display     = ''
         // Fechar QR modal e mostrar sucesso
@@ -1181,11 +1222,11 @@ function initSocket(){
         toast('WhatsApp conectado com sucesso!','g')
         refreshWaList()
       } else {
-        led.style.background   = 'var(--muted)'
-        led.style.boxShadow    = '0 0 0 3px rgba(100,116,139,.15)'
-        stxt.textContent       = 'WhatsApp desconectado'
-        stxt.style.color       = ''
-        ptxt.textContent       = 'Conecte para receber e enviar mensagens reais'
+        led.style.background   = '#555'
+        led.style.boxShadow    = 'none'
+        stxt.textContent       = 'Desconectado'
+        stxt.style.color       = '#8696a0'
+        ptxt.textContent       = ''
         cBtn.style.display     = ''
         dBtn.style.display     = 'none'
       }
@@ -1262,83 +1303,65 @@ function waLogout(){
 }
 
 function refreshWaList(){
-  const waList=Object.values(waChats)
-  // Se WhatsApp conectado mas sem contatos ainda — banner de orientação
+  const waList=Object.values(waChats);
+  const cl=document.getElementById('cl-list');
   if(waOk && !waList.length){
-    document.getElementById('cl-list').innerHTML=
-      `<div style="padding:20px 14px;text-align:center">
-        <div style="font-size:28px;margin-bottom:8px">📱</div>
-        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">WhatsApp Conectado!</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px">Mensagens recebidas aparecerão aqui.<br>Para iniciar uma conversa, clique no ✏</div>
-        <button class="btn-p" style="font-size:12px;padding:7px 16px" onclick="openM('nova-conversa',null)">✏ Nova Conversa Real</button>
-       </div>`
-    document.getElementById('chat-count').textContent='0'
-    return
+    cl.innerHTML=`<div style="padding:40px 20px;text-align:center"><div style="font-size:40px;margin-bottom:12px;opacity:.3">💬</div><div style="color:#8696a0;font-size:13px;line-height:1.7">Nenhuma conversa ainda.<br>Clique em ✏ para iniciar.</div></div>`;
+    document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent='0');
+    return;
   }
-  if(!waList.length){ renderChatList(); return }
-  // Contatos reais do WhatsApp
-  const realItems = waList.map((c,i)=>`
-    <div class="ci ${activeJid===c.jid?'on':''}" data-jid="${c.jid}" onclick="selWaChat('${c.jid}',this)">
-      <div class="ci-av ${avColors[c.name?.charCodeAt(0)%avColors.length]||'ava'}">${(c.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
-      <div style="flex:1;min-width:0">
-        <div class="ci-nm">${c.name||c.phone}</div>
-        <div class="ci-pv">${c.lastMsg||'Nova conversa'}</div>
+  if(!waOk && !waList.length){ renderChatList(); return; }
+  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
+  const items=waList.map(c=>{
+    const nm=c.name||c.phone||c.jid;
+    const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const col=avC[(nm.charCodeAt(0)||0)%avC.length];
+    return `<div class="wa-ci ${activeJid===c.jid?'on':''}" data-jid="${c.jid}" onclick="selWaChat('${c.jid}',this)">
+      <div class="wa-av" style="background:${col}">${ini}</div>
+      <div class="wa-ci-info">
+        <div class="wa-ci-top"><span class="wa-ci-nm">${nm}</span><span class="wa-ci-ts">${c.lastTs||''}</span></div>
+        <div class="wa-ci-bot"><span class="wa-ci-pv">${c.lastMsg||'Nova conversa'}</span>${c.unread?`<span class="wa-ci-unr">${c.unread}</span>`:''}</div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <div class="ci-tm">${c.lastTs||''}</div>
-        ${c.unread?`<div class="ci-unr">${c.unread}</div>`:''}
-      </div>
-    </div>`).join('')
-  // Quando WhatsApp conectado, mostrar apenas contatos reais (sem demo)
-  if(waOk){
-    document.getElementById('cl-list').innerHTML=
-      `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
-      +realItems
-    document.getElementById('chat-count').textContent=waList.length
-  } else {
-    document.getElementById('cl-list').innerHTML=
-      `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
-      +realItems
-      +`<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--border);margin-top:4px">Demo</div>`
-      +chats.map((c,i)=>`<div class="ci" onclick="selChat(${i},this)"><div class="ci-av ${c.av}">${c.ini}</div><div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div><div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div></div>`).join('')
-    document.getElementById('chat-count').textContent=waList.length+chats.length
-  }
+    </div>`;
+  }).join('');
+  cl.innerHTML=items;
+  document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent=waList.length);
 }
 
-function selWaChat(jid, el){
-  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'))
-  if(el) el.classList.add('on')
-  activeJid = jid
-  const c = waChats[jid]
-  if(!c) return
-  c.unread=0
-  const nm=c.name||c.phone
-  const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
-  const clsCl=avColors[nm.charCodeAt(0)%avColors.length]||'ava'
-  document.getElementById('cav').className='ci-av '+clsCl
-  document.getElementById('cav').textContent=ini
-  document.getElementById('cnm').textContent=nm
-  document.getElementById('cst').textContent=`📱 +${c.phone}`
-  document.getElementById('cst').style.color='var(--green)'
-  if(socket) socket.emit('get-messages', jid)
-  else renderWaMsgs(jid)
-  refreshWaList()
+function selWaChat(jid,el){
+  document.querySelectorAll('.wa-ci').forEach(c=>c.classList.remove('on'));
+  if(el) el.classList.add('on');
+  activeJid=jid; activeChat=null;
+  const c=waChats[jid]; if(!c) return;
+  c.unread=0;
+  const nm=c.name||c.phone||jid;
+  const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
+  const col=avC[(nm.charCodeAt(0)||0)%avC.length];
+  const cavEl=document.getElementById('cav');
+  cavEl.textContent=ini; cavEl.style.background=col;
+  document.getElementById('cnm').textContent=nm;
+  document.getElementById('cst').textContent=`📱 +${c.phone||jid.replace('@s.whatsapp.net','')}`;
+  document.getElementById('cst').style.color='#00a884';
+  document.getElementById('wa-empty-screen').style.display='none';
+  document.getElementById('wa-chat-panel').style.display='flex';
+  if(socket) socket.emit('get-messages',jid);
+  else renderWaMsgs(jid);
 }
 
 function renderWaMsgs(jid){
-  const c=waChats[jid]
-  if(!c) return
-  const msgs=document.getElementById('msgs')
-  msgs.innerHTML=c.msgs.map(m=>`<div class="msg ${m.rx?'rx':'tx'}"><div class="mb">${m.text}</div><div class="mt">${m.ts}${!m.rx?' ✓✓':''}</div></div>`).join('')
-  msgs.scrollTop=msgs.scrollHeight
+  const c=waChats[jid];if(!c)return;
+  const msgs=document.getElementById('msgs');
+  msgs.innerHTML=c.msgs.map(m=>`<div class="wa-msg ${m.rx?'rx':'tx'}"><div class="wa-mb">${m.text}<div class="wa-mt"><span>${m.ts}</span>${!m.rx?'<span class="ck">✓✓</span>':''}</div></div></div>`).join('');
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
 function appendMsg(rx, text, ts){ appendChatMsg(rx, text, ts) }
 
 function filterChats(v){
-  document.querySelectorAll('.cl-list .ci').forEach(el=>{
-    el.style.display=el.textContent.toLowerCase().includes((v||'').toLowerCase())?'':'none'
-  })
+  document.querySelectorAll('#cl-list .wa-ci').forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes((v||'').toLowerCase())?'':'none';
+  });
 }
 
 function iniciarConversa(){
@@ -1381,7 +1404,6 @@ function iniciarConversa(){
   document.getElementById('u-av').textContent=s.av||'AK';
   document.title=(s.name||'ABA')+' Edu';
   renderChatList();
-  selChat(0,null);
   updateDash();
   setTimeout(animChart,200);
   document.querySelectorAll('.ov').forEach(ov=>{
