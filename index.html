@@ -1,308 +1,256 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ABA Edu</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0d14;
-  --s1:#111827;
-  --s2:#1f2937;
-  --s3:#374151;
-  --border:#2d3748;
-  --accent:#2563eb;
-  --accent-h:#1d4ed8;
-  --accent-light:rgba(37,99,235,.12);
-  --green:#10b981;
-  --red:#ef4444;
-  --yellow:#f59e0b;
-  --blue:#38bdf8;
-  --text:#f1f5f9;
-  --sub:#94a3b8;
-  --muted:#64748b;
-  --sw:248px;
-  --sc:68px;
-  --radius:10px;
-  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --bg:#0a0d14;--s1:#111827;--s2:#1f2937;--s3:#374151;
+  --border:#2d3748;--accent:#2563eb;--al:rgba(37,99,235,.13);
+  --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--cyan:#38bdf8;
+  --text:#f1f5f9;--sub:#94a3b8;--muted:#64748b;
+  --sw:250px;--sc:66px;--r:10px;--sh:0 4px 24px rgba(0,0,0,.45);
 }
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
-
-/* ─── SIDEBAR ─── */
-#sb{width:var(--sw);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;flex-shrink:0;z-index:10}
+/* SIDEBAR */
+#sb{width:var(--sw);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;flex-shrink:0}
 #sb.col{width:var(--sc)}
-.sb-top{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0;box-shadow:0 0 0 3px rgba(37,99,235,.25)}
-.logo-txt{font-size:16px;font-weight:800;letter-spacing:-.3px}.logo-txt b{color:#60a5fa}
-.tog{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px;flex-shrink:0;transition:color .15s}
-.tog:hover{color:var(--text)}
-.nav{padding:8px 0;flex:1;overflow-y:auto;overflow-x:hidden}
-.nl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:10px 18px 4px;white-space:nowrap;letter-spacing:.08em;transition:opacity .15s}
+.sb-top{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border);white-space:nowrap}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 0 0 3px var(--al)}
+.logo-t{font-size:16px;font-weight:800;letter-spacing:-.3px} .logo-t b{color:#60a5fa}
+.tog{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;flex-shrink:0;padding:2px;transition:color .15s} .tog:hover{color:var(--text)}
+.nav{padding:6px 0;flex:1;overflow-y:auto;overflow-x:hidden}
+.nl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:10px 18px 3px;white-space:nowrap;letter-spacing:.08em;transition:opacity .15s}
 #sb.col .nl{opacity:0}
 .ni{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;white-space:nowrap;position:relative;transition:background .12s}
-.ni:hover{background:var(--s2)}
-.ni.on{background:var(--accent-light)}
+.ni:hover{background:var(--s2)} .ni.on{background:var(--al)}
 .ni.on::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
-.ni-ic{font-size:17px;flex-shrink:0;color:var(--muted);width:22px;text-align:center;transition:color .12s}
-.ni.on .ni-ic{color:var(--accent)}
-.ni-tx{font-size:13px;font-weight:500;transition:color .12s}
-.ni.on .ni-tx{color:var(--accent);font-weight:600}
-.bx{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;flex-shrink:0;transition:opacity .15s}
+.ni-ic{font-size:17px;flex-shrink:0;color:var(--muted);width:22px;text-align:center}
+.ni.on .ni-ic{color:var(--accent)} .ni.on .ni-tx{color:var(--accent);font-weight:600}
+.ni-tx{font-size:13px;font-weight:500}
+.bx{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;flex-shrink:0}
 #sb.col .ni-tx,#sb.col .bx{opacity:0;pointer-events:none}
-.sb-foot{border-top:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:10px;white-space:nowrap}
-.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
-.u-nm{font-size:13px;font-weight:600}
-.u-rl{font-size:11px;color:var(--muted)}
+.sb-foot{border-top:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:background .12s}
+.sb-foot:hover{background:var(--s2)}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0}
+.u-nm{font-size:13px;font-weight:700} .u-rl{font-size:11px;color:var(--muted)}
 #sb.col .sb-foot>*:not(.av){opacity:0}
-
-/* ─── MAIN ─── */
+/* MAIN */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.topbar{background:var(--s1);border-bottom:1px solid var(--border);height:58px;padding:0 24px;display:flex;align-items:center;gap:14px;flex-shrink:0}
-.tb-title{font-size:17px;font-weight:800;flex:1;letter-spacing:-.3px}
-.tb-acts{display:flex;align-items:center;gap:8px}
-.content{flex:1;overflow-y:auto;padding:22px 24px}
-
-/* ─── BUTTONS ─── */
-.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{filter:brightness(1.1)}
-.btn-p{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35)}
-.btn-g{background:var(--s2);color:var(--text);border:1px solid var(--border)}
-.btn-ic{width:36px;height:36px;border-radius:8px;background:var(--s2);border:1px solid var(--border);color:var(--sub);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative}
-.btn-ic:hover{background:var(--s3);color:var(--text)}
-.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1)}
-
-/* ─── SEARCH ─── */
-.srch{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0 12px;height:36px;transition:border-color .15s}
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);height:58px;padding:0 22px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.tb-t{font-size:17px;font-weight:800;flex:1;letter-spacing:-.3px}
+.tb-a{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:22px}
+/* BUTTONS */
+.btn{padding:8px 15px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{filter:brightness(1.1)} .btn:active{transform:scale(.97)}
+.bp{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.bg{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.br{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.bic{width:36px;height:36px;border-radius:8px;background:var(--s2);border:1px solid var(--border);color:var(--sub);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative}
+.bic:hover{background:var(--s3);color:var(--text)}
+.nd{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1)}
+/* SEARCH */
+.srch{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0 11px;height:36px;transition:border-color .15s}
 .srch:focus-within{border-color:var(--accent)}
-.srch input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:180px}
+.srch input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:170px}
 .srch input::placeholder{color:var(--muted)}
-
-/* ─── PAGES ─── */
-.pg{display:none;animation:fadeIn .2s ease}
-.pg.on{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-/* ─── CARDS ─── */
-.grid{display:grid;gap:14px}
-.g4{grid-template-columns:repeat(4,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g2{grid-template-columns:repeat(2,1fr)}
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .15s,box-shadow .15s}
-.card:hover{border-color:var(--s3);box-shadow:var(--shadow)}
-.c-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.c-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
+/* PAGES */
+.pg{display:none;animation:fi .18s ease} .pg.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* GRID */
+.grid{display:grid;gap:14px} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--s3);box-shadow:var(--sh)}
+.c-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.c-l{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .c-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.ic-b{background:rgba(37,99,235,.15)}
-.ic-g{background:rgba(16,185,129,.15)}
-.ic-y{background:rgba(245,158,11,.15)}
-.ic-r{background:rgba(239,68,68,.15)}
-.c-val{font-size:28px;font-weight:900;letter-spacing:-1px}
-.c-dt{font-size:12px;margin-top:3px;display:flex;align-items:center;gap:4px}
-.up{color:var(--green)}.dn{color:var(--red)}
-
-/* ─── SECTION HEADER ─── */
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.ib{background:rgba(37,99,235,.15)} .ig{background:rgba(16,185,129,.15)} .iy{background:rgba(245,158,11,.15)} .ir{background:rgba(239,68,68,.15)}
+.c-v{font-size:28px;font-weight:900;letter-spacing:-1px}
+.c-d{font-size:12px;margin-top:3px} .up{color:var(--green)} .dn{color:var(--red)}
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
 .sh-t{font-size:15px;font-weight:800;letter-spacing:-.2px}
-
-/* ─── CHART ─── */
-.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px}
-.chart-bars{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:14px}
+/* CHART */
+.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-top:14px}
+.chart-bars{display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:12px}
 .cb-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
-.cb{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#2563eb,#60a5fa);opacity:.75;min-height:4px;transition:opacity .2s,height .8s cubic-bezier(.4,0,.2,1)}
-.cb:hover{opacity:1}
-.cb-l{font-size:10px;color:var(--muted)}
-.chart-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--muted)}
-.leg{display:flex;align-items:center;gap:5px}
-.leg-dot{width:8px;height:8px;border-radius:50%}
-
-/* ─── TABLE ─── */
-.tbl-w{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.cb{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),#60a5fa);opacity:.7;min-height:4px;transition:opacity .2s,height .8s cubic-bezier(.4,0,.2,1)}
+.cb:hover{opacity:1} .cb-l{font-size:10px;color:var(--muted)}
+/* TABLE */
+.tw{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:14px}
 table{width:100%;border-collapse:collapse}
 thead tr{border-bottom:1px solid var(--border);background:var(--s2)}
-th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
-td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tbody tr{transition:background .1s}
-tbody tr:hover{background:var(--s2)}
-
-/* ─── TAGS ─── */
-.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.tg{background:rgba(16,185,129,.12);color:var(--green)}
-.tr{background:rgba(239,68,68,.12);color:var(--red)}
-.ty{background:rgba(245,158,11,.12);color:var(--yellow)}
-.tb{background:rgba(56,189,248,.12);color:var(--blue)}
-.tp{background:rgba(37,99,235,.12);color:#60a5fa}
-.tm{background:rgba(100,116,139,.12);color:var(--muted)}
-
-/* ─── KANBAN ─── */
-.kan{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
-.kc{min-width:230px;max-width:230px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:box-shadow .15s}
-.kc.drag-over{box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)}
-.kc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.kc-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody tr:hover{background:var(--s2)}
+/* TAGS */
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.tg{background:rgba(16,185,129,.12);color:var(--green)} .tr{background:rgba(239,68,68,.12);color:var(--red)}
+.ty{background:rgba(245,158,11,.12);color:var(--yellow)} .tb{background:rgba(56,189,248,.12);color:var(--cyan)}
+.tp{background:rgba(37,99,235,.12);color:#60a5fa} .tm{background:rgba(100,116,139,.12);color:var(--muted)}
+/* KANBAN */
+.kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.kc{min-width:228px;max-width:228px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:13px;transition:box-shadow .15s}
+.kc.dov{box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)}
+.kc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.kc-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px}
 .kc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .kc-n{background:var(--s2);color:var(--muted);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px}
-.kk{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;transition:all .15s;user-select:none}
-.kk:active{cursor:grabbing;opacity:.7;transform:scale(.98)}
-.kk:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(37,99,235,.2)}
-.kk.dragging{opacity:.4}
-.kk-nm{font-size:12px;font-weight:700;margin-bottom:5px}
+.kk{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:7px;cursor:grab;transition:all .15s;user-select:none;position:relative}
+.kk:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(37,99,235,.18)}
+.kk:active{cursor:grabbing;opacity:.7}
+.kk.drag{opacity:.35}
+.kk-acts{position:absolute;top:7px;right:7px;display:none;gap:4px}
+.kk:hover .kk-acts{display:flex}
+.kk-nm{font-size:12px;font-weight:700;margin-bottom:4px;padding-right:48px}
 .kk-inf{font-size:11px;color:var(--muted)}
-.kk-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-top:6px}
+.kk-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-top:5px}
 .kan-add{width:100%;background:none;border:1px dashed var(--border);color:var(--muted);border-radius:7px;padding:7px;cursor:pointer;font-size:12px;transition:all .15s;margin-top:2px}
 .kan-add:hover{border-color:var(--accent);color:var(--accent)}
-
-/* ─── CHAT ─── */
-.chat-lay{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 140px)}
-.cl{width:270px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.cl-h{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
-.cl-srch{padding:10px 12px;border-bottom:1px solid var(--border)}
+/* CHAT */
+.chat-lay{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;height:calc(100vh-138px)}
+.cl{width:265px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.cl-h{padding:13px 15px;border-bottom:1px solid var(--border);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.cl-srch{padding:9px 11px;border-bottom:1px solid var(--border)}
 .cl-list{overflow-y:auto;flex:1}
-.ci{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:background .1s}
+.ci{padding:11px 13px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:9px;align-items:flex-start;transition:background .1s}
 .ci:hover,.ci.on{background:var(--s2)}
-.ci-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
-.ci-nm{font-size:13px;font-weight:700}
-.ci-pv{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.ci-av{width:37px;height:37px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.ci-nm{font-size:13px;font-weight:700} .ci-pv{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:145px}
 .ci-tm{font-size:10px;color:var(--muted);white-space:nowrap}
-.ci-unread{width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.ci-unr{width:17px;height:17px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
 .cw{flex:1;display:flex;flex-direction:column;min-width:0}
-.cw-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
-.cw-status{display:flex;align-items:center;gap:5px;font-size:11px}
-.online{color:var(--green)}.offline{color:var(--muted)}
-.cm{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:65%}
-.msg.rx{align-self:flex-start}
-.msg.tx{align-self:flex-end}
-.mb{padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.55}
+.cw-h{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;flex-shrink:0}
+.cm{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:9px}
+.msg{max-width:65%} .msg.rx{align-self:flex-start} .msg.tx{align-self:flex-end}
+.mb{padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.55}
 .msg.rx .mb{background:var(--s2);border-radius:3px 10px 10px 10px}
 .msg.tx .mb{background:var(--accent);color:#fff;border-radius:10px 3px 10px 10px}
-.mt{font-size:10px;color:var(--muted);margin-top:3px}
-.msg.tx .mt{text-align:right}
-.ci-bar{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.ci-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;resize:none;font-family:inherit}
+.mt{font-size:10px;color:var(--muted);margin-top:3px} .msg.tx .mt{text-align:right}
+.ti-ind{font-size:11px;color:var(--muted);padding:0 15px 5px;min-height:20px}
+.ci-bar{padding:11px 15px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.ci-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit;resize:none;transition:border-color .15s}
 .ci-in:focus{border-color:var(--accent)}
-.typing-ind{font-size:11px;color:var(--muted);padding:0 16px 6px;min-height:20px}
-
-/* ─── EMPTY ─── */
-.empty{text-align:center;padding:70px 20px}
-.empty-ic{font-size:56px;margin-bottom:14px;opacity:.35}
-.empty-t{font-size:17px;font-weight:800;margin-bottom:7px}
-.empty-d{color:var(--muted);font-size:13px;margin-bottom:22px;max-width:320px;margin-left:auto;margin-right:auto}
-
-/* ─── FIN CARDS ─── */
+/* EMPTY */
+.empty{text-align:center;padding:65px 20px}
+.e-ic{font-size:52px;margin-bottom:12px;opacity:.3}
+.e-t{font-size:17px;font-weight:800;margin-bottom:6px}
+.e-d{color:var(--muted);font-size:13px;margin-bottom:20px;max-width:300px;margin-left:auto;margin-right:auto}
+/* FIN CARDS */
 .fcards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.fc{border-radius:var(--radius);padding:20px;color:#fff;position:relative;overflow:hidden}
-.fc::before{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.08)}
-.fc.g{background:linear-gradient(135deg,#065f46,#10b981)}
-.fc.y{background:linear-gradient(135deg,#92400e,#f59e0b)}
-.fc.r{background:linear-gradient(135deg,#991b1b,#ef4444)}
-.fc.b{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
-.fc-l{font-size:11px;font-weight:700;opacity:.85;margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em}
-.fc-v{font-size:26px;font-weight:900;letter-spacing:-1px}
-.fc-s{font-size:11px;opacity:.75;margin-top:4px}
-
-/* ─── MODAL ─── */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:ovIn .15s ease}
-.ov.hide{display:none}
-@keyframes ovIn{from{opacity:0}to{opacity:1}}
-.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);animation:modalIn .2s cubic-bezier(.4,0,.2,1)}
-@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
-.m-h{padding:22px 24px 0;display:flex;align-items:flex-start;justify-content:space-between}
-.m-t{font-size:17px;font-weight:800;letter-spacing:-.3px}
-.m-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.m-x{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px;transition:color .15s}
-.m-x:hover{color:var(--text)}
-.m-b{padding:20px 24px 24px}
-.fg{margin-bottom:14px}
+.fc{border-radius:var(--r);padding:18px;color:#fff;position:relative;overflow:hidden}
+.fc::before{content:'';position:absolute;right:-20px;top:-20px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.08)}
+.fc.g{background:linear-gradient(135deg,#065f46,#10b981)} .fc.y{background:linear-gradient(135deg,#92400e,#f59e0b)}
+.fc.r{background:linear-gradient(135deg,#991b1b,#ef4444)} .fc.bl{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+.fc-l{font-size:11px;font-weight:700;opacity:.85;margin-bottom:7px;text-transform:uppercase;letter-spacing:.07em}
+.fc-v{font-size:24px;font-weight:900;letter-spacing:-1px} .fc-s{font-size:11px;opacity:.75;margin-top:3px}
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:ovin .15s}
+.ov.hide{display:none} @keyframes ovin{from{opacity:0}to{opacity:1}}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--sh);animation:min .2s cubic-bezier(.4,0,.2,1)}
+.modal.wide{width:680px}
+@keyframes min{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.m-h{padding:20px 22px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.m-t{font-size:16px;font-weight:800;letter-spacing:-.3px} .m-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.m-x{background:none;border:none;color:var(--muted);font-size:21px;cursor:pointer;line-height:1;padding:2px;transition:color .15s} .m-x:hover{color:var(--text)}
+.m-b{padding:18px 22px 22px}
+.fg{margin-bottom:13px}
 .fl{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
-.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;font-family:inherit}
-.fi:focus{border-color:var(--accent)}
-select.fi{cursor:pointer}
+.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;font-family:inherit}
+.fi:focus{border-color:var(--accent)} select.fi{cursor:pointer}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.m-ft{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
-
-/* ─── STEPS MODAL ─── */
-.stps{display:flex;align-items:center;gap:5px;margin-bottom:24px}
+.m-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+/* CONFIRM */
+.confirm-modal{background:var(--s1);border:1px solid rgba(239,68,68,.3);border-radius:14px;width:380px;padding:24px;box-shadow:var(--sh);animation:min .2s}
+.cf-ic{font-size:38px;margin-bottom:12px;text-align:center}
+.cf-t{font-size:15px;font-weight:800;text-align:center;margin-bottom:6px}
+.cf-d{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px}
+.cf-ft{display:flex;gap:10px;justify-content:center}
+/* STEPS */
+.stps{display:flex;align-items:center;gap:5px;margin-bottom:22px}
 .sd{width:28px;height:28px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--s2);border:2px solid var(--border);color:var(--muted);flex-shrink:0;transition:all .2s}
-.sd.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.sd.dn{background:var(--green);border-color:var(--green);color:#fff}
-.sl{flex:1;height:2px;background:var(--border);transition:background .3s}
-.sl.dn{background:var(--green)}
-.stp{display:none}.stp.on{display:block}
-.s-t{font-size:15px;font-weight:800;margin-bottom:4px}
-.s-d{font-size:12px;color:var(--muted);margin-bottom:18px}
-.opt-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{background:var(--s2);border:2px solid var(--border);border-radius:9px;padding:14px 12px;cursor:pointer;text-align:center;transition:all .15s}
-.opt:hover,.opt.on{border-color:var(--accent);background:var(--accent-light)}
-.opt-ic{font-size:22px;margin-bottom:5px}
-.opt-l{font-size:12px;font-weight:700}
-.s-ft{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
-.s-ctr{font-size:12px;color:var(--muted)}
-
-/* ─── TOAST ─── */
-#toasts{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200}
-.toast{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow);animation:tIn .2s ease;min-width:260px;max-width:340px}
-.toast.exit{animation:tOut .2s ease forwards}
-@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes tOut{to{opacity:0;transform:translateX(20px)}}
-.toast-ic{font-size:18px;flex-shrink:0}
-.toast-close{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
-
-/* ─── AVATAR COLORS ─── */
-.av-a{background:linear-gradient(135deg,#2563eb,#60a5fa)}
-.av-b{background:linear-gradient(135deg,#059669,#34d399)}
-.av-c{background:linear-gradient(135deg,#d97706,#fbbf24)}
-.av-d{background:linear-gradient(135deg,#dc2626,#f87171)}
-.av-e{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
-.av-f{background:linear-gradient(135deg,#0891b2,#22d3ee)}
-
-/* ─── MISC ─── */
-.divider{height:1px;background:var(--border);margin:16px 0}
-.info-box{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:12px;font-size:12px;color:var(--sub)}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--s3)}
+.sd.on{background:var(--accent);border-color:var(--accent);color:#fff} .sd.dn{background:var(--green);border-color:var(--green);color:#fff}
+.sl{flex:1;height:2px;background:var(--border);transition:background .3s} .sl.dn{background:var(--green)}
+.stp{display:none} .stp.on{display:block}
+.s-t{font-size:14px;font-weight:800;margin-bottom:3px} .s-d{font-size:12px;color:var(--muted);margin-bottom:16px}
+.opt-g{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.opt{background:var(--s2);border:2px solid var(--border);border-radius:9px;padding:13px 11px;cursor:pointer;text-align:center;transition:all .15s}
+.opt:hover,.opt.on{border-color:var(--accent);background:var(--al)}
+.opt-ic{font-size:20px;margin-bottom:4px} .opt-l{font-size:12px;font-weight:700}
+.s-ft{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
+/* SETTINGS PAGE */
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cfg-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.cfg-card-t{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:7px;color:var(--sub)}
+.clr-row{display:flex;gap:9px;flex-wrap:wrap}
+.clr-dot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .18s;flex-shrink:0}
+.clr-dot:hover{transform:scale(1.12)} .clr-dot.on{border-color:#fff;transform:scale(1.1)}
+/* TURMAS */
+.turma-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color .15s}
+.turma-card:hover{border-color:var(--accent)} .turma-name{font-size:14px;font-weight:800;margin-bottom:5px}
+.turma-info{font-size:12px;color:var(--muted)}
+/* TOAST */
+#toasts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:7px;z-index:200}
+.toast{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:11px 15px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;box-shadow:var(--sh);animation:tin .2s;min-width:250px;max-width:340px}
+.toast.out{animation:tout .2s forwards}
+@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateX(20px)}}
+.toast-x{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1}
+/* AVATAR */
+.ava{background:linear-gradient(135deg,var(--accent),#60a5fa)}
+.avb{background:linear-gradient(135deg,#059669,#34d399)} .avc{background:linear-gradient(135deg,#d97706,#fbbf24)}
+.avd{background:linear-gradient(135deg,#dc2626,#f87171)} .ave{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.avf{background:linear-gradient(135deg,#0891b2,#22d3ee)}
+/* INLINE EDIT */
+[contenteditable]{outline:none;border-radius:4px;padding:1px 3px;transition:background .15s}
+[contenteditable]:hover{background:var(--s2)} [contenteditable]:focus{background:var(--s2);box-shadow:0 0 0 2px var(--accent)}
+/* MISC */
+.divider{height:1px;background:var(--border);margin:14px 0}
+.info-box{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:11px;font-size:12px;color:var(--sub)}
+::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px} ::-webkit-scrollbar-thumb:hover{background:var(--s3)}
 @media(max-width:960px){.g4{grid-template-columns:1fr 1fr}.fcards{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<!-- ════════ SIDEBAR ════════ -->
 <nav id="sb">
   <div class="sb-top">
-    <div class="logo">A</div>
-    <span class="logo-txt">ABA <b>Edu</b></span>
+    <div class="logo" id="logo-ic">A</div>
+    <span class="logo-t" id="logo-nm">ABA <b>Edu</b></span>
     <button class="tog" onclick="toggleSB()">☰</button>
   </div>
   <div class="nav">
     <div class="nl">Principal</div>
-    <div class="ni on" data-pg="dashboard" onclick="go('dashboard',this)"><span class="ni-ic">◈</span><span class="ni-tx">Dashboard</span></div>
-    <div class="ni" data-pg="captacao" onclick="go('captacao',this)"><span class="ni-ic">⚡</span><span class="ni-tx">Captação</span><span class="bx" id="nb-cap">12</span></div>
-    <div class="ni" data-pg="chat" onclick="go('chat',this)"><span class="ni-ic">💬</span><span class="ni-tx">Chat Ao Vivo</span><span class="bx" id="nb-chat">3</span></div>
-    <div class="ni" data-pg="contatos" onclick="go('contatos',this)"><span class="ni-ic">👤</span><span class="ni-tx">Contatos</span></div>
+    <div class="ni on" onclick="go('dashboard',this)"><span class="ni-ic">◈</span><span class="ni-tx">Dashboard</span></div>
+    <div class="ni" onclick="go('captacao',this)"><span class="ni-ic">⚡</span><span class="ni-tx">Captação</span><span class="bx" id="nb-cap">0</span></div>
+    <div class="ni" onclick="go('chat',this)"><span class="ni-ic">💬</span><span class="ni-tx">Chat Ao Vivo</span><span class="bx" id="nb-cht">3</span></div>
+    <div class="ni" onclick="go('contatos',this)"><span class="ni-ic">👤</span><span class="ni-tx">Contatos</span></div>
     <div class="nl">Gestão</div>
-    <div class="ni" data-pg="alunos" onclick="go('alunos',this)"><span class="ni-ic">🎓</span><span class="ni-tx">Alunos</span></div>
-    <div class="ni" data-pg="turmas" onclick="go('turmas',this)"><span class="ni-ic">📚</span><span class="ni-tx">Turmas</span></div>
-    <div class="ni" data-pg="financeiro" onclick="go('financeiro',this)"><span class="ni-ic">💰</span><span class="ni-tx">Financeiro</span></div>
-    <div class="nl">Sistema</div>
-    <div class="ni" onclick="openCfg()"><span class="ni-ic">⚙</span><span class="ni-tx">Configurações</span></div>
+    <div class="ni" onclick="go('alunos',this)"><span class="ni-ic">🎓</span><span class="ni-tx">Alunos</span></div>
+    <div class="ni" onclick="go('turmas',this)"><span class="ni-ic">📚</span><span class="ni-tx">Turmas</span></div>
+    <div class="ni" onclick="go('financeiro',this)"><span class="ni-ic">💰</span><span class="ni-tx">Financeiro</span></div>
+    <div class="nl">Admin</div>
+    <div class="ni" onclick="go('config',this)"><span class="ni-ic">⚙</span><span class="ni-tx">Configurações</span></div>
   </div>
-  <div class="sb-foot">
-    <div class="av av-a">AK</div>
-    <div><div class="u-nm">Arthur Kalleb</div><div class="u-rl">Administrador</div></div>
+  <div class="sb-foot" onclick="go('config',document.querySelector('.ni:last-of-type'))">
+    <div class="av" id="u-av">AK</div>
+    <div><div class="u-nm" id="u-nm">Arthur Kalleb</div><div class="u-rl" id="u-rl">Administrador</div></div>
   </div>
 </nav>
 
-<!-- ═══════════════════ MAIN ═══════════════════ -->
+<!-- ════════ MAIN ════════ -->
 <div id="main">
   <div class="topbar">
-    <span class="tb-title" id="ptitle">Dashboard</span>
-    <div class="tb-acts">
-      <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input id="gsrch" type="text" placeholder="Pesquisar..." oninput="globalSearch(this.value)"/></div>
-      <button class="btn-ic" onclick="showNotifs()" title="Notificações"><span>🔔</span><span class="notif-dot"></span></button>
-      <button class="btn btn-p" onclick="openCfg()">⚙ Configurar</button>
+    <span class="tb-t" id="ptitle">Dashboard</span>
+    <div class="tb-a">
+      <div class="srch"><span style="color:var(--muted)">🔍</span><input id="gsrch" type="text" placeholder="Pesquisar..." oninput="gSearch(this.value)"/></div>
+      <button class="bic" onclick="showNotifs()" title="Notificações"><span>🔔</span><span class="nd" id="nd"></span></button>
+      <button class="btn bp" onclick="go('config',document.querySelectorAll('.ni')[8])">⚙ Admin</button>
     </div>
   </div>
   <div class="content">
@@ -310,10 +258,10 @@ select.fi{cursor:pointer}
   <!-- ══ DASHBOARD ══ -->
   <div class="pg on" id="pg-dashboard">
     <div class="grid g4">
-      <div class="card"><div class="c-head"><span class="c-lbl">Total Contatos</span><div class="c-ic ic-b">👤</div></div><div class="c-val" id="d-cont">1.284</div><div class="c-dt up">↑ +8,2% este mês</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">Alunos Ativos</span><div class="c-ic ic-g">🎓</div></div><div class="c-val" id="d-alun">342</div><div class="c-dt up">↑ +5 novos hoje</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">Chats Abertos</span><div class="c-ic ic-y">💬</div></div><div class="c-val" id="d-chat">17</div><div class="c-dt dn">↓ 3 sem resposta</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">Receita Mensal</span><div class="c-ic ic-b">💰</div></div><div class="c-val" id="d-rev">R$42k</div><div class="c-dt up">↑ +12% vs anterior</div></div>
+      <div class="card"><div class="c-h"><span class="c-l">Total Contatos</span><div class="c-ic ib">👤</div></div><div class="c-v" id="d-cont">0</div><div class="c-d up">↑ atualizado ao vivo</div></div>
+      <div class="card"><div class="c-h"><span class="c-l">Alunos Ativos</span><div class="c-ic ig">🎓</div></div><div class="c-v" id="d-alun">0</div><div class="c-d up">↑ do banco de dados</div></div>
+      <div class="card"><div class="c-h"><span class="c-l">Chats Abertos</span><div class="c-ic iy">💬</div></div><div class="c-v" id="d-chat">5</div><div class="c-d dn">↓ 3 sem resposta</div></div>
+      <div class="card"><div class="c-h"><span class="c-l">Receita Mensal</span><div class="c-ic ib">💰</div></div><div class="c-v" id="d-rev">R$0</div><div class="c-d up">↑ calculado automaticamente</div></div>
     </div>
     <div class="chart-wrap">
       <div class="sh"><span class="sh-t">Atendimentos por Mês</span><span class="tag tp">2025</span></div>
@@ -331,125 +279,42 @@ select.fi{cursor:pointer}
         <div class="cb-w"><div class="cb" data-h="52" style="height:0%"></div><span class="cb-l">Nov</span></div>
         <div class="cb-w"><div class="cb" data-h="38" style="height:0%"></div><span class="cb-l">Dez</span></div>
       </div>
-      <div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:#2563eb"></div>Atendimentos</div><div class="leg"><div class="leg-dot" style="background:#60a5fa"></div>Meta mensal</div></div>
     </div>
-    <div class="tbl-w">
-      <div style="padding:14px 16px 0"><span class="sh-t">Atividades Recentes</span></div>
+    <div class="tw">
+      <div style="padding:13px 15px 0"><span class="sh-t">Atividades Recentes</span></div>
       <table><thead><tr><th>Nome</th><th>Evento</th><th>Origem</th><th>Horário</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-a" style="width:28px;height:28px;font-size:10px">MS</div>Maria Silva</div></td><td>Nova mensagem</td><td>WhatsApp</td><td>Agora</td><td><span class="tag tb">Novo</span></td></tr>
-        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-b" style="width:28px;height:28px;font-size:10px">JP</div>João Pedro</div></td><td>Matrícula concluída</td><td>Site</td><td>2 min</td><td><span class="tag tg">Concluído</span></td></tr>
-        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-c" style="width:28px;height:28px;font-size:10px">AB</div>Ana Beatriz</div></td><td>Lead adicionado</td><td>Instagram</td><td>5 min</td><td><span class="tag tp">Lead</span></td></tr>
-        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-d" style="width:28px;height:28px;font-size:10px">CM</div>Carlos Melo</div></td><td>Pagamento recebido</td><td>PIX</td><td>12 min</td><td><span class="tag tg">Pago</span></td></tr>
-        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-e" style="width:28px;height:28px;font-size:10px">FL</div>Fernanda Lima</div></td><td>Sem resposta</td><td>Chat</td><td>18 min</td><td><span class="tag ty">Pendente</span></td></tr>
-      </tbody></table>
+      <tbody id="dash-recentes"></tbody></table>
     </div>
   </div>
 
   <!-- ══ CAPTAÇÃO ══ -->
   <div class="pg" id="pg-captacao">
-    <div class="sh"><span class="sh-t">Funil de Captação</span><button class="btn btn-p" onclick="openModal('new-lead')">+ Novo Lead</button></div>
-    <div class="kan" id="kanban">
-      <div class="kc" data-col="novo" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
-        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#ef4444"></span>Novo Lead</span><span class="kc-n" id="kn-novo">4</span></div>
-        <div id="kcards-novo">
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="1"><div class="kk-nm">Luísa Campos</div><div class="kk-inf">📱 (11) 9 8765-4321</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Instagram</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="2"><div class="kk-nm">Rafael Torres</div><div class="kk-inf">📱 (21) 9 9988-7766</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">WhatsApp</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="3"><div class="kk-nm">Patrícia Nunes</div><div class="kk-inf">📱 (31) 9 7654-3210</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">Site</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="4"><div class="kk-nm">Diego Santos</div><div class="kk-inf">📱 (41) 9 8899-0011</div><span class="kk-tag" style="background:rgba(245,158,11,.12);color:#fbbf24">Indicação</span></div>
-        </div>
-        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
-      </div>
-      <div class="kc" data-col="contato" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
-        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#f59e0b"></span>Contato Feito</span><span class="kc-n" id="kn-contato">3</span></div>
-        <div id="kcards-contato">
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="5"><div class="kk-nm">Mariana Costa</div><div class="kk-inf">📱 (11) 9 3344-5566</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Anúncio</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="6"><div class="kk-nm">Bruno Alves</div><div class="kk-inf">📱 (21) 9 6677-8899</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">WhatsApp</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="7"><div class="kk-nm">Camila Rocha</div><div class="kk-inf">📱 (31) 9 1122-3344</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">Site</span></div>
-        </div>
-        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
-      </div>
-      <div class="kc" data-col="proposta" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
-        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#38bdf8"></span>Proposta Enviada</span><span class="kc-n" id="kn-proposta">3</span></div>
-        <div id="kcards-proposta">
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="8"><div class="kk-nm">Felipe Mendes</div><div class="kk-inf">📱 (41) 9 5566-7788</div><span class="kk-tag" style="background:rgba(56,189,248,.12);color:#7dd3fc">E-mail</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="9"><div class="kk-nm">Juliana Freitas</div><div class="kk-inf">📱 (11) 9 9900-1122</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Instagram</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="10"><div class="kk-nm">Roberto Lima</div><div class="kk-inf">📱 (21) 9 8877-6655</div><span class="kk-tag" style="background:rgba(245,158,11,.12);color:#fbbf24">Indicação</span></div>
-        </div>
-        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
-      </div>
-      <div class="kc" data-col="matriculado" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
-        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#10b981"></span>Matriculado</span><span class="kc-n" id="kn-matriculado">2</span></div>
-        <div id="kcards-matriculado">
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="11"><div class="kk-nm">Aline Ferreira</div><div class="kk-inf">📱 (31) 9 4455-6677</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">✓ Matriculado</span></div>
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="12"><div class="kk-nm">Thiago Ribeiro</div><div class="kk-inf">📱 (41) 9 3322-1100</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">✓ Matriculado</span></div>
-        </div>
-        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
-      </div>
-      <div class="kc" data-col="perdido" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
-        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#64748b"></span>Perdido</span><span class="kc-n" id="kn-perdido">1</span></div>
-        <div id="kcards-perdido">
-          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="13"><div class="kk-nm">Vanessa Pinto</div><div class="kk-inf">📱 (11) 9 2211-3344</div><span class="kk-tag" style="background:rgba(100,116,139,.12);color:#94a3b8">Sem interesse</span></div>
-        </div>
-        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
-      </div>
-    </div>
+    <div class="sh"><span class="sh-t">Funil de Captação</span><button class="btn bp" onclick="openM('lead',null)">＋ Novo Lead</button></div>
+    <div class="kan" id="kanban"></div>
   </div>
 
   <!-- ══ CHAT ══ -->
   <div class="pg" id="pg-chat">
     <div class="chat-lay">
       <div class="cl">
-        <div class="cl-h">Conversas <span class="bx">3</span></div>
-        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar conversa..."/></div></div>
-        <div class="cl-list">
-          <div class="ci on" onclick="selChat(this,'Maria Silva','av-a','MS','online')">
-            <div class="ci-av av-a">MS</div>
-            <div style="flex:1;min-width:0"><div class="ci-nm">Maria Silva</div><div class="ci-pv">Gostaria de saber sobre os cursos</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">Agora</div><div class="ci-unread">2</div></div>
-          </div>
-          <div class="ci" onclick="selChat(this,'João Pedro','av-b','JP','online')">
-            <div class="ci-av av-b">JP</div>
-            <div style="flex:1;min-width:0"><div class="ci-nm">João Pedro</div><div class="ci-pv">Quando começa a próxima turma?</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">5 min</div><div class="ci-unread">1</div></div>
-          </div>
-          <div class="ci" onclick="selChat(this,'Ana Beatriz','av-c','AB','offline')">
-            <div class="ci-av av-c">AB</div>
-            <div style="flex:1;min-width:0"><div class="ci-nm">Ana Beatriz</div><div class="ci-pv">Preciso de informações sobre o curso</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">12 min</div></div>
-          </div>
-          <div class="ci" onclick="selChat(this,'Carlos Melo','av-d','CM','offline')">
-            <div class="ci-av av-d">CM</div>
-            <div style="flex:1;min-width:0"><div class="ci-nm">Carlos Melo</div><div class="ci-pv">Ok, obrigado pela informação!</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">1h</div></div>
-          </div>
-          <div class="ci" onclick="selChat(this,'Fernanda Lima','av-e','FL','offline')">
-            <div class="ci-av av-e">FL</div>
-            <div style="flex:1;min-width:0"><div class="ci-nm">Fernanda Lima</div><div class="ci-pv">Qual o valor da mensalidade?</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">2h</div></div>
-          </div>
-        </div>
+        <div class="cl-h">Conversas <span class="bx">5</span></div>
+        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar..."/></div></div>
+        <div class="cl-list" id="cl-list"></div>
       </div>
       <div class="cw">
         <div class="cw-h">
-          <div class="ci-av av-a" id="cav">MS</div>
-          <div><div style="font-size:14px;font-weight:800" id="cnm">Maria Silva</div><div class="cw-status"><span class="online" id="cst">● Online</span></div></div>
-          <div style="margin-left:auto;display:flex;gap:8px">
-            <button class="btn btn-g" style="font-size:12px">Ver perfil</button>
-            <button class="btn btn-p" style="font-size:12px">Matricular</button>
+          <div class="ci-av ava" id="cav">?</div>
+          <div><div style="font-size:14px;font-weight:800" id="cnm">Selecione uma conversa</div><div style="font-size:11px;color:var(--green)" id="cst">● Online</div></div>
+          <div style="margin-left:auto;display:flex;gap:7px">
+            <button class="btn bg" style="font-size:12px" onclick="toast('Perfil aberto!','b')">Ver perfil</button>
+            <button class="btn bp" style="font-size:12px" onclick="openM('aluno',null);toast('Formulário de matrícula aberto','b')">Matricular</button>
           </div>
         </div>
-        <div class="cm" id="msgs">
-          <div class="msg rx"><div class="mb">Olá, boa tarde! Gostaria de saber sobre os cursos disponíveis.</div><div class="mt">14:32</div></div>
-          <div class="msg tx"><div class="mb">Olá Maria! Temos cursos de ABA, Autismo e Desenvolvimento Infantil. Qual área te interessa?</div><div class="mt">14:33 ✓✓</div></div>
-          <div class="msg rx"><div class="mb">Me interessa o curso de ABA. Quais são os horários?</div><div class="mt">14:34</div></div>
-          <div class="msg tx"><div class="mb">Temos turmas pela manhã (8h–12h) e à tarde (14h–18h), 3x por semana. Quer se matricular?</div><div class="mt">14:35 ✓✓</div></div>
-          <div class="msg rx"><div class="mb">Qual o valor e como faço a matrícula?</div><div class="mt">14:36</div></div>
-        </div>
-        <div class="typing-ind" id="typing"></div>
+        <div class="cm" id="msgs"><div style="text-align:center;color:var(--muted);margin-top:60px;font-size:13px">Selecione uma conversa ao lado</div></div>
+        <div class="ti-ind" id="typing"></div>
         <div class="ci-bar">
-          <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter para enviar)" onkeydown="sendMsg(event)"></textarea>
-          <button class="btn btn-p" onclick="sendMsg({key:'Enter'})">Enviar</button>
+          <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter envia)" onkeydown="sendMsg(event)"></textarea>
+          <button class="btn bp" onclick="sendMsg({key:'Enter'})">Enviar</button>
         </div>
       </div>
     </div>
@@ -458,411 +323,737 @@ select.fi{cursor:pointer}
   <!-- ══ CONTATOS ══ -->
   <div class="pg" id="pg-contatos">
     <div class="sh">
-      <span class="sh-t">Contatos <span style="font-size:13px;color:var(--muted);font-weight:400" id="cnt-count">(6 registros)</span></span>
-      <div style="display:flex;gap:8px">
-        <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input type="text" placeholder="Buscar..." oninput="filterContatos(this.value)"/></div>
-        <select class="fi" style="width:auto;padding:0 10px;height:36px;border-radius:8px" onchange="filterContatos()">
-          <option value="">Todos os status</option>
-          <option value="Matriculado">Matriculado</option>
-          <option value="Em contato">Em contato</option>
-          <option value="Lead">Lead</option>
-          <option value="Pendente">Pendente</option>
+      <span class="sh-t">Contatos <span style="font-size:13px;color:var(--muted);font-weight:400" id="cnt-c">(0)</span></span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="srch"><span style="color:var(--muted)">🔍</span><input type="text" placeholder="Buscar..." oninput="renderContatos(this.value)"/></div>
+        <select class="fi" style="width:auto;padding:0 10px;height:36px" onchange="renderContatos()">
+          <option value="">Todos</option><option>Matriculado</option><option>Em contato</option><option>Lead</option><option>Pendente</option>
         </select>
-        <button class="btn btn-p" onclick="openModal('new-contato')">+ Novo Contato</button>
+        <button class="btn bp" onclick="openM('contato',null)">＋ Novo Contato</button>
       </div>
     </div>
-    <div class="tbl-w">
-      <table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Último contato</th><th>Status</th><th></th></tr></thead>
-      <tbody id="contatos-body">
-        <tr data-nm="Maria Silva" data-st="Em contato"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-a" style="width:30px;height:30px;font-size:11px">MS</div>Maria Silva</div></td><td>(11) 9 8765-4321</td><td>Instagram</td><td>Hoje, 14:32</td><td><span class="tag tb">Em contato</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-        <tr data-nm="João Pedro" data-st="Matriculado"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-b" style="width:30px;height:30px;font-size:11px">JP</div>João Pedro</div></td><td>(21) 9 9988-7766</td><td>WhatsApp</td><td>Hoje, 14:05</td><td><span class="tag tg">Matriculado</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-        <tr data-nm="Ana Beatriz" data-st="Lead"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-c" style="width:30px;height:30px;font-size:11px">AB</div>Ana Beatriz</div></td><td>(31) 9 7654-3210</td><td>Site</td><td>Hoje, 13:50</td><td><span class="tag tp">Lead</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-        <tr data-nm="Carlos Melo" data-st="Matriculado"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-d" style="width:30px;height:30px;font-size:11px">CM</div>Carlos Melo</div></td><td>(41) 9 8899-0011</td><td>Indicação</td><td>Ontem</td><td><span class="tag tg">Matriculado</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-        <tr data-nm="Fernanda Lima" data-st="Pendente"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-e" style="width:30px;height:30px;font-size:11px">FL</div>Fernanda Lima</div></td><td>(11) 9 3344-5566</td><td>Anúncio</td><td>Ontem</td><td><span class="tag ty">Pendente</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-        <tr data-nm="Rafael Torres" data-st="Lead"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-f" style="width:30px;height:30px;font-size:11px">RT</div>Rafael Torres</div></td><td>(21) 9 6677-8899</td><td>Google</td><td>2 dias atrás</td><td><span class="tag tp">Lead</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
-      </tbody></table>
-    </div>
+    <div class="tw"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Status</th><th>Ações</th></tr></thead><tbody id="contatos-tb"></tbody></table></div>
   </div>
 
   <!-- ══ ALUNOS ══ -->
   <div class="pg" id="pg-alunos">
-    <div class="sh"><span class="sh-t">Alunos</span><button class="btn btn-p" onclick="openModal('new-aluno')">+ Novo Aluno</button></div>
-    <div class="grid g4" style="margin-bottom:16px">
-      <div class="card"><div class="c-head"><span class="c-lbl">Total</span><div class="c-ic ic-g">🎓</div></div><div class="c-val">342</div><div class="c-dt up">↑ +5 este mês</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">ABA</span><span class="tag tp">43%</span></div><div class="c-val" style="color:#60a5fa">148</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">Autismo</span><span class="tag tg">33%</span></div><div class="c-val" style="color:var(--green)">112</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
-      <div class="card"><div class="c-head"><span class="c-lbl">Desenvolvimento</span><span class="tag tb">24%</span></div><div class="c-val" style="color:var(--blue)">82</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
-    </div>
-    <div class="tbl-w">
-      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+    <div class="sh"><span class="sh-t">Alunos</span><button class="btn bp" onclick="openM('aluno',null)">＋ Novo Aluno</button></div>
+    <div class="grid g4" id="aluno-stats" style="margin-bottom:14px"></div>
+    <div class="tw">
+      <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
         <span class="sh-t">Lista de Alunos</span>
-        <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input type="text" placeholder="Buscar aluno..." oninput="filterAlunos(this.value)"/></div>
+        <div class="srch"><span style="color:var(--muted)">🔍</span><input type="text" placeholder="Buscar aluno..." oninput="renderAlunos(this.value)"/></div>
       </div>
-      <table><thead><tr><th>Aluno</th><th>Turma</th><th>Segmento</th><th>Matrícula</th><th>Status</th></tr></thead>
-      <tbody id="alunos-body">
-        <tr data-nm="João Pedro Alves"><td>João Pedro Alves</td><td>ABA Avançado – Manhã</td><td><span class="tag tp">ABA</span></td><td>Jan/2025</td><td><span class="tag tg">Ativo</span></td></tr>
-        <tr data-nm="Larissa Mendonça"><td>Larissa Mendonça</td><td>Autismo Básico – Tarde</td><td><span class="tag tg">Autismo</span></td><td>Mar/2025</td><td><span class="tag tg">Ativo</span></td></tr>
-        <tr data-nm="Eduardo Neves"><td>Eduardo Neves</td><td>Desenvolvimento – Manhã</td><td><span class="tag tb">Desenv.</span></td><td>Fev/2025</td><td><span class="tag ty">Pendente</span></td></tr>
-        <tr data-nm="Isabela Cruz"><td>Isabela Cruz</td><td>ABA Básico – Tarde</td><td><span class="tag tp">ABA</span></td><td>Abr/2025</td><td><span class="tag tg">Ativo</span></td></tr>
-        <tr data-nm="Vinicius Lopes"><td>Vinicius Lopes</td><td>Autismo Avançado – Manhã</td><td><span class="tag tg">Autismo</span></td><td>Jan/2025</td><td><span class="tag tr">Inativo</span></td></tr>
-      </tbody></table>
+      <table><thead><tr><th>Nome</th><th>Turma</th><th>Segmento</th><th>Matrícula</th><th>Status</th><th>Ações</th></tr></thead><tbody id="alunos-tb"></tbody></table>
     </div>
   </div>
 
   <!-- ══ TURMAS ══ -->
   <div class="pg" id="pg-turmas">
-    <div class="sh"><span class="sh-t">Turmas</span><button class="btn btn-p" onclick="openModal('new-turma')">+ Nova Turma</button></div>
-    <div class="empty">
-      <div class="empty-ic">📚</div>
-      <div class="empty-t">Nenhuma turma cadastrada</div>
-      <div class="empty-d">Crie sua primeira turma para organizar os alunos por grupos e horários de atendimento.</div>
-      <button class="btn btn-p" onclick="openModal('new-turma')">+ Criar primeira turma</button>
-    </div>
+    <div class="sh"><span class="sh-t">Turmas</span><button class="btn bp" onclick="openM('turma',null)">＋ Nova Turma</button></div>
+    <div id="turmas-grid" class="grid g2" style="margin-top:4px"></div>
+    <div class="empty" id="turmas-empty" style="display:none"><div class="e-ic">📚</div><div class="e-t">Nenhuma turma ainda</div><div class="e-d">Crie sua primeira turma para organizar os alunos.</div><button class="btn bp" onclick="openM('turma',null)">＋ Criar turma</button></div>
   </div>
 
   <!-- ══ FINANCEIRO ══ -->
   <div class="pg" id="pg-financeiro">
-    <div class="sh"><span class="sh-t">Financeiro</span><button class="btn btn-p" onclick="openModal('new-lancamento')">+ Novo Lançamento</button></div>
-    <div class="fcards">
-      <div class="fc g"><div class="fc-l">✅ Recebido</div><div class="fc-v">R$ 38.420</div><div class="fc-s">284 pagamentos confirmados</div></div>
-      <div class="fc y"><div class="fc-l">⏳ Pendente</div><div class="fc-v">R$ 8.750</div><div class="fc-s">62 cobranças em aberto</div></div>
-      <div class="fc r"><div class="fc-l">🚨 Atrasado</div><div class="fc-v">R$ 3.200</div><div class="fc-s">24 pagamentos vencidos</div></div>
-      <div class="fc b"><div class="fc-l">📊 Inadimplência</div><div class="fc-v">7,2%</div><div class="fc-s">Meta: abaixo de 5%</div></div>
+    <div class="sh"><span class="sh-t">Financeiro</span><button class="btn bp" onclick="openM('fin',null)">＋ Novo Lançamento</button></div>
+    <div class="fcards" id="fin-cards"></div>
+    <div class="tw" style="margin-top:14px">
+      <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+        <span class="sh-t">Transações</span>
+        <select class="fi" style="width:auto;padding:0 10px;height:33px;font-size:12px" onchange="renderFin(this.value)">
+          <option value="">Todos</option><option>Pago</option><option>Pendente</option><option>Atrasado</option>
+        </select>
+      </div>
+      <table><thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fin-tb"></tbody></table>
     </div>
-    <div class="tbl-w">
-      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
-        <span class="sh-t">Últimas Transações</span>
-        <div style="display:flex;gap:8px">
-          <select class="fi" style="width:auto;padding:0 10px;height:34px;border-radius:8px;font-size:12px" onchange="filterFin(this.value)">
-            <option value="">Todos</option><option value="Pago">Pago</option><option value="Pendente">Pendente</option><option value="Atrasado">Atrasado</option>
-          </select>
+  </div>
+
+  <!-- ══ CONFIGURAÇÕES ══ -->
+  <div class="pg" id="pg-config">
+    <div class="sh"><span class="sh-t">⚙ Configurações do Sistema</span></div>
+    <div class="cfg-grid">
+      <div class="cfg-card">
+        <div class="cfg-card-t">🏫 Escola</div>
+        <div class="fg"><label class="fl">Nome da escola</label><input class="fi" id="cfg-name" type="text" oninput="applySettings()"/></div>
+        <div class="fg"><label class="fl">Slogan / Subtítulo</label><input class="fi" id="cfg-slogan" type="text" oninput="applySettings()"/></div>
+        <div class="fg"><label class="fl">Letra do Logo</label><input class="fi" id="cfg-logoic" type="text" maxlength="2" oninput="applySettings()" style="text-transform:uppercase"/></div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-card-t">👤 Perfil Admin</div>
+        <div class="fg"><label class="fl">Seu nome</label><input class="fi" id="cfg-user" type="text" oninput="applySettings()"/></div>
+        <div class="fg"><label class="fl">Cargo / Função</label><input class="fi" id="cfg-role" type="text" oninput="applySettings()"/></div>
+        <div class="fg"><label class="fl">Iniciais (avatar)</label><input class="fi" id="cfg-av" type="text" maxlength="2" oninput="applySettings()" style="text-transform:uppercase"/></div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-card-t">🎨 Cores e Tema</div>
+        <div class="fg"><label class="fl">Cor de destaque</label>
+          <div class="clr-row" id="clr-row">
+            <div class="clr-dot on" style="background:#2563eb" data-c="#2563eb" onclick="pickClr(this)"></div>
+            <div class="clr-dot" style="background:#7c3aed" data-c="#7c3aed" onclick="pickClr(this)"></div>
+            <div class="clr-dot" style="background:#059669" data-c="#059669" onclick="pickClr(this)"></div>
+            <div class="clr-dot" style="background:#dc2626" data-c="#dc2626" onclick="pickClr(this)"></div>
+            <div class="clr-dot" style="background:#0891b2" data-c="#0891b2" onclick="pickClr(this)"></div>
+            <div class="clr-dot" style="background:#d97706" data-c="#d97706" onclick="pickClr(this)"></div>
+          </div>
+        </div>
+        <div class="fg"><label class="fl">Cor personalizada</label><div style="display:flex;gap:8px"><input class="fi" id="cfg-clr-custom" type="color" style="width:50px;height:36px;padding:2px;cursor:pointer" onchange="setCustomClr(this.value)"/><input class="fi" id="cfg-clr-hex" type="text" placeholder="#2563eb" style="flex:1" oninput="if(this.value.length===7)setCustomClr(this.value)"/></div></div>
+      </div>
+      <div class="cfg-card">
+        <div class="cfg-card-t">🗑 Gerenciar Dados</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Gerencie os dados armazenados localmente no navegador.</p>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <button class="btn bp" style="width:100%;justify-content:center" onclick="exportData()">📥 Exportar dados (JSON)</button>
+          <button class="btn bg" style="width:100%;justify-content:center" onclick="openM('setup',null)">🚀 Assistente de configuração</button>
+          <button class="btn br" style="width:100%;justify-content:center" onclick="confirmClear()">⚠ Resetar todos os dados</button>
         </div>
       </div>
-      <table><thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead>
-      <tbody id="fin-body">
-        <tr data-st="Pago"><td>João Pedro Alves</td><td>Mensalidade Jun/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 380,00</strong></td><td><span class="tag tg">Pago</span></td></tr>
-        <tr data-st="Pago"><td>Larissa Mendonça</td><td>Mensalidade Jun/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 420,00</strong></td><td><span class="tag tg">Pago</span></td></tr>
-        <tr data-st="Pendente"><td>Eduardo Neves</td><td>Mensalidade Jun/2025</td><td>10/06/2025</td><td><strong style="color:var(--yellow)">R$ 350,00</strong></td><td><span class="tag ty">Pendente</span></td></tr>
-        <tr data-st="Atrasado"><td>Isabela Cruz</td><td>Mensalidade Mai/2025</td><td>05/05/2025</td><td><strong style="color:var(--red)">R$ 380,00</strong></td><td><span class="tag tr">Atrasado</span></td></tr>
-        <tr data-st="Pendente"><td>Vinicius Lopes</td><td>Mensalidade Jun/2025</td><td>15/06/2025</td><td><strong>R$ 400,00</strong></td><td><span class="tag tm">Aguardando</span></td></tr>
-      </tbody></table>
     </div>
   </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
 
-<!-- ═══════════════════ MODAIS ═══════════════════ -->
-
-<!-- Modal: Novo Lead -->
-<div class="ov hide" id="ov-new-lead" onclick="closeOv(event,'new-lead')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Lead</div><div class="m-sub">Adicione um novo potencial aluno ao funil</div></div><button class="m-x" onclick="closeModal('new-lead')">✕</button></div>
+<!-- ════════ MODAIS ════════ -->
+<!-- Lead -->
+<div class="ov hide" id="ov-lead"><div class="modal">
+  <div class="m-h"><div><div class="m-t" id="lead-mt">Novo Lead</div><div class="m-sub">Funil de Captação</div></div><button class="m-x" onclick="closeM('lead')">✕</button></div>
   <div class="m-b">
-    <div class="frow"><div class="fg"><label class="fl">Nome completo</label><input class="fi" id="l-nm" type="text" placeholder="Nome do lead"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="l-tel" type="text" placeholder="(11) 9 0000-0000"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="l-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option><option>Anúncio</option></select></div><div class="fg"><label class="fl">Etapa inicial</label><select class="fi" id="l-etapa"><option value="novo">Novo Lead</option><option value="contato">Contato Feito</option></select></div></div>
-    <div class="fg"><label class="fl">Observações</label><textarea class="fi" rows="2" placeholder="Informações adicionais..." id="l-obs"></textarea></div>
-    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-lead')">Cancelar</button><button class="btn btn-p" onclick="addLead()">Adicionar Lead</button></div>
-  </div></div>
-</div>
+    <input type="hidden" id="lead-id"/>
+    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="l-nm" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="l-tel" placeholder="(11) 9 0000-0000"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="l-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option><option>Anúncio</option></select></div><div class="fg"><label class="fl">Etapa</label><select class="fi" id="l-col"><option value="novo">Novo Lead</option><option value="contato">Contato Feito</option><option value="proposta">Proposta Enviada</option><option value="matriculado">Matriculado</option><option value="perdido">Perdido</option></select></div></div>
+    <div class="fg"><label class="fl">Observações</label><textarea class="fi" rows="2" id="l-obs" placeholder="Observações..."></textarea></div>
+    <div class="m-ft"><button class="btn bg" onclick="closeM('lead')">Cancelar</button><button class="btn bp" onclick="saveLead()">Salvar</button></div>
+  </div>
+</div></div>
 
-<!-- Modal: Novo Contato -->
-<div class="ov hide" id="ov-new-contato" onclick="closeOv(event,'new-contato')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Contato</div><div class="m-sub">Cadastre um novo contato no sistema</div></div><button class="m-x" onclick="closeModal('new-contato')">✕</button></div>
+<!-- Contato -->
+<div class="ov hide" id="ov-contato"><div class="modal">
+  <div class="m-h"><div><div class="m-t" id="cnt-mt">Novo Contato</div><div class="m-sub">Cadastro de contato</div></div><button class="m-x" onclick="closeM('contato')">✕</button></div>
   <div class="m-b">
-    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="c-nm" type="text" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="c-tel" type="text" placeholder="(11) 9 0000-0000"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="c-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="c-st"><option value="Lead">Lead</option><option value="Em contato">Em contato</option><option value="Matriculado">Matriculado</option><option value="Pendente">Pendente</option></select></div></div>
-    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-contato')">Cancelar</button><button class="btn btn-p" onclick="addContato()">Salvar Contato</button></div>
-  </div></div>
-</div>
+    <input type="hidden" id="cnt-id"/>
+    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="c-nm" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="c-tel" placeholder="(11) 9 0000-0000"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="c-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="c-st"><option>Lead</option><option>Em contato</option><option>Matriculado</option><option>Pendente</option></select></div></div>
+    <div class="m-ft"><button class="btn bg" onclick="closeM('contato')">Cancelar</button><button class="btn bp" onclick="saveContato()">Salvar</button></div>
+  </div>
+</div></div>
 
-<!-- Modal: Novo Aluno -->
-<div class="ov hide" id="ov-new-aluno" onclick="closeOv(event,'new-aluno')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Aluno</div><div class="m-sub">Cadastre um novo aluno</div></div><button class="m-x" onclick="closeModal('new-aluno')">✕</button></div>
+<!-- Aluno -->
+<div class="ov hide" id="ov-aluno"><div class="modal">
+  <div class="m-h"><div><div class="m-t" id="aln-mt">Novo Aluno</div><div class="m-sub">Matrícula de aluno</div></div><button class="m-x" onclick="closeM('aluno')">✕</button></div>
   <div class="m-b">
-    <div class="frow"><div class="fg"><label class="fl">Nome completo</label><input class="fi" id="a-nm" type="text" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Data de Nasc.</label><input class="fi" id="a-dt" type="date"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="a-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turma</label><select class="fi" id="a-tur"><option>ABA Avançado – Manhã</option><option>ABA Básico – Tarde</option><option>Autismo Básico – Tarde</option><option>Autismo Avançado – Manhã</option><option>Desenvolvimento – Manhã</option></select></div></div>
-    <div class="fg"><label class="fl">Responsável</label><input class="fi" id="a-resp" type="text" placeholder="Nome do responsável"/></div>
-    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-aluno')">Cancelar</button><button class="btn btn-p" onclick="addAluno()">Matricular Aluno</button></div>
-  </div></div>
-</div>
+    <input type="hidden" id="aln-id"/>
+    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="a-nm" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Responsável</label><input class="fi" id="a-resp" placeholder="Nome do responsável"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="a-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="a-st"><option>Ativo</option><option>Pendente</option><option>Inativo</option></select></div></div>
+    <div class="fg"><label class="fl">Turma</label><select class="fi" id="a-tur"><option>— Sem turma —</option></select></div>
+    <div class="m-ft"><button class="btn bg" onclick="closeM('aluno')">Cancelar</button><button class="btn bp" onclick="saveAluno()">Salvar</button></div>
+  </div>
+</div></div>
 
-<!-- Modal: Nova Turma -->
-<div class="ov hide" id="ov-new-turma" onclick="closeOv(event,'new-turma')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Nova Turma</div><div class="m-sub">Configure uma nova turma</div></div><button class="m-x" onclick="closeModal('new-turma')">✕</button></div>
+<!-- Turma -->
+<div class="ov hide" id="ov-turma"><div class="modal">
+  <div class="m-h"><div><div class="m-t" id="tur-mt">Nova Turma</div><div class="m-sub">Configurar turma</div></div><button class="m-x" onclick="closeM('turma')">✕</button></div>
   <div class="m-b">
-    <div class="fg"><label class="fl">Nome da Turma</label><input class="fi" id="t-nm" type="text" placeholder="Ex: ABA Avançado – Manhã"/></div>
-    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turno</label><select class="fi"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Máx. Alunos</label><input class="fi" type="number" placeholder="10"/></div><div class="fg"><label class="fl">Dias da Semana</label><select class="fi"><option>Seg/Qua/Sex</option><option>Ter/Qui</option><option>Seg a Sex</option></select></div></div>
-    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-turma')">Cancelar</button><button class="btn btn-p" onclick="addTurma()">Criar Turma</button></div>
-  </div></div>
-</div>
+    <input type="hidden" id="tur-id"/>
+    <div class="fg"><label class="fl">Nome da Turma</label><input class="fi" id="t-nm" placeholder="Ex: ABA Avançado – Manhã"/></div>
+    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="t-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turno</label><select class="fi" id="t-trn"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Máx. Alunos</label><input class="fi" id="t-max" type="number" placeholder="10" min="1"/></div><div class="fg"><label class="fl">Dias</label><select class="fi" id="t-dias"><option>Seg/Qua/Sex</option><option>Ter/Qui</option><option>Seg a Sex</option><option>Todos os dias</option></select></div></div>
+    <div class="m-ft"><button class="btn bg" onclick="closeM('turma')">Cancelar</button><button class="btn bp" onclick="saveTurma()">Salvar</button></div>
+  </div>
+</div></div>
 
-<!-- Modal: Novo Lançamento -->
-<div class="ov hide" id="ov-new-lancamento" onclick="closeOv(event,'new-lancamento')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Lançamento</div><div class="m-sub">Registre uma cobrança ou pagamento</div></div><button class="m-x" onclick="closeModal('new-lancamento')">✕</button></div>
+<!-- Financeiro -->
+<div class="ov hide" id="ov-fin"><div class="modal">
+  <div class="m-h"><div><div class="m-t" id="fin-mt">Novo Lançamento</div><div class="m-sub">Registro financeiro</div></div><button class="m-x" onclick="closeM('fin')">✕</button></div>
   <div class="m-b">
-    <div class="frow"><div class="fg"><label class="fl">Aluno</label><input class="fi" type="text" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Valor</label><input class="fi" type="text" placeholder="R$ 0,00"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date"/></div><div class="fg"><label class="fl">Tipo</label><select class="fi"><option>Mensalidade</option><option>Matrícula</option><option>Material</option></select></div></div>
-    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-lancamento')">Cancelar</button><button class="btn btn-p" onclick="toast('💰 Lançamento registrado!','g');closeModal('new-lancamento')">Salvar</button></div>
-  </div></div>
-</div>
+    <input type="hidden" id="fin-id"/>
+    <div class="frow"><div class="fg"><label class="fl">Aluno</label><input class="fi" id="f-stu" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Valor (R$)</label><input class="fi" id="f-val" type="number" placeholder="380.00" step="0.01"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Descrição</label><input class="fi" id="f-desc" placeholder="Ex: Mensalidade Jun/2025"/></div><div class="fg"><label class="fl">Vencimento</label><input class="fi" id="f-due" type="date"/></div></div>
+    <div class="fg"><label class="fl">Status</label><select class="fi" id="f-st"><option>Pendente</option><option>Pago</option><option>Atrasado</option></select></div>
+    <div class="m-ft"><button class="btn bg" onclick="closeM('fin')">Cancelar</button><button class="btn bp" onclick="saveFin()">Salvar</button></div>
+  </div>
+</div></div>
 
-<!-- Modal: Configurações (7 passos) -->
-<div class="ov hide" id="ov-cfg" onclick="closeOv(event,'cfg')">
-  <div class="modal"><div class="m-h"><div><div class="m-t">Configuração Inicial</div><div class="m-sub" id="cfg-sub">Passo 1 de 7</div></div><button class="m-x" onclick="closeModal('cfg')">✕</button></div>
+<!-- Setup (7 passos) -->
+<div class="ov hide" id="ov-setup"><div class="modal">
+  <div class="m-h"><div><div class="m-t">Assistente de Configuração</div><div class="m-sub" id="setup-sub">Passo 1 de 7</div></div><button class="m-x" onclick="closeM('setup')">✕</button></div>
   <div class="m-b">
-    <div class="stps" id="cfg-steps"></div>
-    <div class="stp on" id="stp1"><div class="s-t">Sobre sua escola</div><div class="s-d">Informe os dados básicos da sua instituição.</div><div class="fg"><label class="fl">Nome da escola</label><input class="fi" type="text" placeholder="Instituto ABA Brasil"/></div><div class="frow"><div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" placeholder="00.000.000/0001-00"/></div><div class="fg"><label class="fl">Cidade/Estado</label><input class="fi" type="text" placeholder="São Paulo – SP"/></div></div></div>
-    <div class="stp" id="stp2"><div class="s-t">Segmento de atuação</div><div class="s-d">Qual é o principal foco da sua escola?</div><div class="opt-g"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🧠</div><div class="opt-l">ABA / Autismo</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🌱</div><div class="opt-l">Desenv. Infantil</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">📚</div><div class="opt-l">Reforço Escolar</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎵</div><div class="opt-l">Música / Artes</div></div></div></div>
-    <div class="stp" id="stp3"><div class="s-t">Tamanho da escola</div><div class="s-d">Quantos alunos você atende atualmente?</div><div class="opt-g"><div class="opt" onclick="selOpt(this)"><div class="opt-ic">😊</div><div class="opt-l">Até 50 alunos</div></div><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">😄</div><div class="opt-l">50 – 200 alunos</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🏫</div><div class="opt-l">200 – 500</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎉</div><div class="opt-l">Mais de 500</div></div></div></div>
-    <div class="stp" id="stp4"><div class="s-t">Conectar WhatsApp</div><div class="s-d">Integre o WhatsApp Business para receber mensagens.</div><div class="fg"><label class="fl">Número WhatsApp Business</label><input class="fi" type="text" placeholder="+55 (11) 9 0000-0000"/></div><div class="fg"><label class="fl">Token de acesso (opcional)</label><input class="fi" type="text" placeholder="Deixe em branco para configurar depois"/></div><div class="info-box">🔒 Seus dados são criptografados. Você pode configurar isso depois.</div></div>
-    <div class="stp" id="stp5"><div class="s-t">Configurar equipe</div><div class="s-d">Adicione membros da equipe ao sistema.</div><div class="fg"><label class="fl">Nome do colaborador</label><input class="fi" type="text" placeholder="Nome completo"/></div><div class="frow"><div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" placeholder="email@escola.com.br"/></div><div class="fg"><label class="fl">Função</label><select class="fi"><option>Atendimento</option><option>Terapeuta</option><option>Coordenador</option><option>Financeiro</option><option>Admin</option></select></div></div></div>
-    <div class="stp" id="stp6"><div class="s-t">Personalizar visual</div><div class="s-d">Escolha a aparência do sistema.</div><div class="fg"><label class="fl">Tema</label><div class="opt-g" style="grid-template-columns:1fr 1fr"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🌙</div><div class="opt-l">Dark</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">☀️</div><div class="opt-l">Light</div></div></div></div><div class="fg"><label class="fl">Cor principal</label><div style="display:flex;gap:10px;margin-top:6px" id="clr-pick"><div onclick="pickColor(this,'#2563eb')" style="width:36px;height:36px;border-radius:50%;background:#2563eb;cursor:pointer;border:3px solid #fff;transition:transform .15s" title="Azul"></div><div onclick="pickColor(this,'#7c3aed')" style="width:36px;height:36px;border-radius:50%;background:#7c3aed;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Roxo"></div><div onclick="pickColor(this,'#059669')" style="width:36px;height:36px;border-radius:50%;background:#059669;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Verde"></div><div onclick="pickColor(this,'#dc2626')" style="width:36px;height:36px;border-radius:50%;background:#dc2626;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Vermelho"></div><div onclick="pickColor(this,'#0891b2')" style="width:36px;height:36px;border-radius:50%;background:#0891b2;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Ciano"></div></div></div></div>
-    <div class="stp" id="stp7"><div style="text-align:center;padding:14px 0"><div style="font-size:56px;margin-bottom:12px">🎉</div><div class="s-t" style="font-size:20px">Tudo pronto!</div><div class="s-d">Sua escola está configurada e pronta para usar o ABA Edu.</div><div style="background:var(--s2);border-radius:9px;padding:14px;margin-top:14px;text-align:left;font-size:13px;display:flex;flex-direction:column;gap:7px"><div>✅ Escola configurada com sucesso</div><div>✅ Segmento: ABA / Autismo</div><div>✅ Tema: Dark Mode ativo</div><div>🔔 WhatsApp: pendente de configuração</div></div></div></div>
-    <div class="s-ft"><button class="btn btn-g" id="cfg-prev" onclick="cfgStep(-1)">← Anterior</button><div class="s-ctr" id="cfg-ctr">1 / 7</div><button class="btn btn-p" id="cfg-next" onclick="cfgStep(1)">Próximo →</button></div>
-  </div></div>
-</div>
+    <div class="stps" id="setup-stps"></div>
+    <div class="stp on" id="stp1"><div class="s-t">Sobre sua escola</div><div class="s-d">Informe os dados básicos.</div><div class="fg"><label class="fl">Nome</label><input class="fi" type="text" placeholder="Instituto ABA Brasil"/></div><div class="frow"><div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" placeholder="00.000.000/0001-00"/></div><div class="fg"><label class="fl">Cidade/UF</label><input class="fi" type="text" placeholder="São Paulo – SP"/></div></div></div>
+    <div class="stp" id="stp2"><div class="s-t">Segmento</div><div class="s-d">Foco principal da escola.</div><div class="opt-g"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🧠</div><div class="opt-l">ABA / Autismo</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🌱</div><div class="opt-l">Desenv. Infantil</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">📚</div><div class="opt-l">Reforço Escolar</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎵</div><div class="opt-l">Música / Artes</div></div></div></div>
+    <div class="stp" id="stp3"><div class="s-t">Tamanho</div><div class="s-d">Quantos alunos você atende?</div><div class="opt-g"><div class="opt" onclick="selOpt(this)"><div class="opt-ic">😊</div><div class="opt-l">Até 50</div></div><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🏫</div><div class="opt-l">50 – 200</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎓</div><div class="opt-l">200 – 500</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎉</div><div class="opt-l">Mais de 500</div></div></div></div>
+    <div class="stp" id="stp4"><div class="s-t">WhatsApp</div><div class="s-d">Conecte o WhatsApp Business.</div><div class="fg"><label class="fl">Número</label><input class="fi" type="text" placeholder="+55 (11) 9 0000-0000"/></div><div class="fg"><label class="fl">Token (opcional)</label><input class="fi" type="text" placeholder="Deixe em branco para depois"/></div><div class="info-box">🔒 Dados criptografados e seguros.</div></div>
+    <div class="stp" id="stp5"><div class="s-t">Equipe</div><div class="s-d">Adicione membros da equipe.</div><div class="fg"><label class="fl">Nome</label><input class="fi" type="text" placeholder="Nome completo"/></div><div class="frow"><div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" placeholder="email@escola.com.br"/></div><div class="fg"><label class="fl">Função</label><select class="fi"><option>Atendimento</option><option>Terapeuta</option><option>Coordenador</option><option>Financeiro</option><option>Admin</option></select></div></div></div>
+    <div class="stp" id="stp6"><div class="s-t">Visual</div><div class="s-d">Tema e cor do sistema.</div><div class="opt-g" style="margin-bottom:14px"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🌙</div><div class="opt-l">Dark</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">☀️</div><div class="opt-l">Light (em breve)</div></div></div><div class="clr-row"><div class="clr-dot on" style="background:#2563eb" onclick="pickClr(this)" data-c="#2563eb"></div><div class="clr-dot" style="background:#7c3aed" onclick="pickClr(this)" data-c="#7c3aed"></div><div class="clr-dot" style="background:#059669" onclick="pickClr(this)" data-c="#059669"></div><div class="clr-dot" style="background:#dc2626" onclick="pickClr(this)" data-c="#dc2626"></div></div></div>
+    <div class="stp" id="stp7"><div style="text-align:center;padding:12px 0"><div style="font-size:52px;margin-bottom:11px">🎉</div><div class="s-t" style="font-size:19px">Tudo pronto!</div><div class="s-d">Seu sistema ABA Edu está configurado.</div><div style="background:var(--s2);border-radius:9px;padding:13px;margin-top:13px;text-align:left;font-size:13px;display:flex;flex-direction:column;gap:6px"><div>✅ Escola configurada</div><div>✅ Segmento definido</div><div>✅ Tema ativo</div><div>🔔 WhatsApp: pendente</div></div></div></div>
+    <div class="s-ft"><button class="btn bg" id="setup-prev" onclick="setupStep(-1)">← Anterior</button><div style="font-size:12px;color:var(--muted)" id="setup-ctr">1 / 7</div><button class="btn bp" id="setup-next" onclick="setupStep(1)">Próximo →</button></div>
+  </div>
+</div></div>
 
-<!-- Toast container -->
+<!-- Confirm delete -->
+<div class="ov hide" id="ov-confirm"><div class="confirm-modal">
+  <div class="cf-ic">⚠️</div>
+  <div class="cf-t">Confirmar exclusão</div>
+  <div class="cf-d" id="cf-msg">Tem certeza? Esta ação não pode ser desfeita.</div>
+  <div class="cf-ft"><button class="btn bg" onclick="closeM('confirm')">Cancelar</button><button class="btn br" id="cf-ok">Excluir</button></div>
+</div></div>
+
+<!-- Toasts -->
 <div id="toasts"></div>
 
 <script>
-// ─── NAVIGATION ───
-const titles={dashboard:'Dashboard',captacao:'Captação',chat:'Chat Ao Vivo',contatos:'Contatos',alunos:'Alunos',turmas:'Turmas',financeiro:'Financeiro'};
+// ════════════════════════════════
+//  STATE & PERSISTENCE
+// ════════════════════════════════
+const DEF = {
+  settings:{name:'ABA Edu',logoic:'A',slogan:'Sistema de Gestão Educacional',user:'Arthur Kalleb',role:'Administrador',av:'AK',accent:'#2563eb'},
+  contatos:[
+    {id:1,name:'Maria Silva',phone:'(11) 9 8765-4321',origin:'Instagram',status:'Em contato',dt:'Hoje, 14:32'},
+    {id:2,name:'João Pedro',phone:'(21) 9 9988-7766',origin:'WhatsApp',status:'Matriculado',dt:'Hoje, 14:05'},
+    {id:3,name:'Ana Beatriz',phone:'(31) 9 7654-3210',origin:'Site',status:'Lead',dt:'Hoje, 13:50'},
+    {id:4,name:'Carlos Melo',phone:'(41) 9 8899-0011',origin:'Indicação',status:'Matriculado',dt:'Ontem'},
+    {id:5,name:'Fernanda Lima',phone:'(11) 9 3344-5566',origin:'Anúncio',status:'Pendente',dt:'Ontem'},
+    {id:6,name:'Rafael Torres',phone:'(21) 9 6677-8899',origin:'Google',status:'Lead',dt:'2 dias atrás'}
+  ],
+  alunos:[
+    {id:1,name:'João Pedro Alves',resp:'Maria Alves',segment:'ABA',turma:'ABA Avançado – Manhã',status:'Ativo',dt:'Jan/2025'},
+    {id:2,name:'Larissa Mendonça',resp:'Carlos Mendonça',segment:'Autismo',turma:'Autismo Básico – Tarde',status:'Ativo',dt:'Mar/2025'},
+    {id:3,name:'Eduardo Neves',resp:'Fátima Neves',segment:'Desenvolvimento',turma:'Desenvolvimento – Manhã',status:'Pendente',dt:'Fev/2025'},
+    {id:4,name:'Isabela Cruz',resp:'Paulo Cruz',segment:'ABA',turma:'ABA Básico – Tarde',status:'Ativo',dt:'Abr/2025'},
+    {id:5,name:'Vinicius Lopes',resp:'Sandra Lopes',segment:'Autismo',turma:'Autismo Avançado – Manhã',status:'Inativo',dt:'Jan/2025'}
+  ],
+  turmas:[
+    {id:1,name:'ABA Avançado – Manhã',segment:'ABA',shift:'Manhã',max:10,days:'Seg/Qua/Sex'},
+    {id:2,name:'ABA Básico – Tarde',segment:'ABA',shift:'Tarde',max:8,days:'Ter/Qui'},
+    {id:3,name:'Autismo Básico – Tarde',segment:'Autismo',shift:'Tarde',max:6,days:'Seg/Qua/Sex'},
+    {id:4,name:'Autismo Avançado – Manhã',segment:'Autismo',shift:'Manhã',max:6,days:'Ter/Qui'},
+    {id:5,name:'Desenvolvimento – Manhã',segment:'Desenvolvimento',shift:'Manhã',max:12,days:'Seg a Sex'}
+  ],
+  financeiro:[
+    {id:1,student:'João Pedro Alves',desc:'Mensalidade Jun/2025',due:'05/06/2025',value:380,status:'Pago'},
+    {id:2,student:'Larissa Mendonça',desc:'Mensalidade Jun/2025',due:'05/06/2025',value:420,status:'Pago'},
+    {id:3,student:'Eduardo Neves',desc:'Mensalidade Jun/2025',due:'10/06/2025',value:350,status:'Pendente'},
+    {id:4,student:'Isabela Cruz',desc:'Mensalidade Mai/2025',due:'05/05/2025',value:380,status:'Atrasado'},
+    {id:5,student:'Vinicius Lopes',desc:'Mensalidade Jun/2025',due:'15/06/2025',value:400,status:'Pendente'}
+  ],
+  kanban:{
+    novo:[{id:1,name:'Luísa Campos',phone:'(11) 9 8765-4321',origin:'Instagram',obs:''},{id:2,name:'Rafael Torres',phone:'(21) 9 9988-7766',origin:'WhatsApp',obs:''},{id:3,name:'Patrícia Nunes',phone:'(31) 9 7654-3210',origin:'Site',obs:''},{id:4,name:'Diego Santos',phone:'(41) 9 8899-0011',origin:'Indicação',obs:''}],
+    contato:[{id:5,name:'Mariana Costa',phone:'(11) 9 3344-5566',origin:'Anúncio',obs:''},{id:6,name:'Bruno Alves',phone:'(21) 9 6677-8899',origin:'WhatsApp',obs:''},{id:7,name:'Camila Rocha',phone:'(31) 9 1122-3344',origin:'Site',obs:''}],
+    proposta:[{id:8,name:'Felipe Mendes',phone:'(41) 9 5566-7788',origin:'E-mail',obs:''},{id:9,name:'Juliana Freitas',phone:'(11) 9 9900-1122',origin:'Instagram',obs:''},{id:10,name:'Roberto Lima',phone:'(21) 9 8877-6655',origin:'Indicação',obs:''}],
+    matriculado:[{id:11,name:'Aline Ferreira',phone:'(31) 9 4455-6677',origin:'WhatsApp',obs:''},{id:12,name:'Thiago Ribeiro',phone:'(41) 9 3322-1100',origin:'Site',obs:''}],
+    perdido:[{id:13,name:'Vanessa Pinto',phone:'(11) 9 2211-3344',origin:'Instagram',obs:'Sem interesse'}]
+  }
+};
+let S = JSON.parse(localStorage.getItem('aba-state')) || JSON.parse(JSON.stringify(DEF));
+const save=()=>localStorage.setItem('aba-state',JSON.stringify(S));
+const uid=()=>Date.now()+Math.random().toString(36).slice(2);
+
+// ════════════════════════════════
+//  RENDER HELPERS
+// ════════════════════════════════
+const avColors=['ava','avb','avc','avd','ave','avf'];
+const av=(nm,sz=30)=>{const ini=(nm||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const cl=avColors[nm.charCodeAt(0)%avColors.length];return `<div class="av ${cl}" style="width:${sz}px;height:${sz}px;font-size:${sz*.35}px;flex-shrink:0">${ini}</div>`};
+const stMap={Matriculado:'tg',Pago:'tg',Ativo:'tg',Em contato:'tb',Lead:'tp',Pendente:'ty',Aguardando:'tm',Atrasado:'tr',Inativo:'tr',Perdido:'tm'};
+const stTag=(st)=>`<span class="tag ${stMap[st]||'tm'}">${st}</span>`;
+const segMap={ABA:'tp',Autismo:'tg',Desenvolvimento:'tb'};
+const fmtVal=(v)=>`R$ ${parseFloat(v).toFixed(2).replace('.',',')}`;
+
+// ════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════
+const pgTitles={dashboard:'Dashboard',captacao:'Captação',chat:'Chat Ao Vivo',contatos:'Contatos',alunos:'Alunos',turmas:'Turmas',financeiro:'Financeiro',config:'⚙ Configurações'};
 function go(pg,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('pg-'+pg).classList.add('on');
-  el.classList.add('on');
-  document.getElementById('ptitle').textContent=titles[pg];
-  if(pg==='dashboard') animChart();
+  if(el) el.classList.add('on');
+  document.getElementById('ptitle').textContent=pgTitles[pg]||pg;
   document.getElementById('gsrch').value='';
+  if(pg==='dashboard'){updateDash();setTimeout(animChart,120);}
+  if(pg==='captacao') renderKanban();
+  if(pg==='contatos') renderContatos();
+  if(pg==='alunos'){renderAlunos();renderAlunoStats();}
+  if(pg==='turmas') renderTurmas();
+  if(pg==='financeiro') renderFin();
+  if(pg==='config') loadCfg();
 }
 function toggleSB(){document.getElementById('sb').classList.toggle('col')}
 
-// ─── CHART ANIMATION ───
-function animChart(){
-  setTimeout(()=>{
-    document.querySelectorAll('.cb').forEach(b=>{
-      b.style.height=b.dataset.h+'%';
-    });
-  },100);
+// ════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════
+function updateDash(){
+  document.getElementById('d-cont').textContent=S.contatos.length;
+  document.getElementById('d-alun').textContent=S.alunos.filter(a=>a.status==='Ativo').length;
+  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+parseFloat(f.value),0);
+  document.getElementById('d-rev').textContent='R$'+Math.round(paid/1000)+'k';
+  const rows=S.contatos.slice(-5).reverse().map(c=>`<tr><td><div style="display:flex;align-items:center;gap:8px">${av(c.name,26)}${c.name}</div></td><td>Contato adicionado</td><td>${c.origin}</td><td>${c.dt||'Recente'}</td><td>${stTag(c.status)}</td></tr>`).join('');
+  document.getElementById('dash-recentes').innerHTML=rows||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Nenhuma atividade</td></tr>';
 }
-window.onload=()=>animChart();
+function animChart(){document.querySelectorAll('.cb').forEach(b=>b.style.height=b.dataset.h+'%')}
 
-// ─── TOAST ───
-function toast(msg,type='b'){
-  const icons={g:'✅',r:'❌',y:'⚠️',b:'ℹ️'};
-  const colors={g:'var(--green)',r:'var(--red)',y:'var(--yellow)',b:'var(--accent)'};
-  const el=document.createElement('div');
-  el.className='toast';
-  el.innerHTML=`<span class="toast-ic">${icons[type]}</span><span style="flex:1">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
-  el.style.borderLeft=`3px solid ${colors[type]}`;
-  document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>{el.classList.add('exit');setTimeout(()=>el.remove(),200)},3500);
+// ════════════════════════════════
+//  KANBAN
+// ════════════════════════════════
+const kanCols=[
+  {id:'novo',label:'Novo Lead',color:'#ef4444'},
+  {id:'contato',label:'Contato Feito',color:'#f59e0b'},
+  {id:'proposta',label:'Proposta Enviada',color:'#38bdf8'},
+  {id:'matriculado',label:'Matriculado',color:'#10b981'},
+  {id:'perdido',label:'Perdido',color:'#64748b'}
+];
+let dragId=null,dragCol=null;
+function renderKanban(){
+  const total=Object.values(S.kanban).reduce((s,a)=>s+a.length,0);
+  document.getElementById('nb-cap').textContent=total;
+  document.getElementById('kanban').innerHTML=kanCols.map(col=>`
+    <div class="kc" data-col="${col.id}" ondragover="kOver(event,this)" ondrop="kDrop(event,'${col.id}')" ondragleave="this.classList.remove('dov')">
+      <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:${col.color}"></span>${col.label}</span><span class="kc-n">${S.kanban[col.id].length}</span></div>
+      <div id="kcards-${col.id}">
+        ${(S.kanban[col.id]||[]).map(k=>kanCard(k,col.id)).join('')}
+      </div>
+      <button class="kan-add" onclick="openM('lead',null);document.getElementById('l-col').value='${col.id}'">＋ Adicionar</button>
+    </div>`).join('');
 }
-
-// ─── MODALS ───
-function openModal(id){document.getElementById('ov-'+id).classList.remove('hide')}
-function closeModal(id){document.getElementById('ov-'+id).classList.add('hide')}
-function closeOv(e,id){if(e.target===document.getElementById('ov-'+id))closeModal(id)}
-
-// ─── KANBAN DRAG & DROP ───
-let dragged=null;
-function kDragStart(e,el){dragged=el;setTimeout(()=>el.classList.add('dragging'),0)}
-document.addEventListener('dragend',()=>{if(dragged){dragged.classList.remove('dragging');dragged=null}});
-function kDragOver(e,col){e.preventDefault();col.classList.add('drag-over')}
-function kDragLeave(col){col.classList.remove('drag-over')}
-function kDrop(e,col){
-  e.preventDefault();col.classList.remove('drag-over');
-  if(!dragged)return;
-  const cid=col.dataset.col;
-  const body=document.getElementById('kcards-'+cid);
-  body.appendChild(dragged);
-  updateKanCounts();
-  toast('Card movido para '+col.querySelector('.kc-t').textContent.trim(),'b');
+function kanCard(k,col){
+  const origColors={WhatsApp:'rgba(37,99,235,.12)',Instagram:'rgba(239,68,68,.12)',Site:'rgba(16,185,129,.12)',Indicação:'rgba(245,158,11,.12)',Email:'rgba(56,189,248,.12)',Google:'rgba(16,185,129,.12)',Anúncio:'rgba(239,68,68,.12)',default:'rgba(100,116,139,.12)'};
+  const origTxt={WhatsApp:'#60a5fa',Instagram:'#f87171',Site:'#34d399',Indicação:'#fbbf24',Email:'#7dd3fc',Google:'#34d399',Anúncio:'#f87171',default:'#94a3b8'};
+  const bg=origColors[k.origin]||origColors.default;
+  const tc=origTxt[k.origin]||origTxt.default;
+  return `<div class="kk" draggable="true" data-id="${k.id}" data-col="${col}" ondragstart="kStart(event,'${k.id}','${col}')">
+    <div class="kk-acts"><button class="btn bg" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();openM('lead',${k.id})">✏</button><button class="btn br" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();delLead('${k.id}','${col}')">🗑</button></div>
+    <div class="kk-nm">${k.name}</div>
+    <div class="kk-inf">📱 ${k.phone||'—'}</div>
+    <span class="kk-tag" style="background:${bg};color:${tc}">${k.origin}</span>
+  </div>`;
 }
-function updateKanCounts(){
-  ['novo','contato','proposta','matriculado','perdido'].forEach(c=>{
-    const n=document.getElementById('kcards-'+c).querySelectorAll('.kk').length;
-    document.getElementById('kn-'+c).textContent=n;
+function kStart(e,id,col){dragId=id;dragCol=col;setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('drag')},0)}
+document.addEventListener('dragend',()=>{document.querySelectorAll('.kk.drag').forEach(e=>e.classList.remove('drag'))});
+function kOver(e,el){e.preventDefault();el.classList.add('dov')}
+function kDrop(e,toCol){
+  e.preventDefault();document.querySelectorAll('.kc').forEach(c=>c.classList.remove('dov'));
+  if(!dragId||dragCol===toCol)return;
+  const idx=S.kanban[dragCol].findIndex(k=>k.id==dragId);
+  if(idx<0)return;
+  const item=S.kanban[dragCol].splice(idx,1)[0];
+  S.kanban[toCol].push(item);
+  save();renderKanban();
+  toast('Movido para "'+kanCols.find(c=>c.id===toCol)?.label+'"','b');
+  dragId=null;dragCol=null;
+}
+function delLead(id,col){
+  confirm2(`Excluir o lead?`,()=>{
+    S.kanban[col]=S.kanban[col].filter(k=>k.id!=id);
+    save();renderKanban();toast('Lead removido','r');
   });
 }
+function openM(type,id){
+  if(type==='lead'){
+    const item=id?Object.values(S.kanban).flat().find(k=>k.id==id):null;
+    document.getElementById('lead-mt').textContent=item?'Editar Lead':'Novo Lead';
+    document.getElementById('lead-id').value=item?item.id:'';
+    document.getElementById('l-nm').value=item?item.name:'';
+    document.getElementById('l-tel').value=item?item.phone:'';
+    document.getElementById('l-orig').value=item?item.origin:'WhatsApp';
+    document.getElementById('l-obs').value=item?item.obs:'';
+    if(item){const col=Object.entries(S.kanban).find(([,arr])=>arr.some(k=>k.id==id));if(col)document.getElementById('l-col').value=col[0];}
+  }
+  if(type==='contato'){
+    const item=id?S.contatos.find(c=>c.id==id):null;
+    document.getElementById('cnt-mt').textContent=item?'Editar Contato':'Novo Contato';
+    document.getElementById('cnt-id').value=item?item.id:'';
+    document.getElementById('c-nm').value=item?item.name:'';
+    document.getElementById('c-tel').value=item?item.phone:'';
+    document.getElementById('c-orig').value=item?item.origin:'WhatsApp';
+    document.getElementById('c-st').value=item?item.status:'Lead';
+  }
+  if(type==='aluno'){
+    const item=id?S.alunos.find(a=>a.id==id):null;
+    document.getElementById('aln-mt').textContent=item?'Editar Aluno':'Novo Aluno';
+    document.getElementById('aln-id').value=item?item.id:'';
+    document.getElementById('a-nm').value=item?item.name:'';
+    document.getElementById('a-resp').value=item?item.resp:'';
+    document.getElementById('a-seg').value=item?item.segment:'ABA';
+    document.getElementById('a-st').value=item?item.status:'Ativo';
+    const turSel=document.getElementById('a-tur');
+    turSel.innerHTML='<option>— Sem turma —</option>'+S.turmas.map(t=>`<option ${item&&item.turma===t.name?'selected':''}>${t.name}</option>`).join('');
+    if(item)turSel.value=item.turma;
+  }
+  if(type==='turma'){
+    const item=id?S.turmas.find(t=>t.id==id):null;
+    document.getElementById('tur-mt').textContent=item?'Editar Turma':'Nova Turma';
+    document.getElementById('tur-id').value=item?item.id:'';
+    document.getElementById('t-nm').value=item?item.name:'';
+    document.getElementById('t-seg').value=item?item.segment:'ABA';
+    document.getElementById('t-trn').value=item?item.shift:'Manhã';
+    document.getElementById('t-max').value=item?item.max:10;
+    document.getElementById('t-dias').value=item?item.days:'Seg/Qua/Sex';
+  }
+  if(type==='fin'){
+    const item=id?S.financeiro.find(f=>f.id==id):null;
+    document.getElementById('fin-mt').textContent=item?'Editar Lançamento':'Novo Lançamento';
+    document.getElementById('fin-id').value=item?item.id:'';
+    document.getElementById('f-stu').value=item?item.student:'';
+    document.getElementById('f-val').value=item?item.value:'';
+    document.getElementById('f-desc').value=item?item.desc:'';
+    document.getElementById('f-due').value=item?item.due:'';
+    document.getElementById('f-st').value=item?item.status:'Pendente';
+  }
+  if(type==='setup'){curStep=1;document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));document.getElementById('stp1').classList.add('on');buildSteps();}
+  document.getElementById('ov-'+type).classList.remove('hide');
+}
+function closeM(t){document.getElementById('ov-'+t).classList.add('hide')}
 
-// ─── ADD LEAD ───
-function addLead(){
+// ════════════════════════════════
+//  SAVE CRUD
+// ════════════════════════════════
+function saveLead(){
   const nm=document.getElementById('l-nm').value.trim();
-  const tel=document.getElementById('l-tel').value.trim();
-  const orig=document.getElementById('l-orig').value;
-  const col=document.getElementById('l-etapa').value;
-  if(!nm){toast('Informe o nome do lead','r');return}
-  const div=document.createElement('div');
-  div.className='kk';div.draggable=true;
-  div.setAttribute('ondragstart','kDragStart(event,this)');
-  div.dataset.id=Date.now();
-  div.innerHTML=`<div class="kk-nm">${nm}</div><div class="kk-inf">📱 ${tel||'Sem telefone'}</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">${orig}</span>`;
-  document.getElementById('kcards-'+col).appendChild(div);
-  updateKanCounts();
-  closeModal('new-lead');
-  toast('Lead "'+nm+'" adicionado!','g');
-  document.getElementById('l-nm').value='';document.getElementById('l-tel').value='';
+  if(!nm){toast('Informe o nome','r');return}
+  const id=document.getElementById('lead-id').value;
+  const obj={id:id||uid(),name:nm,phone:document.getElementById('l-tel').value,origin:document.getElementById('l-orig').value,obs:document.getElementById('l-obs').value};
+  const col=document.getElementById('l-col').value;
+  if(id){
+    const oldCol=Object.entries(S.kanban).find(([,arr])=>arr.some(k=>k.id==id));
+    if(oldCol){S.kanban[oldCol[0]]=S.kanban[oldCol[0]].filter(k=>k.id!=id);}
+    S.kanban[col].push(obj);
+  } else {S.kanban[col].push(obj);}
+  save();renderKanban();closeM('lead');toast((id?'Lead atualizado':'Lead adicionado')+'!','g');
 }
-
-// ─── ADD CONTATO ───
-const avCls=['av-a','av-b','av-c','av-d','av-e','av-f'];
-let avIdx=0;
-function addContato(){
+function saveContato(){
   const nm=document.getElementById('c-nm').value.trim();
-  const tel=document.getElementById('c-tel').value.trim();
-  const orig=document.getElementById('c-orig').value;
-  const st=document.getElementById('c-st').value;
-  if(!nm){toast('Informe o nome do contato','r');return}
-  const ini=nm.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-  const cls=avCls[avIdx++%avCls.length];
-  const stMap={Lead:'tp',Matriculado:'tg','Em contato':'tb',Pendente:'ty'};
-  const stLbl={Lead:'Lead',Matriculado:'Matriculado','Em contato':'Em contato',Pendente:'Pendente'};
-  const row=document.createElement('tr');
-  row.dataset.nm=nm;row.dataset.st=st;
-  row.innerHTML=`<td><div style="display:flex;align-items:center;gap:9px"><div class="av ${cls}" style="width:30px;height:30px;font-size:11px">${ini}</div>${nm}</div></td><td>${tel||'—'}</td><td>${orig}</td><td>Agora</td><td><span class="tag ${stMap[st]||'tm'}">${stLbl[st]||st}</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td>`;
-  document.getElementById('contatos-body').prepend(row);
-  const cnt=document.querySelectorAll('#contatos-body tr').length;
-  document.getElementById('cnt-count').textContent=`(${cnt} registros)`;
-  closeModal('new-contato');
-  toast('Contato "'+nm+'" cadastrado!','g');
-  document.getElementById('c-nm').value='';document.getElementById('c-tel').value='';
+  if(!nm){toast('Informe o nome','r');return}
+  const id=document.getElementById('cnt-id').value;
+  const obj={id:id||uid(),name:nm,phone:document.getElementById('c-tel').value,origin:document.getElementById('c-orig').value,status:document.getElementById('c-st').value,dt:'Agora'};
+  if(id){const i=S.contatos.findIndex(c=>c.id==id);if(i>=0)S.contatos[i]=obj;}
+  else S.contatos.push(obj);
+  save();renderContatos();closeM('contato');toast((id?'Contato atualizado':'Contato salvo')+'!','g');updateDash();
 }
-
-// ─── ADD ALUNO ───
-function addAluno(){
+function saveAluno(){
   const nm=document.getElementById('a-nm').value.trim();
-  const seg=document.getElementById('a-seg').value;
-  const tur=document.getElementById('a-tur').value;
-  if(!nm){toast('Informe o nome do aluno','r');return}
-  const segMap={ABA:'tp',Autismo:'tg','Desenvolvimento':'tb'};
-  const row=document.createElement('tr');
-  row.dataset.nm=nm;
-  row.innerHTML=`<td>${nm}</td><td>${tur}</td><td><span class="tag ${segMap[seg]||'tp'}">${seg}</span></td><td>${new Date().toLocaleDateString('pt-BR',{month:'short',year:'numeric'})}</td><td><span class="tag tg">Ativo</span></td>`;
-  document.getElementById('alunos-body').prepend(row);
-  closeModal('new-aluno');
-  toast('Aluno "'+nm+'" matriculado!','g');
-  document.getElementById('a-nm').value='';
+  if(!nm){toast('Informe o nome','r');return}
+  const id=document.getElementById('aln-id').value;
+  const now=new Date();
+  const obj={id:id||uid(),name:nm,resp:document.getElementById('a-resp').value,segment:document.getElementById('a-seg').value,turma:document.getElementById('a-tur').value,status:document.getElementById('a-st').value,dt:now.toLocaleDateString('pt-BR',{month:'short',year:'numeric'})};
+  if(id){const i=S.alunos.findIndex(a=>a.id==id);if(i>=0)S.alunos[i]=obj;}
+  else S.alunos.push(obj);
+  save();renderAlunos();renderAlunoStats();closeM('aluno');toast((id?'Aluno atualizado':'Aluno matriculado')+'!','g');updateDash();
 }
-
-// ─── ADD TURMA ───
-function addTurma(){
+function saveTurma(){
   const nm=document.getElementById('t-nm').value.trim();
   if(!nm){toast('Informe o nome da turma','r');return}
-  document.getElementById('pg-turmas').querySelector('.empty').style.display='none';
-  closeModal('new-turma');
-  toast('Turma "'+nm+'" criada!','g');
+  const id=document.getElementById('tur-id').value;
+  const obj={id:id||uid(),name:nm,segment:document.getElementById('t-seg').value,shift:document.getElementById('t-trn').value,max:document.getElementById('t-max').value||10,days:document.getElementById('t-dias').value};
+  if(id){const i=S.turmas.findIndex(t=>t.id==id);if(i>=0)S.turmas[i]=obj;}
+  else S.turmas.push(obj);
+  save();renderTurmas();closeM('turma');toast((id?'Turma atualizada':'Turma criada')+'!','g');
+}
+function saveFin(){
+  const stu=document.getElementById('f-stu').value.trim();
+  const val=document.getElementById('f-val').value;
+  if(!stu||!val){toast('Preencha aluno e valor','r');return}
+  const id=document.getElementById('fin-id').value;
+  const obj={id:id||uid(),student:stu,value:parseFloat(val),desc:document.getElementById('f-desc').value,due:document.getElementById('f-due').value,status:document.getElementById('f-st').value};
+  if(id){const i=S.financeiro.findIndex(f=>f.id==id);if(i>=0)S.financeiro[i]=obj;}
+  else S.financeiro.push(obj);
+  save();renderFin();closeM('fin');toast((id?'Lançamento atualizado':'Lançamento salvo')+'!','g');updateDash();
 }
 
-// ─── FILTERS ───
-function filterContatos(val){
-  const rows=document.querySelectorAll('#contatos-body tr');
-  const sel=document.querySelector('#pg-contatos select').value;
-  let v=(val||document.querySelector('#pg-contatos .srch input').value||'').toLowerCase();
-  let vis=0;
-  rows.forEach(r=>{
-    const nm=(r.dataset.nm||'').toLowerCase();
-    const st=r.dataset.st||'';
-    const showNm=nm.includes(v);
-    const showSt=!sel||st===sel;
-    r.style.display=(showNm&&showSt)?'':'none';
-    if(showNm&&showSt)vis++;
-  });
-  document.getElementById('cnt-count').textContent=`(${vis} registros)`;
+// ════════════════════════════════
+//  RENDERS
+// ════════════════════════════════
+function renderContatos(filter=''){
+  const q=(filter||document.querySelector('#pg-contatos .srch input')?.value||'').toLowerCase();
+  const st=document.querySelector('#pg-contatos select')?.value||'';
+  const list=S.contatos.filter(c=>(c.name||'').toLowerCase().includes(q)&&(!st||c.status===st));
+  document.getElementById('cnt-c').textContent=`(${list.length} registros)`;
+  document.getElementById('contatos-tb').innerHTML=list.length?list.map(c=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px">${av(c.name,28)}${c.name}</div></td>
+      <td>${c.phone||'—'}</td><td>${c.origin||'—'}</td><td>${stTag(c.status)}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn bg" style="padding:4px 9px;font-size:11px" onclick="openM('contato','${c.id}')">✏ Editar</button>
+        <button class="btn br" style="padding:4px 9px;font-size:11px" onclick="delContato('${c.id}')">🗑</button>
+      </div></td>
+    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato encontrado</td></tr>';
 }
-function filterAlunos(val){
-  const v=val.toLowerCase();
-  document.querySelectorAll('#alunos-body tr').forEach(r=>{r.style.display=(r.dataset.nm||'').toLowerCase().includes(v)?'':'none'});
+function delContato(id){confirm2('Excluir este contato?',()=>{S.contatos=S.contatos.filter(c=>c.id!=id);save();renderContatos();toast('Contato excluído','r');updateDash();})}
+
+function renderAlunos(filter=''){
+  const q=(filter||document.querySelector('#pg-alunos .srch input')?.value||'').toLowerCase();
+  const list=S.alunos.filter(a=>(a.name||'').toLowerCase().includes(q));
+  document.getElementById('alunos-tb').innerHTML=list.length?list.map(a=>`
+    <tr>
+      <td>${a.name}</td><td>${a.turma||'—'}</td>
+      <td><span class="tag ${segMap[a.segment]||'tm'}">${a.segment}</span></td>
+      <td>${a.dt||'—'}</td><td>${stTag(a.status)}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn bg" style="padding:4px 9px;font-size:11px" onclick="openM('aluno','${a.id}')">✏ Editar</button>
+        <button class="btn br" style="padding:4px 9px;font-size:11px" onclick="delAluno('${a.id}')">🗑</button>
+      </div></td>
+    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum aluno encontrado</td></tr>';
 }
-function filterFin(val){
-  document.querySelectorAll('#fin-body tr').forEach(r=>{r.style.display=(!val||r.dataset.st===val)?'':'none'});
-}
-function globalSearch(v){
-  if(!v)return;
-  const pages=['contatos','alunos'];
-  pages.forEach(pg=>{
-    document.querySelectorAll('#pg-'+pg+' tbody tr').forEach(r=>{
-      r.style.display=(r.textContent.toLowerCase().includes(v.toLowerCase()))?'':'none';
-    });
-  });
+function delAluno(id){confirm2('Excluir este aluno?',()=>{S.alunos=S.alunos.filter(a=>a.id!=id);save();renderAlunos();renderAlunoStats();toast('Aluno excluído','r');updateDash();})}
+
+function renderAlunoStats(){
+  const total=S.alunos.length;
+  const aba=S.alunos.filter(a=>a.segment==='ABA').length;
+  const aut=S.alunos.filter(a=>a.segment==='Autismo').length;
+  const dev=S.alunos.filter(a=>a.segment==='Desenvolvimento').length;
+  document.getElementById('aluno-stats').innerHTML=`
+    <div class="card"><div class="c-h"><span class="c-l">Total</span><div class="c-ic ig">🎓</div></div><div class="c-v">${total}</div><div class="c-d up">↑ alunos cadastrados</div></div>
+    <div class="card"><div class="c-h"><span class="c-l">ABA</span><span class="tag tp">${total?Math.round(aba/total*100):0}%</span></div><div class="c-v" style="color:#60a5fa">${aba}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>
+    <div class="card"><div class="c-h"><span class="c-l">Autismo</span><span class="tag tg">${total?Math.round(aut/total*100):0}%</span></div><div class="c-v" style="color:var(--green)">${aut}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>
+    <div class="card"><div class="c-h"><span class="c-l">Desenvolvimento</span><span class="tag tb">${total?Math.round(dev/total*100):0}%</span></div><div class="c-v" style="color:var(--cyan)">${dev}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>`;
 }
 
-// ─── CHAT ───
-const autoReplies=['Obrigado pela informação! Vou pensar e entrar em contato.','Qual o valor da mensalidade?','Tem turma disponível para o mês que vem?','Posso visitar a escola antes de matricular?','Vocês aceitam plano de saúde?'];
-let replyIdx=0;
-function selChat(el,nm,avCls,ini,status){
-  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'));
+function renderTurmas(){
+  const grid=document.getElementById('turmas-grid');
+  const empty=document.getElementById('turmas-empty');
+  if(!S.turmas.length){grid.innerHTML='';grid.style.display='none';empty.style.display='block';return;}
+  grid.style.display='grid';empty.style.display='none';
+  grid.innerHTML=S.turmas.map(t=>{
+    const cnt=S.alunos.filter(a=>a.turma===t.name).length;
+    const pct=Math.round(cnt/t.max*100);
+    return `<div class="turma-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div class="turma-name">${t.name}</div>
+        <div style="display:flex;gap:5px"><button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="openM('turma','${t.id}')">✏</button><button class="btn br" style="padding:4px 8px;font-size:11px" onclick="delTurma('${t.id}')">🗑</button></div>
+      </div>
+      <div class="turma-info">${t.segment} · ${t.shift} · ${t.days}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+        <div style="flex:1;background:var(--s2);border-radius:10px;height:6px;margin-right:10px"><div style="height:100%;background:var(--accent);border-radius:10px;width:${Math.min(pct,100)}%;transition:width .4s"></div></div>
+        <span style="font-size:11px;color:var(--muted)">${cnt}/${t.max}</span>
+      </div>
+    </div>`}).join('');
+}
+function delTurma(id){confirm2('Excluir esta turma?',()=>{S.turmas=S.turmas.filter(t=>t.id!=id);save();renderTurmas();toast('Turma excluída','r');})}
+
+function renderFin(filter=''){
+  const list=S.financeiro.filter(f=>!filter||f.status===filter);
+  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+f.value,0);
+  const pend=S.financeiro.filter(f=>f.status==='Pendente').reduce((s,f)=>s+f.value,0);
+  const late=S.financeiro.filter(f=>f.status==='Atrasado').reduce((s,f)=>s+f.value,0);
+  const total=paid+pend+late;
+  document.getElementById('fin-cards').innerHTML=`
+    <div class="fc g"><div class="fc-l">✅ Recebido</div><div class="fc-v">${fmtVal(paid)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Pago').length} pagamentos</div></div>
+    <div class="fc y"><div class="fc-l">⏳ Pendente</div><div class="fc-v">${fmtVal(pend)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Pendente').length} cobranças</div></div>
+    <div class="fc r"><div class="fc-l">🚨 Atrasado</div><div class="fc-v">${fmtVal(late)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Atrasado').length} vencidos</div></div>
+    <div class="fc bl"><div class="fc-l">📊 Inadimplência</div><div class="fc-v">${total?Math.round((late/total)*100):0}%</div><div class="fc-s">Meta: abaixo de 5%</div></div>`;
+  document.getElementById('fin-tb').innerHTML=list.length?list.map(f=>`
+    <tr>
+      <td>${f.student}</td><td>${f.desc}</td><td>${f.due||'—'}</td>
+      <td><strong style="color:${f.status==='Pago'?'var(--green)':f.status==='Atrasado'?'var(--red)':'var(--yellow)'}">${fmtVal(f.value)}</strong></td>
+      <td>${stTag(f.status)}</td>
+      <td><div style="display:flex;gap:5px">
+        ${f.status!=='Pago'?`<button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="markPago('${f.id}')">✓ Pago</button>`:''}
+        <button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="openM('fin','${f.id}')">✏</button>
+        <button class="btn br" style="padding:4px 8px;font-size:11px" onclick="delFin('${f.id}')">🗑</button>
+      </div></td>
+    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento</td></tr>';
+}
+function markPago(id){const f=S.financeiro.find(f=>f.id==id);if(f){f.status='Pago';save();renderFin();toast('Pagamento confirmado!','g');}}
+function delFin(id){confirm2('Excluir este lançamento?',()=>{S.financeiro=S.financeiro.filter(f=>f.id!=id);save();renderFin();toast('Lançamento excluído','r');})}
+
+// ════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════
+function loadCfg(){
+  const s=S.settings;
+  document.getElementById('cfg-name').value=s.name||'ABA Edu';
+  document.getElementById('cfg-slogan').value=s.slogan||'';
+  document.getElementById('cfg-logoic').value=s.logoic||'A';
+  document.getElementById('cfg-user').value=s.user||'Admin';
+  document.getElementById('cfg-role').value=s.role||'Administrador';
+  document.getElementById('cfg-av').value=s.av||'AK';
+  document.getElementById('cfg-clr-hex').value=s.accent||'#2563eb';
+  document.querySelectorAll('.clr-dot').forEach(d=>{d.classList.toggle('on',d.dataset.c===s.accent)});
+}
+function applySettings(){
+  const nm=document.getElementById('cfg-name').value||'ABA Edu';
+  const ic=document.getElementById('cfg-logoic').value.toUpperCase()||'A';
+  const slogan=document.getElementById('cfg-slogan').value;
+  const user=document.getElementById('cfg-user').value||'Admin';
+  const role=document.getElementById('cfg-role').value||'Administrador';
+  const avI=document.getElementById('cfg-av').value.toUpperCase()||'AK';
+  S.settings={...S.settings,name:nm,logoic:ic,slogan,user,role,av:avI};
+  save();
+  document.getElementById('logo-ic').textContent=ic;
+  document.getElementById('logo-nm').innerHTML=nm+' <b>Edu</b>';
+  document.getElementById('u-nm').textContent=user;
+  document.getElementById('u-rl').textContent=role;
+  document.getElementById('u-av').textContent=avI;
+  document.title=nm;
+}
+function pickClr(el){
+  document.querySelectorAll('.clr-dot').forEach(d=>d.classList.remove('on'));
   el.classList.add('on');
-  document.getElementById('cnm').textContent=nm;
-  const av=document.getElementById('cav');
-  av.className='ci-av '+avCls;av.textContent=ini;
+  const c=el.dataset.c;
+  setColor(c);
+  document.getElementById('cfg-clr-hex').value=c;
+}
+function setCustomClr(v){if(!/^#[0-9a-fA-F]{6}$/.test(v))return;setColor(v);document.querySelectorAll('.clr-dot').forEach(d=>d.classList.remove('on'));document.getElementById('cfg-clr-custom').value=v;}
+function setColor(c){document.documentElement.style.setProperty('--accent',c);document.documentElement.style.setProperty('--al',hexToRgba(c,.13));S.settings.accent=c;save();toast('Cor aplicada!','b')}
+function hexToRgba(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return `rgba(${r},${g},${b},${a})`}
+function exportData(){
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S,null,2));
+  a.download='aba-edu-dados.json';a.click();
+  toast('Dados exportados!','g');
+}
+function confirmClear(){confirm2('Resetar TODOS os dados do sistema? Esta ação não pode ser desfeita.',()=>{localStorage.removeItem('aba-state');location.reload();})}
+
+// ════════════════════════════════
+//  CHAT
+// ════════════════════════════════
+const chats=[
+  {nm:'Maria Silva',av:'ava',ini:'MS',st:'online',msgs:[{rx:true,t:'Olá! Gostaria de saber sobre os cursos.',ts:'14:32'},{rx:false,t:'Olá Maria! Temos ABA, Autismo e Desenvolvimento. Qual te interessa?',ts:'14:33'},{rx:true,t:'ABA! Quais horários disponíveis?',ts:'14:34'},{rx:false,t:'Turmas manhã (8h–12h) e tarde (14h–18h), 3x/semana.',ts:'14:35'},{rx:true,t:'Qual o valor e como me matriculo?',ts:'14:36'}]},
+  {nm:'João Pedro',av:'avb',ini:'JP',st:'online',msgs:[{rx:true,t:'Quando começa a próxima turma de ABA?',ts:'10:15'},{rx:false,t:'A próxima turma começa em 01/07. Quer garantir sua vaga?',ts:'10:17'},{rx:true,t:'Sim! Me envie o link do formulário.',ts:'10:18'}]},
+  {nm:'Ana Beatriz',av:'avc',ini:'AB',st:'offline',msgs:[{rx:true,t:'Preciso de informações sobre o curso de Autismo.',ts:'Ontem'}]},
+  {nm:'Carlos Melo',av:'avd',ini:'CM',st:'offline',msgs:[{rx:false,t:'Seu pagamento foi confirmado. Obrigado!',ts:'1h'},{rx:true,t:'Ok, obrigado pela informação!',ts:'1h'}]},
+  {nm:'Fernanda Lima',av:'ave',ini:'FL',st:'offline',msgs:[{rx:true,t:'Qual o valor da mensalidade?',ts:'2h'}]}
+];
+let activeChat=null;
+const autoReplies=['Obrigado! Vou pensar e entro em contato.','Qual a forma de pagamento?','Posso visitar antes de matricular?','Tem vaga para o mês que vem?','Vocês aceitam plano de saúde?','Perfeito, me manda mais detalhes.'];
+let rIdx=0;
+function renderChatList(){
+  document.getElementById('cl-list').innerHTML=chats.map((c,i)=>`
+    <div class="ci ${i===0?'on':''}" onclick="selChat(${i},this)">
+      <div class="ci-av ${c.av}">${c.ini}</div>
+      <div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div>
+        ${c.unread?`<div class="ci-unr">${c.unread}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+function selChat(i,el){
+  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'));
+  if(el)el.classList.add('on');
+  activeChat=i;
+  const c=chats[i];
+  c.unread=0;
+  document.getElementById('cav').className='ci-av '+c.av;
+  document.getElementById('cav').textContent=c.ini;
+  document.getElementById('cnm').textContent=c.nm;
   const st=document.getElementById('cst');
-  st.className='cw-status '+(status==='online'?'online':'offline');
-  st.textContent=(status==='online'?'● Online':'● Offline');
-  el.querySelector('.ci-unread')&&el.querySelector('.ci-unread').remove();
-  document.getElementById('nb-chat').textContent=Math.max(0,parseInt(document.getElementById('nb-chat').textContent)-1)||'0';
+  st.style.color=c.st==='online'?'var(--green)':'var(--muted)';
+  st.textContent=c.st==='online'?'● Online':'● Offline';
+  const msgs=document.getElementById('msgs');
+  msgs.innerHTML=c.msgs.map(m=>`<div class="msg ${m.rx?'rx':'tx'}"><div class="mb">${m.t}</div><div class="mt">${m.ts}${!m.rx?' ✓✓':''}</div></div>`).join('');
+  msgs.scrollTop=msgs.scrollHeight;
+  renderChatList();
 }
 function sendMsg(e){
   if(e.key!=='Enter'||e.shiftKey)return;
   const inp=document.getElementById('minput');
-  const txt=inp.value.trim();if(!txt)return;
-  const msgs=document.getElementById('msgs');
+  const txt=inp.value.trim();if(!txt||activeChat===null)return;
   const now=new Date();
-  const t=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-  const m=document.createElement('div');m.className='msg tx';
-  m.innerHTML=`<div class="mb">${txt}</div><div class="mt">${t} ✓✓</div>`;
-  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
+  const ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const c=chats[activeChat];
+  c.msgs.push({rx:false,t:txt,ts});
   inp.value='';
-  const typing=document.getElementById('typing');
-  typing.textContent=document.getElementById('cnm').textContent+' está digitando...';
+  const msgs=document.getElementById('msgs');
+  const m=document.createElement('div');m.className='msg tx';
+  m.innerHTML=`<div class="mb">${txt}</div><div class="mt">${ts} ✓✓</div>`;
+  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
+  const ti=document.getElementById('typing');
+  ti.textContent=c.nm+' está digitando...';
   setTimeout(()=>{
-    typing.textContent='';
+    ti.textContent='';
+    const reply=autoReplies[rIdx++%autoReplies.length];
+    c.msgs.push({rx:true,t:reply,ts});
     const r=document.createElement('div');r.className='msg rx';
-    r.innerHTML=`<div class="mb">${autoReplies[replyIdx++%autoReplies.length]}</div><div class="mt">${t}</div>`;
+    r.innerHTML=`<div class="mb">${reply}</div><div class="mt">${ts}</div>`;
     msgs.appendChild(r);msgs.scrollTop=msgs.scrollHeight;
-  },1200+Math.random()*800);
+  },900+Math.random()*600);
 }
 
-// ─── NOTIFICAÇÕES ───
+// ════════════════════════════════
+//  SETUP WIZARD
+// ════════════════════════════════
+let curStep=1;const totSteps=7;
+function buildSteps(){
+  const ind=document.getElementById('setup-stps');ind.innerHTML='';
+  for(let i=1;i<=totSteps;i++){
+    const d=document.createElement('div');
+    d.className='sd'+(i<curStep?' dn':i===curStep?' on':'');
+    d.textContent=i<curStep?'✓':i;ind.appendChild(d);
+    if(i<totSteps){const l=document.createElement('div');l.className='sl'+(i<curStep?' dn':'');ind.appendChild(l);}
+  }
+  document.getElementById('setup-ctr').textContent=curStep+' / '+totSteps;
+  document.getElementById('setup-prev').style.visibility=curStep===1?'hidden':'visible';
+  document.getElementById('setup-next').textContent=curStep===totSteps?'✓ Concluir':'Próximo →';
+  document.getElementById('setup-sub').textContent='Passo '+curStep+' de '+totSteps;
+}
+function setupStep(d){
+  if(curStep+d<1)return;
+  if(curStep+d>totSteps){closeM('setup');toast('Configuração salva!','g');return}
+  document.getElementById('stp'+curStep).classList.remove('on');
+  curStep+=d;
+  document.getElementById('stp'+curStep).classList.add('on');
+  buildSteps();
+}
+function selOpt(el){el.closest('.opt-g').querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));el.classList.add('on')}
+
+// ════════════════════════════════
+//  CONFIRM DIALOG
+// ════════════════════════════════
+function confirm2(msg,cb){
+  document.getElementById('cf-msg').textContent=msg;
+  document.getElementById('cf-ok').onclick=()=>{cb();closeM('confirm')};
+  document.getElementById('ov-confirm').classList.remove('hide');
+}
+
+// ════════════════════════════════
+//  TOAST
+// ════════════════════════════════
+function toast(msg,type='b'){
+  const clrs={g:'var(--green)',r:'var(--red)',y:'var(--yellow)',b:'var(--accent)'};
+  const ics={g:'✅',r:'❌',y:'⚠️',b:'ℹ️'};
+  const el=document.createElement('div');
+  el.className='toast';
+  el.style.borderLeft=`3px solid ${clrs[type]}`;
+  el.innerHTML=`<span style="font-size:17px">${ics[type]}</span><span style="flex:1">${msg}</span><button class="toast-x" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),200)},3500);
+}
 function showNotifs(){
   toast('3 novas mensagens no chat','b');
-  toast('João Pedro fez matrícula','g');
-  toast('Pagamento de Carlos em atraso','y');
-  document.querySelector('.notif-dot').style.display='none';
+  toast('Pagamento de Isabela Cruz vencido','y');
+  toast('2 leads aguardam resposta','b');
+  document.getElementById('nd').style.display='none';
+}
+function gSearch(v){
+  if(!v)return;
+  const pages=['contatos','alunos'];
+  pages.forEach(pg=>document.querySelectorAll(`#pg-${pg} tbody tr`).forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(v.toLowerCase())?'':'none';
+  }));
 }
 
-// ─── CONFIG STEPS ───
-let cfgStep_=1;const cfgTotal=7;
-function buildCfgSteps(){
-  const ind=document.getElementById('cfg-steps');ind.innerHTML='';
-  for(let i=1;i<=cfgTotal;i++){
-    const d=document.createElement('div');
-    d.className='sd'+(i<cfgStep_?' dn':i===cfgStep_?' on':'');
-    d.textContent=i<cfgStep_?'✓':i;
-    ind.appendChild(d);
-    if(i<cfgTotal){const l=document.createElement('div');l.className='sl'+(i<cfgStep_?' dn':'');ind.appendChild(l)}
-  }
-  document.getElementById('cfg-ctr').textContent=cfgStep_+' / '+cfgTotal;
-  document.getElementById('cfg-prev').style.visibility=cfgStep_===1?'hidden':'visible';
-  document.getElementById('cfg-next').innerHTML=cfgStep_===cfgTotal?'✓ Concluir':'Próximo →';
-  document.getElementById('cfg-sub').textContent='Passo '+cfgStep_+' de '+cfgTotal;
-}
-function cfgStep(d){
-  if(cfgStep_+d<1)return;
-  if(cfgStep_+d>cfgTotal){closeModal('cfg');toast('Configuração salva com sucesso!','g');return}
-  document.getElementById('stp'+cfgStep_).classList.remove('on');
-  cfgStep_+=d;
-  document.getElementById('stp'+cfgStep_).classList.add('on');
-  buildCfgSteps();
-}
-function openCfg(){cfgStep_=1;document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));document.getElementById('stp1').classList.add('on');buildCfgSteps();openModal('cfg')}
-
-// ─── OPTION SELECTOR ───
-function selOpt(el){el.closest('.opt-g').querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));el.classList.add('on')}
-function pickColor(el,c){document.getElementById('clr-pick').querySelectorAll('div').forEach(d=>d.style.border='3px solid transparent');el.style.border='3px solid #fff';el.style.transform='scale(1.15)';setTimeout(()=>el.style.transform='',200);document.documentElement.style.setProperty('--accent',c);document.documentElement.style.setProperty('--accent-h',c);toast('Cor atualizada!','b')}
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+(function init(){
+  const s=S.settings;
+  document.documentElement.style.setProperty('--accent',s.accent||'#2563eb');
+  document.documentElement.style.setProperty('--al',hexToRgba(s.accent||'#2563eb',.13));
+  document.getElementById('logo-ic').textContent=s.logoic||'A';
+  document.getElementById('logo-nm').innerHTML=(s.name||'ABA')+' <b>Edu</b>';
+  document.getElementById('u-nm').textContent=s.user||'Admin';
+  document.getElementById('u-rl').textContent=s.role||'Administrador';
+  document.getElementById('u-av').textContent=s.av||'AK';
+  document.title=(s.name||'ABA')+' Edu';
+  renderChatList();
+  selChat(0,null);
+  updateDash();
+  setTimeout(animChart,200);
+  document.querySelectorAll('.ov').forEach(ov=>{
+    ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.add('hide')});
+  });
+})();
 </script>
 </body>
 </html>
