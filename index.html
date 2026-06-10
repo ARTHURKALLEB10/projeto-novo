@@ -1179,6 +1179,7 @@ function initSocket(){
         document.getElementById('qr-phone').textContent=phone?`Número: +${phone}`:'Conectado com sucesso'
         document.getElementById('qr-sub').textContent='Conectado!'
         toast('WhatsApp conectado com sucesso!','g')
+        refreshWaList()
       } else {
         led.style.background   = 'var(--muted)'
         led.style.boxShadow    = '0 0 0 3px rgba(100,116,139,.15)'
@@ -1262,8 +1263,20 @@ function waLogout(){
 
 function refreshWaList(){
   const waList=Object.values(waChats)
+  // Se WhatsApp conectado mas sem contatos ainda — banner de orientação
+  if(waOk && !waList.length){
+    document.getElementById('cl-list').innerHTML=
+      `<div style="padding:20px 14px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">📱</div>
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">WhatsApp Conectado!</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px">Mensagens recebidas aparecerão aqui.<br>Para iniciar uma conversa, clique no ✏</div>
+        <button class="btn-p" style="font-size:12px;padding:7px 16px" onclick="openM('nova-conversa',null)">✏ Nova Conversa Real</button>
+       </div>`
+    document.getElementById('chat-count').textContent='0'
+    return
+  }
   if(!waList.length){ renderChatList(); return }
-  // Mesclar contatos reais do WhatsApp com os mocks
+  // Contatos reais do WhatsApp
   const realItems = waList.map((c,i)=>`
     <div class="ci ${activeJid===c.jid?'on':''}" data-jid="${c.jid}" onclick="selWaChat('${c.jid}',this)">
       <div class="ci-av ${avColors[c.name?.charCodeAt(0)%avColors.length]||'ava'}">${(c.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
@@ -1276,12 +1289,20 @@ function refreshWaList(){
         ${c.unread?`<div class="ci-unr">${c.unread}</div>`:''}
       </div>
     </div>`).join('')
-  document.getElementById('cl-list').innerHTML=
-    `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
-    +realItems
-    +`<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--border);margin-top:4px">Demo</div>`
-    +chats.map((c,i)=>`<div class="ci" onclick="selChat(${i},this)"><div class="ci-av ${c.av}">${c.ini}</div><div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div><div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div></div>`).join('')
-  document.getElementById('chat-count').textContent=waList.length+chats.length
+  // Quando WhatsApp conectado, mostrar apenas contatos reais (sem demo)
+  if(waOk){
+    document.getElementById('cl-list').innerHTML=
+      `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
+      +realItems
+    document.getElementById('chat-count').textContent=waList.length
+  } else {
+    document.getElementById('cl-list').innerHTML=
+      `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
+      +realItems
+      +`<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--border);margin-top:4px">Demo</div>`
+      +chats.map((c,i)=>`<div class="ci" onclick="selChat(${i},this)"><div class="ci-av ${c.av}">${c.ini}</div><div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div><div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div></div>`).join('')
+    document.getElementById('chat-count').textContent=waList.length+chats.length
+  }
 }
 
 function selWaChat(jid, el){

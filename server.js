@@ -83,16 +83,14 @@ async function startWA() {
 
   sock.ev.on('creds.update', saveCreds)
 
-  // Mensagens recebidas
+  // Mensagens recebidas e enviadas
   sock.ev.on('messages.upsert', async ({ messages: msgs, type }) => {
     if (type !== 'notify') return
 
     for (const msg of msgs) {
-      if (msg.key.fromMe) continue
-
-      const jid      = msg.key.remoteJid
-      const isGroup  = jid.endsWith('@g.us')
-      if (isGroup) continue // ignorar grupos por enquanto
+      const jid     = msg.key.remoteJid
+      const isGroup = jid.endsWith('@g.us')
+      if (isGroup) continue
 
       const text = msg.message?.conversation
         || msg.message?.extendedTextMessage?.text
@@ -103,35 +101,21 @@ async function startWA() {
         || (msg.message?.documentMessage ? '[Documento]' : null)
         || '[Mensagem]'
 
-      const phone   = jid.replace('@s.whatsapp.net', '')
-      const name    = msg.pushName || `+${phone}`
-      const ts      = new Date(msg.messageTimestamp * 1000)
+      const phone = jid.replace('@s.whatsapp.net', '')
+      const name  = msg.pushName || contacts[jid]?.name || `+${phone}`
+      const ts    = new Date(msg.messageTimestamp * 1000)
         .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      const rx    = !msg.key.fromMe
 
-      // Salvar mensagem
       if (!messages[jid]) messages[jid] = []
-      messages[jid].push({ rx: true, text, ts, pushName: name })
+      messages[jid].push({ rx, text, ts, pushName: rx ? name : undefined })
 
-      // Atualizar contato
-      contacts[jid] = { jid, name, phone, lastMsg: text, lastTs: ts }
-
-      // Emitir para o frontend
-      io.emit('new-message', { jid, name, phone, text, ts })
-      io.emit('contacts-update', Object.values(contacts))
-    }
-  })
-
-  // Mensagens enviadas pelo próprio número (confirmação)
-  sock.ev.on('messages.upsert', async ({ messages: msgs }) => {
-    for (const msg of msgs) {
-      if (!msg.key.fromMe) continue
-      const jid = msg.key.remoteJid
-      const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''
-      if (!text) continue
-      const ts = new Date(msg.messageTimestamp * 1000)
-        .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      if (!messages[jid]) messages[jid] = []
-      messages[jid].push({ rx: false, text, ts })
+      // Atualizar contato (somente para mensagens recebidas preserva o pushName)
+      if (rx) {
+        contacts[jid] = { jid, name, phone, lastMsg: text, lastTs: ts }
+        io.emit('new-message', { jid, name, phone, text, ts })
+        io.emit('contacts-update', Object.values(contacts))
+      }
     }
   })
 }
