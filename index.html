@@ -310,7 +310,10 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
       <div class="cl">
         <div class="cl-h">
           <span>Conversas</span>
-          <span class="bx" id="chat-count">0</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="bx" id="chat-count">0</span>
+            <button class="bic" style="width:28px;height:28px;font-size:14px" title="Nova conversa" onclick="openM('nova-conversa',null)">✏</button>
+          </div>
         </div>
         <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar..." oninput="filterChats(this.value)"/></div></div>
         <div class="cl-list" id="cl-list"></div>
@@ -320,18 +323,45 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
           <div class="ci-av ava" id="cav">?</div>
           <div>
             <div style="font-size:14px;font-weight:800" id="cnm">Selecione uma conversa</div>
-            <div style="font-size:11px" id="cst" style="color:var(--muted)">—</div>
+            <div style="font-size:11px;color:var(--muted)" id="cst">—</div>
           </div>
           <div style="margin-left:auto;display:flex;gap:7px">
-            <button class="btn bg" style="font-size:12px" onclick="toast('Perfil aberto!','b')">Ver perfil</button>
-            <button class="btn bp" style="font-size:12px" onclick="openM('aluno',null)">Matricular</button>
+            <button class="btn bg" style="font-size:12px" onclick="openM('aluno',null)">+ Matricular</button>
           </div>
         </div>
-        <div class="cm" id="msgs"><div style="text-align:center;color:var(--muted);margin-top:60px;font-size:13px">Selecione uma conversa ao lado</div></div>
+        <div class="cm" id="msgs">
+          <div style="text-align:center;padding:60px 20px">
+            <div style="font-size:40px;margin-bottom:12px;opacity:.3">💬</div>
+            <div style="color:var(--muted);font-size:13px;margin-bottom:10px">Selecione uma conversa ao lado</div>
+            <div style="color:var(--muted);font-size:12px">ou clique em ✏ para iniciar uma nova</div>
+          </div>
+        </div>
         <div class="ti-ind" id="typing"></div>
         <div class="ci-bar">
           <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter envia)" onkeydown="sendMsg(event)"></textarea>
-          <button class="btn bp" onclick="sendMsg({key:'Enter'})">Enviar</button>
+          <button class="btn bp" onclick="sendMsg({key:'Enter'})">➤ Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Conversa WhatsApp -->
+  <div class="ov hide" id="ov-nova-conversa">
+    <div class="modal" style="width:420px">
+      <div class="m-h"><div><div class="m-t">✏ Nova Conversa</div><div class="m-sub">Envie uma mensagem para qualquer número</div></div><button class="m-x" onclick="closeM('nova-conversa')">✕</button></div>
+      <div class="m-b">
+        <div class="fg">
+          <label class="fl">Número do WhatsApp</label>
+          <input class="fi" id="nc-num" type="text" placeholder="Ex: 11999887766 (só números, com DDD)"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">Digite o número com DDD sem espaços ou traços</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Mensagem</label>
+          <textarea class="fi" id="nc-msg" rows="3" placeholder="Digite a mensagem..."></textarea>
+        </div>
+        <div class="m-ft">
+          <button class="btn bg" onclick="closeM('nova-conversa')">Cancelar</button>
+          <button class="btn bp" onclick="iniciarConversa()">📤 Enviar mensagem</button>
         </div>
       </div>
     </div>
@@ -1012,6 +1042,12 @@ function sendMsg(e){
   // WhatsApp real
   if(typeof activeJid!=='undefined' && activeJid && typeof waOk!=='undefined' && waOk && typeof socket!=='undefined' && socket){
     socket.emit('send-message',{jid:activeJid,text:txt});
+    // Mostra imediatamente (otimista)
+    if(!waChats[activeJid]) waChats[activeJid]={ jid:activeJid, msgs:[], unread:0 }
+    waChats[activeJid].msgs.push({ rx:false, text:txt, ts, _pending:true })
+    waChats[activeJid].lastMsg=txt; waChats[activeJid].lastTs=ts
+    appendChatMsg(false,txt,ts)
+    refreshWaList()
     return;
   }
   if(typeof activeJid!=='undefined' && activeJid && !(typeof waOk!=='undefined' && waOk)){
@@ -1198,8 +1234,10 @@ function initSocket(){
 
     socket.on('message-sent', ({ jid, text, ts }) => {
       if(!waChats[jid]) waChats[jid]={ jid, msgs:[], unread:0 }
-      waChats[jid].msgs.push({ rx:false, text, ts })
-      if(activeJid===jid) appendMsg(false, text, ts)
+      // Remove o _pending e confirma com o ts do servidor
+      const idx = waChats[jid].msgs.findIndex(m=>m._pending && m.text===text)
+      if(idx>=0) { waChats[jid].msgs[idx]._pending=false; waChats[jid].msgs[idx].ts=ts }
+      else waChats[jid].msgs.push({ rx:false, text, ts })
     })
 
     socket.on('send-error', (msg) => toast('Erro ao enviar: '+msg,'r'))
@@ -1227,7 +1265,7 @@ function refreshWaList(){
   if(!waList.length){ renderChatList(); return }
   // Mesclar contatos reais do WhatsApp com os mocks
   const realItems = waList.map((c,i)=>`
-    <div class="ci ${activeJid===c.jid?'on':''}" onclick="selWaChat('${c.jid}',this)">
+    <div class="ci ${activeJid===c.jid?'on':''}" data-jid="${c.jid}" onclick="selWaChat('${c.jid}',this)">
       <div class="ci-av ${avColors[c.name?.charCodeAt(0)%avColors.length]||'ava'}">${(c.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
       <div style="flex:1;min-width:0">
         <div class="ci-nm">${c.name||c.phone}</div>
@@ -1278,8 +1316,32 @@ function appendMsg(rx, text, ts){ appendChatMsg(rx, text, ts) }
 
 function filterChats(v){
   document.querySelectorAll('.cl-list .ci').forEach(el=>{
-    el.style.display=el.textContent.toLowerCase().includes(v.toLowerCase())?'':'none'
+    el.style.display=el.textContent.toLowerCase().includes((v||'').toLowerCase())?'':'none'
   })
+}
+
+function iniciarConversa(){
+  const num = document.getElementById('nc-num').value.replace(/\D/g,'').trim()
+  const msg = document.getElementById('nc-msg').value.trim()
+  if(!num){ toast('Informe o número','r'); return }
+  if(!msg){ toast('Informe a mensagem','r'); return }
+  if(!waOk || !socket){ toast('WhatsApp não está conectado','r'); return }
+  const jid = num + '@s.whatsapp.net'
+  // Cria/atualiza contato na lista
+  if(!waChats[jid]) waChats[jid]={ jid, name:'+'+num, phone:num, msgs:[], unread:0 }
+  socket.emit('send-message', { jid, text:msg })
+  waChats[jid].lastMsg = msg
+  waChats[jid].lastTs  = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+  closeM('nova-conversa')
+  document.getElementById('nc-num').value=''
+  document.getElementById('nc-msg').value=''
+  refreshWaList()
+  // Abre a conversa
+  setTimeout(()=>{
+    const el = document.querySelector(`[data-jid="${jid}"]`)
+    selWaChat(jid, el)
+  }, 100)
+  toast('Mensagem enviada para +'+num,'g')
 }
 
 // sendMsg já está definido acima com suporte a WhatsApp + demo

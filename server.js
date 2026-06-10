@@ -4,6 +4,8 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 const qrcode   = require('qrcode')
 const path     = require('path')
+const fs       = require('fs')
+const { exec } = require('child_process')
 const P        = require('pino')
 
 const app        = express()
@@ -46,6 +48,13 @@ async function startWA() {
       waConnected = false
       io.emit('wa-status', { connected: false, waiting: true })
       console.log('📱 QR Code gerado — aponte a câmera do WhatsApp')
+
+      // Salva QR como imagem e abre automaticamente
+      const qrFile = path.join(__dirname, 'qrcode.png')
+      await qrcode.toFile(qrFile, qr, { scale: 10, margin: 2 })
+      console.log('🖼  QR Code salvo em: ' + qrFile)
+      // Abre a imagem no visualizador padrão do Windows
+      exec(`start "" "${qrFile}"`)
     }
 
     if (connection === 'close') {
