@@ -125,6 +125,22 @@ app.get('/api/status',         (req, res) => res.json({ connected: waConnected, 
 app.get('/api/messages/:jid',  (req, res) => res.json(messages[req.params.jid] || []))
 app.get('/api/contacts',       (req, res) => res.json(Object.values(contacts)))
 
+// Endpoint de teste — envia mensagem direto pelo servidor
+app.post('/api/send', async (req, res) => {
+  const { phone, text } = req.body
+  if (!sock || !waConnected) return res.status(503).json({ error: 'WhatsApp não conectado' })
+  try {
+    const cleanPhone = String(phone).replace(/\D/g,'')
+    const jid = `${cleanPhone}@s.whatsapp.net`
+    await sock.sendMessage(jid, { text })
+    console.log(`✅ API /api/send → ${jid}: ${text}`)
+    res.json({ ok: true, jid })
+  } catch (e) {
+    console.error('❌ /api/send erro:', e.message)
+    res.status(500).json({ error: e.message })
+  }
+})
+
 app.post('/api/logout', async (req, res) => {
   if (sock) { try { await sock.logout() } catch (e) {} }
   waConnected = false; qrData = null; connectedPhone = null
@@ -145,13 +161,25 @@ io.on('connection', (socket) => {
       return
     }
     try {
-      const fullJid = jid.includes('@') ? jid : `${jid}@s.whatsapp.net`
+      // Garante JID completo com sufixo correto
+      const phone   = jid.replace('@s.whatsapp.net','').replace(/\D/g,'')
+      const fullJid = `${phone}@s.whatsapp.net`
+
+      console.log(`📤 Enviando para ${fullJid}: "${text}"`)
       await sock.sendMessage(fullJid, { text })
+
       const ts = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       if (!messages[fullJid]) messages[fullJid] = []
       messages[fullJid].push({ rx: false, text, ts })
+
+      if (!contacts[fullJid]) contacts[fullJid] = { jid: fullJid, name: `+${phone}`, phone }
+      contacts[fullJid].lastMsg = text
+      contacts[fullJid].lastTs  = ts
+
       socket.emit('message-sent', { jid: fullJid, text, ts })
+      console.log(`✅ Mensagem entregue a ${fullJid}`)
     } catch (e) {
+      console.error(`❌ Falha ao enviar para ${jid}:`, e.message)
       socket.emit('send-error', e.message)
     }
   })
