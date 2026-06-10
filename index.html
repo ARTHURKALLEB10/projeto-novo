@@ -1,947 +1,868 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ABA Edu</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ABA Edu</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0d14;
+  --s1:#111827;
+  --s2:#1f2937;
+  --s3:#374151;
+  --border:#2d3748;
+  --accent:#2563eb;
+  --accent-h:#1d4ed8;
+  --accent-light:rgba(37,99,235,.12);
+  --green:#10b981;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --blue:#38bdf8;
+  --text:#f1f5f9;
+  --sub:#94a3b8;
+  --muted:#64748b;
+  --sw:248px;
+  --sc:68px;
+  --radius:10px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
 
-    :root {
-      --bg: #0d0f1a;
-      --surface: #13162b;
-      --surface2: #1a1e35;
-      --border: #252a45;
-      --accent: #6c63ff;
-      --accent2: #8b5cf6;
-      --green: #10b981;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --sidebar-w: 240px;
-      --sidebar-collapsed: 64px;
-    }
+/* ─── SIDEBAR ─── */
+#sb{width:var(--sw);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;flex-shrink:0;z-index:10}
+#sb.col{width:var(--sc)}
+.sb-top{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0;box-shadow:0 0 0 3px rgba(37,99,235,.25)}
+.logo-txt{font-size:16px;font-weight:800;letter-spacing:-.3px}.logo-txt b{color:#60a5fa}
+.tog{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px;flex-shrink:0;transition:color .15s}
+.tog:hover{color:var(--text)}
+.nav{padding:8px 0;flex:1;overflow-y:auto;overflow-x:hidden}
+.nl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:10px 18px 4px;white-space:nowrap;letter-spacing:.08em;transition:opacity .15s}
+#sb.col .nl{opacity:0}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;white-space:nowrap;position:relative;transition:background .12s}
+.ni:hover{background:var(--s2)}
+.ni.on{background:var(--accent-light)}
+.ni.on::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
+.ni-ic{font-size:17px;flex-shrink:0;color:var(--muted);width:22px;text-align:center;transition:color .12s}
+.ni.on .ni-ic{color:var(--accent)}
+.ni-tx{font-size:13px;font-weight:500;transition:color .12s}
+.ni.on .ni-tx{color:var(--accent);font-weight:600}
+.bx{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;flex-shrink:0;transition:opacity .15s}
+#sb.col .ni-tx,#sb.col .bx{opacity:0;pointer-events:none}
+.sb-foot{border-top:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.u-nm{font-size:13px;font-weight:600}
+.u-rl{font-size:11px;color:var(--muted)}
+#sb.col .sb-foot>*:not(.av){opacity:0}
 
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+/* ─── MAIN ─── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);height:58px;padding:0 24px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.tb-title{font-size:17px;font-weight:800;flex:1;letter-spacing:-.3px}
+.tb-acts{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:22px 24px}
 
-    /* ── SIDEBAR ── */
-    #sidebar {
-      width: var(--sidebar-w);
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      transition: width .25s ease;
-      overflow: hidden; flex-shrink: 0;
-    }
-    #sidebar.collapsed { width: var(--sidebar-collapsed); }
+/* ─── BUTTONS ─── */
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{filter:brightness(1.1)}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.btn-g{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.btn-ic{width:36px;height:36px;border-radius:8px;background:var(--s2);border:1px solid var(--border);color:var(--sub);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative}
+.btn-ic:hover{background:var(--s3);color:var(--text)}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1)}
 
-    .sidebar-header {
-      display: flex; align-items: center; gap: 10px;
-      padding: 18px 16px; border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-    .logo-icon {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px; color: #fff; flex-shrink: 0;
-    }
-    .logo-text { font-weight: 700; font-size: 16px; }
-    .logo-text span { color: var(--accent); }
+/* ─── SEARCH ─── */
+.srch{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0 12px;height:36px;transition:border-color .15s}
+.srch:focus-within{border-color:var(--accent)}
+.srch input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:180px}
+.srch input::placeholder{color:var(--muted)}
 
-    .toggle-btn {
-      margin-left: auto; background: none; border: none; cursor: pointer;
-      color: var(--muted); font-size: 18px; padding: 4px; flex-shrink: 0;
-    }
-    .toggle-btn:hover { color: var(--text); }
+/* ─── PAGES ─── */
+.pg{display:none;animation:fadeIn .2s ease}
+.pg.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    .nav-section { padding: 10px 0; flex: 1; overflow-y: auto; }
-    .nav-label {
-      font-size: 10px; font-weight: 600; text-transform: uppercase;
-      color: var(--muted); padding: 8px 16px 4px; white-space: nowrap;
-      letter-spacing: .08em;
-    }
-    #sidebar.collapsed .nav-label { opacity: 0; }
+/* ─── CARDS ─── */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--s3);box-shadow:var(--shadow)}
+.c-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.c-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
+.c-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ic-b{background:rgba(37,99,235,.15)}
+.ic-g{background:rgba(16,185,129,.15)}
+.ic-y{background:rgba(245,158,11,.15)}
+.ic-r{background:rgba(239,68,68,.15)}
+.c-val{font-size:28px;font-weight:900;letter-spacing:-1px}
+.c-dt{font-size:12px;margin-top:3px;display:flex;align-items:center;gap:4px}
+.up{color:var(--green)}.dn{color:var(--red)}
 
-    .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 16px; cursor: pointer; border-radius: 0;
-      transition: background .15s; white-space: nowrap;
-      position: relative;
-    }
-    .nav-item:hover { background: var(--surface2); }
-    .nav-item.active { background: rgba(108,99,255,.15); border-right: 3px solid var(--accent); }
-    .nav-item.active .nav-icon { color: var(--accent); }
-    .nav-item.active .nav-text { color: var(--accent); font-weight: 600; }
+/* ─── SECTION HEADER ─── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sh-t{font-size:15px;font-weight:800;letter-spacing:-.2px}
 
-    .nav-icon { font-size: 18px; flex-shrink: 0; color: var(--muted); width: 22px; text-align: center; }
-    .nav-text { font-size: 14px; }
+/* ─── CHART ─── */
+.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:14px}
+.cb-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.cb{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#2563eb,#60a5fa);opacity:.75;min-height:4px;transition:opacity .2s,height .8s cubic-bezier(.4,0,.2,1)}
+.cb:hover{opacity:1}
+.cb-l{font-size:10px;color:var(--muted)}
+.chart-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--muted)}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:8px;height:8px;border-radius:50%}
 
-    .badge {
-      margin-left: auto; background: var(--accent); color: #fff;
-      font-size: 10px; font-weight: 700; padding: 2px 6px;
-      border-radius: 10px; flex-shrink: 0;
-    }
-    #sidebar.collapsed .nav-text,
-    #sidebar.collapsed .badge { opacity: 0; pointer-events: none; }
+/* ─── TABLE ─── */
+.tbl-w{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border);background:var(--s2)}
+th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--s2)}
 
-    .sidebar-footer {
-      border-top: 1px solid var(--border); padding: 14px 16px;
-      display: flex; align-items: center; gap: 10px; white-space: nowrap;
-    }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: linear-gradient(135deg, #6c63ff, #a78bfa);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
-    }
-    .user-info { flex: 1; overflow: hidden; }
-    .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role { font-size: 11px; color: var(--muted); }
-    #sidebar.collapsed .user-info { opacity: 0; }
+/* ─── TAGS ─── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.tg{background:rgba(16,185,129,.12);color:var(--green)}
+.tr{background:rgba(239,68,68,.12);color:var(--red)}
+.ty{background:rgba(245,158,11,.12);color:var(--yellow)}
+.tb{background:rgba(56,189,248,.12);color:var(--blue)}
+.tp{background:rgba(37,99,235,.12);color:#60a5fa}
+.tm{background:rgba(100,116,139,.12);color:var(--muted)}
 
-    /* ── MAIN ── */
-    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* ─── KANBAN ─── */
+.kan{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.kc{min-width:230px;max-width:230px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:box-shadow .15s}
+.kc.drag-over{box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)}
+.kc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kc-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.kc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kc-n{background:var(--s2);color:var(--muted);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px}
+.kk{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;transition:all .15s;user-select:none}
+.kk:active{cursor:grabbing;opacity:.7;transform:scale(.98)}
+.kk:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(37,99,235,.2)}
+.kk.dragging{opacity:.4}
+.kk-nm{font-size:12px;font-weight:700;margin-bottom:5px}
+.kk-inf{font-size:11px;color:var(--muted)}
+.kk-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-top:6px}
+.kan-add{width:100%;background:none;border:1px dashed var(--border);color:var(--muted);border-radius:7px;padding:7px;cursor:pointer;font-size:12px;transition:all .15s;margin-top:2px}
+.kan-add:hover{border-color:var(--accent);color:var(--accent)}
 
-    .topbar {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 16px;
-    }
-    .topbar-title { font-size: 18px; font-weight: 700; flex: 1; }
-    .topbar-actions { display: flex; align-items: center; gap: 10px; }
-    .btn {
-      padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
-      font-size: 13px; font-weight: 600; transition: opacity .15s;
-    }
-    .btn:hover { opacity: .85; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-    .btn-icon {
-      width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--surface2); color: var(--text); cursor: pointer; font-size: 16px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .btn-icon:hover { background: var(--border); }
+/* ─── CHAT ─── */
+.chat-lay{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 140px)}
+.cl{width:270px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.cl-h{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.cl-srch{padding:10px 12px;border-bottom:1px solid var(--border)}
+.cl-list{overflow-y:auto;flex:1}
+.ci{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:background .1s}
+.ci:hover,.ci.on{background:var(--s2)}
+.ci-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.ci-nm{font-size:13px;font-weight:700}
+.ci-pv{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.ci-tm{font-size:10px;color:var(--muted);white-space:nowrap}
+.ci-unread{width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.cw{flex:1;display:flex;flex-direction:column;min-width:0}
+.cw-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.cw-status{display:flex;align-items:center;gap:5px;font-size:11px}
+.online{color:var(--green)}.offline{color:var(--muted)}
+.cm{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:65%}
+.msg.rx{align-self:flex-start}
+.msg.tx{align-self:flex-end}
+.mb{padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.55}
+.msg.rx .mb{background:var(--s2);border-radius:3px 10px 10px 10px}
+.msg.tx .mb{background:var(--accent);color:#fff;border-radius:10px 3px 10px 10px}
+.mt{font-size:10px;color:var(--muted);margin-top:3px}
+.msg.tx .mt{text-align:right}
+.ci-bar{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.ci-in{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;resize:none;font-family:inherit}
+.ci-in:focus{border-color:var(--accent)}
+.typing-ind{font-size:11px;color:var(--muted);padding:0 16px 6px;min-height:20px}
 
-    .content { flex: 1; overflow-y: auto; padding: 24px; }
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:70px 20px}
+.empty-ic{font-size:56px;margin-bottom:14px;opacity:.35}
+.empty-t{font-size:17px;font-weight:800;margin-bottom:7px}
+.empty-d{color:var(--muted);font-size:13px;margin-bottom:22px;max-width:320px;margin-left:auto;margin-right:auto}
 
-    /* ── PAGE SECTIONS ── */
-    .page { display: none; }
-    .page.active { display: block; }
+/* ─── FIN CARDS ─── */
+.fcards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.fc{border-radius:var(--radius);padding:20px;color:#fff;position:relative;overflow:hidden}
+.fc::before{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.08)}
+.fc.g{background:linear-gradient(135deg,#065f46,#10b981)}
+.fc.y{background:linear-gradient(135deg,#92400e,#f59e0b)}
+.fc.r{background:linear-gradient(135deg,#991b1b,#ef4444)}
+.fc.b{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+.fc-l{font-size:11px;font-weight:700;opacity:.85;margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em}
+.fc-v{font-size:26px;font-weight:900;letter-spacing:-1px}
+.fc-s{font-size:11px;opacity:.75;margin-top:4px}
 
-    /* ── CARDS GRID ── */
-    .cards-grid { display: grid; gap: 16px; }
-    .cards-grid-4 { grid-template-columns: repeat(4, 1fr); }
-    .cards-grid-3 { grid-template-columns: repeat(3, 1fr); }
-    .cards-grid-2 { grid-template-columns: repeat(2, 1fr); }
+/* ─── MODAL ─── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:ovIn .15s ease}
+.ov.hide{display:none}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);animation:modalIn .2s cubic-bezier(.4,0,.2,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+.m-h{padding:22px 24px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.m-t{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.m-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.m-x{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px;transition:color .15s}
+.m-x:hover{color:var(--text)}
+.m-b{padding:20px 24px 24px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;font-family:inherit}
+.fi:focus{border-color:var(--accent)}
+select.fi{cursor:pointer}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.m-ft{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
 
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px;
-    }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .card-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
-    .card-icon { font-size: 20px; }
-    .card-value { font-size: 28px; font-weight: 800; }
-    .card-delta { font-size: 12px; margin-top: 4px; }
-    .delta-up { color: var(--green); }
-    .delta-down { color: var(--red); }
+/* ─── STEPS MODAL ─── */
+.stps{display:flex;align-items:center;gap:5px;margin-bottom:24px}
+.sd{width:28px;height:28px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--s2);border:2px solid var(--border);color:var(--muted);flex-shrink:0;transition:all .2s}
+.sd.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sd.dn{background:var(--green);border-color:var(--green);color:#fff}
+.sl{flex:1;height:2px;background:var(--border);transition:background .3s}
+.sl.dn{background:var(--green)}
+.stp{display:none}.stp.on{display:block}
+.s-t{font-size:15px;font-weight:800;margin-bottom:4px}
+.s-d{font-size:12px;color:var(--muted);margin-bottom:18px}
+.opt-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{background:var(--s2);border:2px solid var(--border);border-radius:9px;padding:14px 12px;cursor:pointer;text-align:center;transition:all .15s}
+.opt:hover,.opt.on{border-color:var(--accent);background:var(--accent-light)}
+.opt-ic{font-size:22px;margin-bottom:5px}
+.opt-l{font-size:12px;font-weight:700}
+.s-ft{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.s-ctr{font-size:12px;color:var(--muted)}
 
-    /* ── SECTION HEADER ── */
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .section-title { font-size: 16px; font-weight: 700; }
+/* ─── TOAST ─── */
+#toasts{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200}
+.toast{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow);animation:tIn .2s ease;min-width:260px;max-width:340px}
+.toast.exit{animation:tOut .2s ease forwards}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateX(20px)}}
+.toast-ic{font-size:18px;flex-shrink:0}
+.toast-close{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
 
-    /* ── CHART ── */
-    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 20px; }
-    .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 12px; }
-    .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-    .chart-bar { width: 100%; border-radius: 6px 6px 0 0; background: var(--accent); opacity: .7; min-height: 4px; transition: opacity .2s; }
-    .chart-bar:hover { opacity: 1; }
-    .chart-bar-label { font-size: 10px; color: var(--muted); }
+/* ─── AVATAR COLORS ─── */
+.av-a{background:linear-gradient(135deg,#2563eb,#60a5fa)}
+.av-b{background:linear-gradient(135deg,#059669,#34d399)}
+.av-c{background:linear-gradient(135deg,#d97706,#fbbf24)}
+.av-d{background:linear-gradient(135deg,#dc2626,#f87171)}
+.av-e{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.av-f{background:linear-gradient(135deg,#0891b2,#22d3ee)}
 
-    /* ── TABLE ── */
-    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    thead tr { border-bottom: 1px solid var(--border); }
-    th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--surface2); }
-
-    /* ── TAGS / BADGES ── */
-    .tag {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 600;
-    }
-    .tag-green { background: rgba(16,185,129,.15); color: var(--green); }
-    .tag-red { background: rgba(239,68,68,.15); color: var(--red); }
-    .tag-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
-    .tag-blue { background: rgba(59,130,246,.15); color: var(--blue); }
-    .tag-purple { background: rgba(108,99,255,.15); color: var(--accent); }
-    .tag-gray { background: rgba(100,116,139,.15); color: var(--muted); }
-
-    /* ── SEARCH ── */
-    .search-bar {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 0 12px; height: 38px;
-    }
-    .search-bar input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; width: 200px; }
-    .search-bar input::placeholder { color: var(--muted); }
-
-    /* ── KANBAN ── */
-    .kanban { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
-    .kanban-col { min-width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-    .kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .kanban-col-title { font-size: 13px; font-weight: 700; }
-    .kanban-count { background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-    .kanban-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .15s; }
-    .kanban-card:hover { border-color: var(--accent); }
-    .kanban-card-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-    .kanban-card-info { font-size: 11px; color: var(--muted); }
-    .kanban-add { width: 100%; background: none; border: 1px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px; cursor: pointer; font-size: 13px; margin-top: 4px; }
-    .kanban-add:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── CHAT ── */
-    .chat-layout { display: flex; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; height: calc(100vh - 150px); }
-    .chat-list { width: 280px; border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
-    .chat-list-header { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; }
-    .chat-item { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
-    .chat-item:hover, .chat-item.active { background: var(--surface2); }
-    .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
-    .chat-item-name { font-size: 13px; font-weight: 600; }
-    .chat-item-preview { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
-    .chat-item-time { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
-    .chat-window { flex: 1; display: flex; flex-direction: column; }
-    .chat-window-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .msg { max-width: 60%; }
-    .msg.received { align-self: flex-start; }
-    .msg.sent { align-self: flex-end; }
-    .msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
-    .msg.received .msg-bubble { background: var(--surface2); border-radius: 4px 12px 12px 12px; }
-    .msg.sent .msg-bubble { background: var(--accent); color: #fff; border-radius: 12px 4px 12px 12px; }
-    .msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: right; }
-    .chat-input-bar { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
-    .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px; outline: none; }
-    .chat-input:focus { border-color: var(--accent); }
-
-    /* ── EMPTY STATE ── */
-    .empty-state { text-align: center; padding: 80px 20px; }
-    .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: .4; }
-    .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .empty-desc { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-
-    /* ── FINANCIAL CARDS ── */
-    .fin-card { border-radius: 12px; padding: 20px; color: #fff; }
-    .fin-card.green { background: linear-gradient(135deg, #059669, #10b981); }
-    .fin-card.yellow { background: linear-gradient(135deg, #d97706, #f59e0b); }
-    .fin-card.red { background: linear-gradient(135deg, #dc2626, #ef4444); }
-    .fin-card.purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
-    .fin-card-label { font-size: 12px; font-weight: 600; opacity: .85; margin-bottom: 8px; }
-    .fin-card-value { font-size: 26px; font-weight: 800; }
-    .fin-card-sub { font-size: 11px; opacity: .75; margin-top: 4px; }
-
-    /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.75);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000; backdrop-filter: blur(4px);
-    }
-    .modal-overlay.hidden { display: none; }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; width: 560px; max-width: 95vw;
-      max-height: 90vh; overflow-y: auto;
-    }
-    .modal-header { padding: 24px 28px 0; display: flex; align-items: center; justify-content: space-between; }
-    .modal-title { font-size: 18px; font-weight: 800; }
-    .modal-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
-    .modal-close:hover { color: var(--text); }
-    .modal-body { padding: 20px 28px 28px; }
-
-    .steps-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 28px; }
-    .step-dot {
-      width: 32px; height: 32px; border-radius: 50%; font-size: 12px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--surface2); border: 2px solid var(--border); color: var(--muted);
-      flex-shrink: 0; transition: all .2s;
-    }
-    .step-dot.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .step-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
-    .step-line { flex: 1; height: 2px; background: var(--border); }
-    .step-line.done { background: var(--green); }
-
-    .step-content { display: none; }
-    .step-content.active { display: block; }
-    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-    .step-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-    .form-input {
-      width: 100%; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none;
-    }
-    .form-input:focus { border-color: var(--accent); }
-    select.form-input { cursor: pointer; }
-
-    .option-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-card {
-      background: var(--surface2); border: 2px solid var(--border); border-radius: 10px;
-      padding: 14px; cursor: pointer; transition: border-color .15s; text-align: center;
-    }
-    .option-card:hover, .option-card.selected { border-color: var(--accent); }
-    .option-card.selected { background: rgba(108,99,255,.1); }
-    .option-card-icon { font-size: 24px; margin-bottom: 6px; }
-    .option-card-label { font-size: 13px; font-weight: 600; }
-
-    .modal-footer { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; }
-
-    /* ── CONTACT AVATAR COLORS ── */
-    .av-a { background: linear-gradient(135deg,#6c63ff,#a78bfa); }
-    .av-b { background: linear-gradient(135deg,#10b981,#059669); }
-    .av-c { background: linear-gradient(135deg,#f59e0b,#d97706); }
-    .av-d { background: linear-gradient(135deg,#ef4444,#dc2626); }
-    .av-e { background: linear-gradient(135deg,#3b82f6,#2563eb); }
-
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-    @media (max-width: 900px) {
-      .cards-grid-4 { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+/* ─── MISC ─── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.info-box{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:12px;font-size:12px;color:var(--sub)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--s3)}
+@media(max-width:960px){.g4{grid-template-columns:1fr 1fr}.fcards{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
 
-<!-- ══════════════════════════ SIDEBAR ══════════════════════════ -->
-<nav id="sidebar">
-  <div class="sidebar-header">
-    <div class="logo-icon">N</div>
-    <span class="logo-text">ABA <span>Edu</span></span>
-    <button class="toggle-btn" onclick="toggleSidebar()">&#9776;</button>
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav id="sb">
+  <div class="sb-top">
+    <div class="logo">A</div>
+    <span class="logo-txt">ABA <b>Edu</b></span>
+    <button class="tog" onclick="toggleSB()">☰</button>
   </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Menu Principal</div>
-    <div class="nav-item active" onclick="navigate('dashboard', this)">
-      <span class="nav-icon">&#9672;</span>
-      <span class="nav-text">Dashboard</span>
-    </div>
-    <div class="nav-item" onclick="navigate('captacao', this)">
-      <span class="nav-icon">&#10024;</span>
-      <span class="nav-text">Captação</span>
-      <span class="badge">12</span>
-    </div>
-    <div class="nav-item" onclick="navigate('chat', this)">
-      <span class="nav-icon">&#128172;</span>
-      <span class="nav-text">Chat Ao Vivo</span>
-      <span class="badge">3</span>
-    </div>
-    <div class="nav-item" onclick="navigate('contatos', this)">
-      <span class="nav-icon">&#128100;</span>
-      <span class="nav-text">Contatos</span>
-    </div>
-
-    <div class="nav-label">Gestão</div>
-    <div class="nav-item" onclick="navigate('alunos', this)">
-      <span class="nav-icon">&#127891;</span>
-      <span class="nav-text">Alunos</span>
-    </div>
-    <div class="nav-item" onclick="navigate('turmas', this)">
-      <span class="nav-icon">&#128218;</span>
-      <span class="nav-text">Turmas</span>
-    </div>
-    <div class="nav-item" onclick="navigate('financeiro', this)">
-      <span class="nav-icon">&#128176;</span>
-      <span class="nav-text">Financeiro</span>
-    </div>
-
-    <div class="nav-label">Sistema</div>
-    <div class="nav-item" onclick="openModal()">
-      <span class="nav-icon">&#9881;</span>
-      <span class="nav-text">Configurações</span>
-    </div>
+  <div class="nav">
+    <div class="nl">Principal</div>
+    <div class="ni on" data-pg="dashboard" onclick="go('dashboard',this)"><span class="ni-ic">◈</span><span class="ni-tx">Dashboard</span></div>
+    <div class="ni" data-pg="captacao" onclick="go('captacao',this)"><span class="ni-ic">⚡</span><span class="ni-tx">Captação</span><span class="bx" id="nb-cap">12</span></div>
+    <div class="ni" data-pg="chat" onclick="go('chat',this)"><span class="ni-ic">💬</span><span class="ni-tx">Chat Ao Vivo</span><span class="bx" id="nb-chat">3</span></div>
+    <div class="ni" data-pg="contatos" onclick="go('contatos',this)"><span class="ni-ic">👤</span><span class="ni-tx">Contatos</span></div>
+    <div class="nl">Gestão</div>
+    <div class="ni" data-pg="alunos" onclick="go('alunos',this)"><span class="ni-ic">🎓</span><span class="ni-tx">Alunos</span></div>
+    <div class="ni" data-pg="turmas" onclick="go('turmas',this)"><span class="ni-ic">📚</span><span class="ni-tx">Turmas</span></div>
+    <div class="ni" data-pg="financeiro" onclick="go('financeiro',this)"><span class="ni-ic">💰</span><span class="ni-tx">Financeiro</span></div>
+    <div class="nl">Sistema</div>
+    <div class="ni" onclick="openCfg()"><span class="ni-ic">⚙</span><span class="ni-tx">Configurações</span></div>
   </div>
-
-  <div class="sidebar-footer">
-    <div class="avatar">AU</div>
-    <div class="user-info">
-      <div class="user-name">Arthur Kalleb</div>
-      <div class="user-role">Administrador</div>
-    </div>
+  <div class="sb-foot">
+    <div class="av av-a">AK</div>
+    <div><div class="u-nm">Arthur Kalleb</div><div class="u-rl">Administrador</div></div>
   </div>
 </nav>
 
-<!-- ══════════════════════════ MAIN ══════════════════════════ -->
+<!-- ═══════════════════ MAIN ═══════════════════ -->
 <div id="main">
   <div class="topbar">
-    <span class="topbar-title" id="page-title">Dashboard</span>
-    <div class="topbar-actions">
-      <div class="search-bar">
-        <span>&#128269;</span>
-        <input type="text" placeholder="Pesquisar..." />
+    <span class="tb-title" id="ptitle">Dashboard</span>
+    <div class="tb-acts">
+      <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input id="gsrch" type="text" placeholder="Pesquisar..." oninput="globalSearch(this.value)"/></div>
+      <button class="btn-ic" onclick="showNotifs()" title="Notificações"><span>🔔</span><span class="notif-dot"></span></button>
+      <button class="btn btn-p" onclick="openCfg()">⚙ Configurar</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="pg on" id="pg-dashboard">
+    <div class="grid g4">
+      <div class="card"><div class="c-head"><span class="c-lbl">Total Contatos</span><div class="c-ic ic-b">👤</div></div><div class="c-val" id="d-cont">1.284</div><div class="c-dt up">↑ +8,2% este mês</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">Alunos Ativos</span><div class="c-ic ic-g">🎓</div></div><div class="c-val" id="d-alun">342</div><div class="c-dt up">↑ +5 novos hoje</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">Chats Abertos</span><div class="c-ic ic-y">💬</div></div><div class="c-val" id="d-chat">17</div><div class="c-dt dn">↓ 3 sem resposta</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">Receita Mensal</span><div class="c-ic ic-b">💰</div></div><div class="c-val" id="d-rev">R$42k</div><div class="c-dt up">↑ +12% vs anterior</div></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="sh"><span class="sh-t">Atendimentos por Mês</span><span class="tag tp">2025</span></div>
+      <div class="chart-bars" id="chart">
+        <div class="cb-w"><div class="cb" data-h="55" style="height:0%"></div><span class="cb-l">Jan</span></div>
+        <div class="cb-w"><div class="cb" data-h="70" style="height:0%"></div><span class="cb-l">Fev</span></div>
+        <div class="cb-w"><div class="cb" data-h="45" style="height:0%"></div><span class="cb-l">Mar</span></div>
+        <div class="cb-w"><div class="cb" data-h="82" style="height:0%"></div><span class="cb-l">Abr</span></div>
+        <div class="cb-w"><div class="cb" data-h="63" style="height:0%"></div><span class="cb-l">Mai</span></div>
+        <div class="cb-w"><div class="cb" data-h="95" style="height:0%"></div><span class="cb-l">Jun</span></div>
+        <div class="cb-w"><div class="cb" data-h="78" style="height:0%"></div><span class="cb-l">Jul</span></div>
+        <div class="cb-w"><div class="cb" data-h="88" style="height:0%"></div><span class="cb-l">Ago</span></div>
+        <div class="cb-w"><div class="cb" data-h="67" style="height:0%"></div><span class="cb-l">Set</span></div>
+        <div class="cb-w"><div class="cb" data-h="74" style="height:0%"></div><span class="cb-l">Out</span></div>
+        <div class="cb-w"><div class="cb" data-h="52" style="height:0%"></div><span class="cb-l">Nov</span></div>
+        <div class="cb-w"><div class="cb" data-h="38" style="height:0%"></div><span class="cb-l">Dez</span></div>
       </div>
-      <button class="btn-icon">&#128276;</button>
-      <button class="btn btn-primary" onclick="openModal()">+ Configurar</button>
+      <div class="chart-legend"><div class="leg"><div class="leg-dot" style="background:#2563eb"></div>Atendimentos</div><div class="leg"><div class="leg-dot" style="background:#60a5fa"></div>Meta mensal</div></div>
+    </div>
+    <div class="tbl-w">
+      <div style="padding:14px 16px 0"><span class="sh-t">Atividades Recentes</span></div>
+      <table><thead><tr><th>Nome</th><th>Evento</th><th>Origem</th><th>Horário</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-a" style="width:28px;height:28px;font-size:10px">MS</div>Maria Silva</div></td><td>Nova mensagem</td><td>WhatsApp</td><td>Agora</td><td><span class="tag tb">Novo</span></td></tr>
+        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-b" style="width:28px;height:28px;font-size:10px">JP</div>João Pedro</div></td><td>Matrícula concluída</td><td>Site</td><td>2 min</td><td><span class="tag tg">Concluído</span></td></tr>
+        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-c" style="width:28px;height:28px;font-size:10px">AB</div>Ana Beatriz</div></td><td>Lead adicionado</td><td>Instagram</td><td>5 min</td><td><span class="tag tp">Lead</span></td></tr>
+        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-d" style="width:28px;height:28px;font-size:10px">CM</div>Carlos Melo</div></td><td>Pagamento recebido</td><td>PIX</td><td>12 min</td><td><span class="tag tg">Pago</span></td></tr>
+        <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-e" style="width:28px;height:28px;font-size:10px">FL</div>Fernanda Lima</div></td><td>Sem resposta</td><td>Chat</td><td>18 min</td><td><span class="tag ty">Pendente</span></td></tr>
+      </tbody></table>
     </div>
   </div>
 
-  <div class="content">
-
-    <!-- ══ DASHBOARD ══ -->
-    <div class="page active" id="page-dashboard">
-      <div class="cards-grid cards-grid-4">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-label">Total Contatos</span>
-            <span class="card-icon">&#128100;</span>
-          </div>
-          <div class="card-value">1.284</div>
-          <div class="card-delta delta-up">&#8679; +8,2% este mês</div>
+  <!-- ══ CAPTAÇÃO ══ -->
+  <div class="pg" id="pg-captacao">
+    <div class="sh"><span class="sh-t">Funil de Captação</span><button class="btn btn-p" onclick="openModal('new-lead')">+ Novo Lead</button></div>
+    <div class="kan" id="kanban">
+      <div class="kc" data-col="novo" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
+        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#ef4444"></span>Novo Lead</span><span class="kc-n" id="kn-novo">4</span></div>
+        <div id="kcards-novo">
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="1"><div class="kk-nm">Luísa Campos</div><div class="kk-inf">📱 (11) 9 8765-4321</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Instagram</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="2"><div class="kk-nm">Rafael Torres</div><div class="kk-inf">📱 (21) 9 9988-7766</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">WhatsApp</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="3"><div class="kk-nm">Patrícia Nunes</div><div class="kk-inf">📱 (31) 9 7654-3210</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">Site</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="4"><div class="kk-nm">Diego Santos</div><div class="kk-inf">📱 (41) 9 8899-0011</div><span class="kk-tag" style="background:rgba(245,158,11,.12);color:#fbbf24">Indicação</span></div>
         </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-label">Alunos Ativos</span>
-            <span class="card-icon">&#127891;</span>
-          </div>
-          <div class="card-value">342</div>
-          <div class="card-delta delta-up">&#8679; +5 novos hoje</div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-label">Chats Abertos</span>
-            <span class="card-icon">&#128172;</span>
-          </div>
-          <div class="card-value">17</div>
-          <div class="card-delta delta-down">&#8681; 3 aguardando</div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-label">Receita Mensal</span>
-            <span class="card-icon">&#128176;</span>
-          </div>
-          <div class="card-value">R$42k</div>
-          <div class="card-delta delta-up">&#8679; +12% vs mês ant.</div>
-        </div>
+        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
       </div>
-
-      <div class="chart-card">
-        <div class="section-header">
-          <span class="section-title">Atendimentos por Mês</span>
-          <span class="tag tag-purple">2025</span>
+      <div class="kc" data-col="contato" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
+        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#f59e0b"></span>Contato Feito</span><span class="kc-n" id="kn-contato">3</span></div>
+        <div id="kcards-contato">
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="5"><div class="kk-nm">Mariana Costa</div><div class="kk-inf">📱 (11) 9 3344-5566</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Anúncio</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="6"><div class="kk-nm">Bruno Alves</div><div class="kk-inf">📱 (21) 9 6677-8899</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">WhatsApp</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="7"><div class="kk-nm">Camila Rocha</div><div class="kk-inf">📱 (31) 9 1122-3344</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">Site</span></div>
         </div>
-        <div class="chart-bars">
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:55%"></div><span class="chart-bar-label">Jan</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%"></div><span class="chart-bar-label">Fev</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:45%"></div><span class="chart-bar-label">Mar</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:80%"></div><span class="chart-bar-label">Abr</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:60%"></div><span class="chart-bar-label">Mai</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:95%"></div><span class="chart-bar-label">Jun</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:75%"></div><span class="chart-bar-label">Jul</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:88%"></div><span class="chart-bar-label">Ago</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:65%"></div><span class="chart-bar-label">Set</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:72%"></div><span class="chart-bar-label">Out</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:50%"></div><span class="chart-bar-label">Nov</span></div>
-          <div class="chart-bar-wrap"><div class="chart-bar" style="height:40%"></div><span class="chart-bar-label">Dez</span></div>
-        </div>
+        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
       </div>
-
-      <div class="table-wrap">
-        <div style="padding:16px 16px 0"><span class="section-title">Atividades Recentes</span></div>
-        <table>
-          <thead><tr><th>Nome</th><th>Evento</th><th>Página</th><th>Horário</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>Maria Silva</td><td>Nova mensagem</td><td>Chat</td><td>Agora</td><td><span class="tag tag-blue">Novo</span></td></tr>
-            <tr><td>João Pedro</td><td>Matrícula concluída</td><td>Alunos</td><td>2 min</td><td><span class="tag tag-green">Concluído</span></td></tr>
-            <tr><td>Ana Beatriz</td><td>Lead adicionado</td><td>Captação</td><td>5 min</td><td><span class="tag tag-purple">Lead</span></td></tr>
-            <tr><td>Carlos Melo</td><td>Pagamento recebido</td><td>Financeiro</td><td>12 min</td><td><span class="tag tag-green">Pago</span></td></tr>
-            <tr><td>Fernanda Lima</td><td>Mensagem sem resposta</td><td>Chat</td><td>18 min</td><td><span class="tag tag-yellow">Pendente</span></td></tr>
-          </tbody>
-        </table>
+      <div class="kc" data-col="proposta" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
+        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#38bdf8"></span>Proposta Enviada</span><span class="kc-n" id="kn-proposta">3</span></div>
+        <div id="kcards-proposta">
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="8"><div class="kk-nm">Felipe Mendes</div><div class="kk-inf">📱 (41) 9 5566-7788</div><span class="kk-tag" style="background:rgba(56,189,248,.12);color:#7dd3fc">E-mail</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="9"><div class="kk-nm">Juliana Freitas</div><div class="kk-inf">📱 (11) 9 9900-1122</div><span class="kk-tag" style="background:rgba(239,68,68,.12);color:#f87171">Instagram</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="10"><div class="kk-nm">Roberto Lima</div><div class="kk-inf">📱 (21) 9 8877-6655</div><span class="kk-tag" style="background:rgba(245,158,11,.12);color:#fbbf24">Indicação</span></div>
+        </div>
+        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
+      </div>
+      <div class="kc" data-col="matriculado" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
+        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#10b981"></span>Matriculado</span><span class="kc-n" id="kn-matriculado">2</span></div>
+        <div id="kcards-matriculado">
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="11"><div class="kk-nm">Aline Ferreira</div><div class="kk-inf">📱 (31) 9 4455-6677</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">✓ Matriculado</span></div>
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="12"><div class="kk-nm">Thiago Ribeiro</div><div class="kk-inf">📱 (41) 9 3322-1100</div><span class="kk-tag" style="background:rgba(16,185,129,.12);color:#34d399">✓ Matriculado</span></div>
+        </div>
+        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
+      </div>
+      <div class="kc" data-col="perdido" ondragover="kDragOver(event,this)" ondrop="kDrop(event,this)" ondragleave="kDragLeave(this)">
+        <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:#64748b"></span>Perdido</span><span class="kc-n" id="kn-perdido">1</span></div>
+        <div id="kcards-perdido">
+          <div class="kk" draggable="true" ondragstart="kDragStart(event,this)" data-id="13"><div class="kk-nm">Vanessa Pinto</div><div class="kk-inf">📱 (11) 9 2211-3344</div><span class="kk-tag" style="background:rgba(100,116,139,.12);color:#94a3b8">Sem interesse</span></div>
+        </div>
+        <button class="kan-add" onclick="openModal('new-lead')">+ Adicionar</button>
       </div>
     </div>
+  </div>
 
-    <!-- ══ CAPTAÇÃO ══ -->
-    <div class="page" id="page-captacao">
-      <div class="section-header">
-        <span class="section-title">Funil de Captação</span>
-        <button class="btn btn-primary">+ Novo Lead</button>
+  <!-- ══ CHAT ══ -->
+  <div class="pg" id="pg-chat">
+    <div class="chat-lay">
+      <div class="cl">
+        <div class="cl-h">Conversas <span class="bx">3</span></div>
+        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar conversa..."/></div></div>
+        <div class="cl-list">
+          <div class="ci on" onclick="selChat(this,'Maria Silva','av-a','MS','online')">
+            <div class="ci-av av-a">MS</div>
+            <div style="flex:1;min-width:0"><div class="ci-nm">Maria Silva</div><div class="ci-pv">Gostaria de saber sobre os cursos</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">Agora</div><div class="ci-unread">2</div></div>
+          </div>
+          <div class="ci" onclick="selChat(this,'João Pedro','av-b','JP','online')">
+            <div class="ci-av av-b">JP</div>
+            <div style="flex:1;min-width:0"><div class="ci-nm">João Pedro</div><div class="ci-pv">Quando começa a próxima turma?</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">5 min</div><div class="ci-unread">1</div></div>
+          </div>
+          <div class="ci" onclick="selChat(this,'Ana Beatriz','av-c','AB','offline')">
+            <div class="ci-av av-c">AB</div>
+            <div style="flex:1;min-width:0"><div class="ci-nm">Ana Beatriz</div><div class="ci-pv">Preciso de informações sobre o curso</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">12 min</div></div>
+          </div>
+          <div class="ci" onclick="selChat(this,'Carlos Melo','av-d','CM','offline')">
+            <div class="ci-av av-d">CM</div>
+            <div style="flex:1;min-width:0"><div class="ci-nm">Carlos Melo</div><div class="ci-pv">Ok, obrigado pela informação!</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">1h</div></div>
+          </div>
+          <div class="ci" onclick="selChat(this,'Fernanda Lima','av-e','FL','offline')">
+            <div class="ci-av av-e">FL</div>
+            <div style="flex:1;min-width:0"><div class="ci-nm">Fernanda Lima</div><div class="ci-pv">Qual o valor da mensalidade?</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="ci-tm">2h</div></div>
+          </div>
+        </div>
       </div>
-      <div class="kanban">
-        <div class="kanban-col">
-          <div class="kanban-col-header"><span class="kanban-col-title">&#128308; Novo Lead</span><span class="kanban-count">4</span></div>
-          <div class="kanban-card"><div class="kanban-card-name">Luísa Campos</div><div class="kanban-card-info">&#128241; (11) 9 8765-4321 &bull; Instagram</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Rafael Torres</div><div class="kanban-card-info">&#128241; (21) 9 9988-7766 &bull; WhatsApp</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Patrícia Nunes</div><div class="kanban-card-info">&#128241; (31) 9 7654-3210 &bull; Site</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Diego Santos</div><div class="kanban-card-info">&#128241; (41) 9 8899-0011 &bull; Indicação</div></div>
-          <button class="kanban-add">+ Adicionar card</button>
+      <div class="cw">
+        <div class="cw-h">
+          <div class="ci-av av-a" id="cav">MS</div>
+          <div><div style="font-size:14px;font-weight:800" id="cnm">Maria Silva</div><div class="cw-status"><span class="online" id="cst">● Online</span></div></div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-g" style="font-size:12px">Ver perfil</button>
+            <button class="btn btn-p" style="font-size:12px">Matricular</button>
+          </div>
         </div>
-        <div class="kanban-col">
-          <div class="kanban-col-header"><span class="kanban-col-title">&#128992; Contato Feito</span><span class="kanban-count">3</span></div>
-          <div class="kanban-card"><div class="kanban-card-name">Mariana Costa</div><div class="kanban-card-info">&#128241; (11) 9 3344-5566 &bull; Anúncio</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Bruno Alves</div><div class="kanban-card-info">&#128241; (21) 9 6677-8899 &bull; WhatsApp</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Camila Rocha</div><div class="kanban-card-info">&#128241; (31) 9 1122-3344 &bull; Site</div></div>
-          <button class="kanban-add">+ Adicionar card</button>
+        <div class="cm" id="msgs">
+          <div class="msg rx"><div class="mb">Olá, boa tarde! Gostaria de saber sobre os cursos disponíveis.</div><div class="mt">14:32</div></div>
+          <div class="msg tx"><div class="mb">Olá Maria! Temos cursos de ABA, Autismo e Desenvolvimento Infantil. Qual área te interessa?</div><div class="mt">14:33 ✓✓</div></div>
+          <div class="msg rx"><div class="mb">Me interessa o curso de ABA. Quais são os horários?</div><div class="mt">14:34</div></div>
+          <div class="msg tx"><div class="mb">Temos turmas pela manhã (8h–12h) e à tarde (14h–18h), 3x por semana. Quer se matricular?</div><div class="mt">14:35 ✓✓</div></div>
+          <div class="msg rx"><div class="mb">Qual o valor e como faço a matrícula?</div><div class="mt">14:36</div></div>
         </div>
-        <div class="kanban-col">
-          <div class="kanban-col-header"><span class="kanban-col-title">&#128993; Proposta Enviada</span><span class="kanban-count">3</span></div>
-          <div class="kanban-card"><div class="kanban-card-name">Felipe Mendes</div><div class="kanban-card-info">&#128241; (41) 9 5566-7788 &bull; E-mail</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Juliana Freitas</div><div class="kanban-card-info">&#128241; (11) 9 9900-1122 &bull; Instagram</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Roberto Lima</div><div class="kanban-card-info">&#128241; (21) 9 8877-6655 &bull; Indicação</div></div>
-          <button class="kanban-add">+ Adicionar card</button>
-        </div>
-        <div class="kanban-col">
-          <div class="kanban-col-header"><span class="kanban-col-title">&#128994; Matriculado</span><span class="kanban-count">2</span></div>
-          <div class="kanban-card"><div class="kanban-card-name">Aline Ferreira</div><div class="kanban-card-info">&#128241; (31) 9 4455-6677 &bull; WhatsApp</div></div>
-          <div class="kanban-card"><div class="kanban-card-name">Thiago Ribeiro</div><div class="kanban-card-info">&#128241; (41) 9 3322-1100 &bull; Site</div></div>
-          <button class="kanban-add">+ Adicionar card</button>
-        </div>
-        <div class="kanban-col">
-          <div class="kanban-col-header"><span class="kanban-col-title">&#11093; Perdido</span><span class="kanban-count">1</span></div>
-          <div class="kanban-card"><div class="kanban-card-name">Vanessa Pinto</div><div class="kanban-card-info">&#128241; (11) 9 2211-3344 &bull; Instagram</div></div>
-          <button class="kanban-add">+ Adicionar card</button>
+        <div class="typing-ind" id="typing"></div>
+        <div class="ci-bar">
+          <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter para enviar)" onkeydown="sendMsg(event)"></textarea>
+          <button class="btn btn-p" onclick="sendMsg({key:'Enter'})">Enviar</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ══ CHAT ══ -->
-    <div class="page" id="page-chat">
-      <div class="chat-layout">
-        <div class="chat-list">
-          <div class="chat-list-header">Conversas <span class="badge" style="margin-left:8px">3</span></div>
-          <div class="chat-item active" onclick="selectChat(this,'Maria Silva','av-a')">
-            <div class="chat-item-avatar av-a">MS</div>
-            <div style="flex:1;min-width:0">
-              <div class="chat-item-name">Maria Silva</div>
-              <div class="chat-item-preview">Olá, gostaria de saber sobre...</div>
-            </div>
-            <div class="chat-item-time">Agora</div>
-          </div>
-          <div class="chat-item" onclick="selectChat(this,'João Pedro','av-b')">
-            <div class="chat-item-avatar av-b">JP</div>
-            <div style="flex:1;min-width:0">
-              <div class="chat-item-name">João Pedro</div>
-              <div class="chat-item-preview">Quando começa a próxima turma?</div>
-            </div>
-            <div class="chat-item-time">5 min</div>
-          </div>
-          <div class="chat-item" onclick="selectChat(this,'Ana Beatriz','av-c')">
-            <div class="chat-item-avatar av-c">AB</div>
-            <div style="flex:1;min-width:0">
-              <div class="chat-item-name">Ana Beatriz</div>
-              <div class="chat-item-preview">Preciso de informações sobre o curso</div>
-            </div>
-            <div class="chat-item-time">12 min</div>
-          </div>
-          <div class="chat-item" onclick="selectChat(this,'Carlos Melo','av-d')">
-            <div class="chat-item-avatar av-d">CM</div>
-            <div style="flex:1;min-width:0">
-              <div class="chat-item-name">Carlos Melo</div>
-              <div class="chat-item-preview">Ok, obrigado pela informação!</div>
-            </div>
-            <div class="chat-item-time">1h</div>
-          </div>
-          <div class="chat-item" onclick="selectChat(this,'Fernanda Lima','av-e')">
-            <div class="chat-item-avatar av-e">FL</div>
-            <div style="flex:1;min-width:0">
-              <div class="chat-item-name">Fernanda Lima</div>
-              <div class="chat-item-preview">Qual o valor da mensalidade?</div>
-            </div>
-            <div class="chat-item-time">2h</div>
-          </div>
-        </div>
-        <div class="chat-window">
-          <div class="chat-window-header">
-            <div class="chat-item-avatar av-a" id="chat-avatar">MS</div>
-            <div>
-              <div style="font-weight:700" id="chat-name">Maria Silva</div>
-              <div style="font-size:12px;color:var(--green)">&#9679; Online</div>
-            </div>
-          </div>
-          <div class="chat-messages">
-            <div class="msg received"><div class="msg-bubble">Olá, boa tarde! Gostaria de saber sobre os cursos disponíveis.</div><div class="msg-time">14:32</div></div>
-            <div class="msg sent"><div class="msg-bubble">Olá Maria! Temos cursos de ABA, Autismo e Desenvolvimento Infantil. Qual área te interessa mais?</div><div class="msg-time">14:33</div></div>
-            <div class="msg received"><div class="msg-bubble">Me interessa o curso de ABA. Quais são os horários disponíveis?</div><div class="msg-time">14:34</div></div>
-            <div class="msg sent"><div class="msg-bubble">Temos turmas pela manhã (8h–12h) e tarde (14h–18h). As aulas são 3x por semana. Quer se matricular?</div><div class="msg-time">14:35</div></div>
-            <div class="msg received"><div class="msg-bubble">Sim! Qual o valor e como faço para me matricular?</div><div class="msg-time">14:36</div></div>
-          </div>
-          <div class="chat-input-bar">
-            <input class="chat-input" type="text" placeholder="Digite uma mensagem..." onkeydown="sendMessage(event)" id="msg-input" />
-            <button class="btn btn-primary" onclick="sendMessage({key:'Enter'})">Enviar</button>
-          </div>
-        </div>
+  <!-- ══ CONTATOS ══ -->
+  <div class="pg" id="pg-contatos">
+    <div class="sh">
+      <span class="sh-t">Contatos <span style="font-size:13px;color:var(--muted);font-weight:400" id="cnt-count">(6 registros)</span></span>
+      <div style="display:flex;gap:8px">
+        <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input type="text" placeholder="Buscar..." oninput="filterContatos(this.value)"/></div>
+        <select class="fi" style="width:auto;padding:0 10px;height:36px;border-radius:8px" onchange="filterContatos()">
+          <option value="">Todos os status</option>
+          <option value="Matriculado">Matriculado</option>
+          <option value="Em contato">Em contato</option>
+          <option value="Lead">Lead</option>
+          <option value="Pendente">Pendente</option>
+        </select>
+        <button class="btn btn-p" onclick="openModal('new-contato')">+ Novo Contato</button>
       </div>
     </div>
-
-    <!-- ══ CONTATOS ══ -->
-    <div class="page" id="page-contatos">
-      <div class="section-header">
-        <span class="section-title">Contatos</span>
-        <div style="display:flex;gap:10px">
-          <div class="search-bar"><span>&#128269;</span><input type="text" placeholder="Buscar contato..." /></div>
-          <button class="btn btn-ghost">Filtros</button>
-          <button class="btn btn-primary">+ Novo Contato</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Último Contato</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px" class="av-a">MS</div>Maria Silva</div></td><td>(11) 9 8765-4321</td><td>Instagram</td><td>Hoje, 14:32</td><td><span class="tag tag-blue">Em contato</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">JP</div>João Pedro</div></td><td>(21) 9 9988-7766</td><td>WhatsApp</td><td>Hoje, 14:05</td><td><span class="tag tag-green">Matriculado</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">AB</div>Ana Beatriz</div></td><td>(31) 9 7654-3210</td><td>Site</td><td>Hoje, 13:50</td><td><span class="tag tag-purple">Lead</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">CM</div>Carlos Melo</div></td><td>(41) 9 8899-0011</td><td>Indicação</td><td>Ontem</td><td><span class="tag tag-green">Matriculado</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">FL</div>Fernanda Lima</div></td><td>(11) 9 3344-5566</td><td>Anúncio</td><td>Ontem</td><td><span class="tag tag-yellow">Pendente</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">RT</div>Rafael Torres</div></td><td>(21) 9 6677-8899</td><td>Google</td><td>2 dias atrás</td><td><span class="tag tag-gray">Frio</span></td><td><button class="btn-icon" style="height:28px;width:28px;font-size:13px">&#9998;</button></td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="tbl-w">
+      <table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Último contato</th><th>Status</th><th></th></tr></thead>
+      <tbody id="contatos-body">
+        <tr data-nm="Maria Silva" data-st="Em contato"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-a" style="width:30px;height:30px;font-size:11px">MS</div>Maria Silva</div></td><td>(11) 9 8765-4321</td><td>Instagram</td><td>Hoje, 14:32</td><td><span class="tag tb">Em contato</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+        <tr data-nm="João Pedro" data-st="Matriculado"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-b" style="width:30px;height:30px;font-size:11px">JP</div>João Pedro</div></td><td>(21) 9 9988-7766</td><td>WhatsApp</td><td>Hoje, 14:05</td><td><span class="tag tg">Matriculado</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+        <tr data-nm="Ana Beatriz" data-st="Lead"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-c" style="width:30px;height:30px;font-size:11px">AB</div>Ana Beatriz</div></td><td>(31) 9 7654-3210</td><td>Site</td><td>Hoje, 13:50</td><td><span class="tag tp">Lead</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+        <tr data-nm="Carlos Melo" data-st="Matriculado"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-d" style="width:30px;height:30px;font-size:11px">CM</div>Carlos Melo</div></td><td>(41) 9 8899-0011</td><td>Indicação</td><td>Ontem</td><td><span class="tag tg">Matriculado</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+        <tr data-nm="Fernanda Lima" data-st="Pendente"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-e" style="width:30px;height:30px;font-size:11px">FL</div>Fernanda Lima</div></td><td>(11) 9 3344-5566</td><td>Anúncio</td><td>Ontem</td><td><span class="tag ty">Pendente</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+        <tr data-nm="Rafael Torres" data-st="Lead"><td><div style="display:flex;align-items:center;gap:9px"><div class="av av-f" style="width:30px;height:30px;font-size:11px">RT</div>Rafael Torres</div></td><td>(21) 9 6677-8899</td><td>Google</td><td>2 dias atrás</td><td><span class="tag tp">Lead</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td></tr>
+      </tbody></table>
     </div>
+  </div>
 
-    <!-- ══ ALUNOS ══ -->
-    <div class="page" id="page-alunos">
-      <div class="section-header">
-        <span class="section-title">Alunos</span>
-        <button class="btn btn-primary">+ Novo Aluno</button>
-      </div>
-      <div class="cards-grid cards-grid-4" style="margin-bottom:20px">
-        <div class="card">
-          <div class="card-header"><span class="card-label">Total</span><span class="card-icon">&#127891;</span></div>
-          <div class="card-value">342</div>
-          <div class="card-delta delta-up">&#8679; +5 este mês</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-label">ABA</span><span style="background:rgba(108,99,255,.2);padding:4px 8px;border-radius:6px;font-size:11px;color:var(--accent)">Segmento</span></div>
-          <div class="card-value">148</div>
-          <div class="card-delta" style="color:var(--muted)">43% do total</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-label">Autismo</span><span style="background:rgba(16,185,129,.2);padding:4px 8px;border-radius:6px;font-size:11px;color:var(--green)">Segmento</span></div>
-          <div class="card-value">112</div>
-          <div class="card-delta" style="color:var(--muted)">33% do total</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-label">Desenvolvimento</span><span style="background:rgba(59,130,246,.2);padding:4px 8px;border-radius:6px;font-size:11px;color:var(--blue)">Segmento</span></div>
-          <div class="card-value">82</div>
-          <div class="card-delta" style="color:var(--muted)">24% do total</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <div style="padding:16px;display:flex;justify-content:space-between;align-items:center">
-          <span class="section-title">Lista de Alunos</span>
-          <div class="search-bar"><span>&#128269;</span><input type="text" placeholder="Buscar aluno..." /></div>
-        </div>
-        <table>
-          <thead><tr><th>Aluno</th><th>Turma</th><th>Segmento</th><th>Matrícula</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>João Pedro Alves</td><td>ABA Avançado – Manhã</td><td><span class="tag tag-purple">ABA</span></td><td>Jan/2025</td><td><span class="tag tag-green">Ativo</span></td></tr>
-            <tr><td>Larissa Mendonça</td><td>Autismo Básico – Tarde</td><td><span class="tag tag-green">Autismo</span></td><td>Mar/2025</td><td><span class="tag tag-green">Ativo</span></td></tr>
-            <tr><td>Eduardo Neves</td><td>Desenvolvimento – Manhã</td><td><span class="tag tag-blue">Desenv.</span></td><td>Fev/2025</td><td><span class="tag tag-yellow">Pendente</span></td></tr>
-            <tr><td>Isabela Cruz</td><td>ABA Básico – Tarde</td><td><span class="tag tag-purple">ABA</span></td><td>Abr/2025</td><td><span class="tag tag-green">Ativo</span></td></tr>
-            <tr><td>Vinicius Lopes</td><td>Autismo Avançado – Manhã</td><td><span class="tag tag-green">Autismo</span></td><td>Jan/2025</td><td><span class="tag tag-red">Inativo</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+  <!-- ══ ALUNOS ══ -->
+  <div class="pg" id="pg-alunos">
+    <div class="sh"><span class="sh-t">Alunos</span><button class="btn btn-p" onclick="openModal('new-aluno')">+ Novo Aluno</button></div>
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="card"><div class="c-head"><span class="c-lbl">Total</span><div class="c-ic ic-g">🎓</div></div><div class="c-val">342</div><div class="c-dt up">↑ +5 este mês</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">ABA</span><span class="tag tp">43%</span></div><div class="c-val" style="color:#60a5fa">148</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">Autismo</span><span class="tag tg">33%</span></div><div class="c-val" style="color:var(--green)">112</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
+      <div class="card"><div class="c-head"><span class="c-lbl">Desenvolvimento</span><span class="tag tb">24%</span></div><div class="c-val" style="color:var(--blue)">82</div><div class="c-dt" style="color:var(--muted)">do total de alunos</div></div>
     </div>
+    <div class="tbl-w">
+      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+        <span class="sh-t">Lista de Alunos</span>
+        <div class="srch"><span style="color:var(--muted);font-size:14px">🔍</span><input type="text" placeholder="Buscar aluno..." oninput="filterAlunos(this.value)"/></div>
+      </div>
+      <table><thead><tr><th>Aluno</th><th>Turma</th><th>Segmento</th><th>Matrícula</th><th>Status</th></tr></thead>
+      <tbody id="alunos-body">
+        <tr data-nm="João Pedro Alves"><td>João Pedro Alves</td><td>ABA Avançado – Manhã</td><td><span class="tag tp">ABA</span></td><td>Jan/2025</td><td><span class="tag tg">Ativo</span></td></tr>
+        <tr data-nm="Larissa Mendonça"><td>Larissa Mendonça</td><td>Autismo Básico – Tarde</td><td><span class="tag tg">Autismo</span></td><td>Mar/2025</td><td><span class="tag tg">Ativo</span></td></tr>
+        <tr data-nm="Eduardo Neves"><td>Eduardo Neves</td><td>Desenvolvimento – Manhã</td><td><span class="tag tb">Desenv.</span></td><td>Fev/2025</td><td><span class="tag ty">Pendente</span></td></tr>
+        <tr data-nm="Isabela Cruz"><td>Isabela Cruz</td><td>ABA Básico – Tarde</td><td><span class="tag tp">ABA</span></td><td>Abr/2025</td><td><span class="tag tg">Ativo</span></td></tr>
+        <tr data-nm="Vinicius Lopes"><td>Vinicius Lopes</td><td>Autismo Avançado – Manhã</td><td><span class="tag tg">Autismo</span></td><td>Jan/2025</td><td><span class="tag tr">Inativo</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
 
-    <!-- ══ TURMAS ══ -->
-    <div class="page" id="page-turmas">
-      <div class="section-header">
-        <span class="section-title">Turmas</span>
-        <button class="btn btn-primary">+ Nova Turma</button>
-      </div>
-      <div class="empty-state">
-        <div class="empty-icon">&#128218;</div>
-        <div class="empty-title">Nenhuma turma cadastrada</div>
-        <div class="empty-desc">Crie sua primeira turma para começar a organizar os alunos por grupos e horários.</div>
-        <button class="btn btn-primary" style="margin:0 auto">&#43; Criar primeira turma</button>
-      </div>
+  <!-- ══ TURMAS ══ -->
+  <div class="pg" id="pg-turmas">
+    <div class="sh"><span class="sh-t">Turmas</span><button class="btn btn-p" onclick="openModal('new-turma')">+ Nova Turma</button></div>
+    <div class="empty">
+      <div class="empty-ic">📚</div>
+      <div class="empty-t">Nenhuma turma cadastrada</div>
+      <div class="empty-d">Crie sua primeira turma para organizar os alunos por grupos e horários de atendimento.</div>
+      <button class="btn btn-p" onclick="openModal('new-turma')">+ Criar primeira turma</button>
     </div>
+  </div>
 
-    <!-- ══ FINANCEIRO ══ -->
-    <div class="page" id="page-financeiro">
-      <div class="section-header">
-        <span class="section-title">Financeiro</span>
-        <button class="btn btn-primary">+ Novo Lançamento</button>
-      </div>
-      <div class="cards-grid cards-grid-4">
-        <div class="fin-card green">
-          <div class="fin-card-label">&#9989; Recebido</div>
-          <div class="fin-card-value">R$ 38.420</div>
-          <div class="fin-card-sub">284 pagamentos confirmados</div>
-        </div>
-        <div class="fin-card yellow">
-          <div class="fin-card-label">&#9203; Pendente</div>
-          <div class="fin-card-value">R$ 8.750</div>
-          <div class="fin-card-sub">62 cobranças em aberto</div>
-        </div>
-        <div class="fin-card red">
-          <div class="fin-card-label">&#128680; Atrasado</div>
-          <div class="fin-card-value">R$ 3.200</div>
-          <div class="fin-card-sub">24 pagamentos vencidos</div>
-        </div>
-        <div class="fin-card purple">
-          <div class="fin-card-label">&#128202; Inadimplência</div>
-          <div class="fin-card-value">7,2%</div>
-          <div class="fin-card-sub">Meta: abaixo de 5%</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <div style="padding:16px 16px 0"><span class="section-title">Últimas Transações</span></div>
-        <table>
-          <thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>João Pedro Alves</td><td>Mensalidade Junho/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 380,00</strong></td><td><span class="tag tag-green">Pago</span></td></tr>
-            <tr><td>Larissa Mendonça</td><td>Mensalidade Junho/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 420,00</strong></td><td><span class="tag tag-green">Pago</span></td></tr>
-            <tr><td>Eduardo Neves</td><td>Mensalidade Junho/2025</td><td>10/06/2025</td><td><strong style="color:var(--yellow)">R$ 350,00</strong></td><td><span class="tag tag-yellow">Pendente</span></td></tr>
-            <tr><td>Isabela Cruz</td><td>Mensalidade Maio/2025</td><td>05/05/2025</td><td><strong style="color:var(--red)">R$ 380,00</strong></td><td><span class="tag tag-red">Atrasado</span></td></tr>
-            <tr><td>Vinicius Lopes</td><td>Mensalidade Junho/2025</td><td>15/06/2025</td><td><strong>R$ 400,00</strong></td><td><span class="tag tag-gray">Aguardando</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+  <!-- ══ FINANCEIRO ══ -->
+  <div class="pg" id="pg-financeiro">
+    <div class="sh"><span class="sh-t">Financeiro</span><button class="btn btn-p" onclick="openModal('new-lancamento')">+ Novo Lançamento</button></div>
+    <div class="fcards">
+      <div class="fc g"><div class="fc-l">✅ Recebido</div><div class="fc-v">R$ 38.420</div><div class="fc-s">284 pagamentos confirmados</div></div>
+      <div class="fc y"><div class="fc-l">⏳ Pendente</div><div class="fc-v">R$ 8.750</div><div class="fc-s">62 cobranças em aberto</div></div>
+      <div class="fc r"><div class="fc-l">🚨 Atrasado</div><div class="fc-v">R$ 3.200</div><div class="fc-s">24 pagamentos vencidos</div></div>
+      <div class="fc b"><div class="fc-l">📊 Inadimplência</div><div class="fc-v">7,2%</div><div class="fc-s">Meta: abaixo de 5%</div></div>
     </div>
+    <div class="tbl-w">
+      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+        <span class="sh-t">Últimas Transações</span>
+        <div style="display:flex;gap:8px">
+          <select class="fi" style="width:auto;padding:0 10px;height:34px;border-radius:8px;font-size:12px" onchange="filterFin(this.value)">
+            <option value="">Todos</option><option value="Pago">Pago</option><option value="Pendente">Pendente</option><option value="Atrasado">Atrasado</option>
+          </select>
+        </div>
+      </div>
+      <table><thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead>
+      <tbody id="fin-body">
+        <tr data-st="Pago"><td>João Pedro Alves</td><td>Mensalidade Jun/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 380,00</strong></td><td><span class="tag tg">Pago</span></td></tr>
+        <tr data-st="Pago"><td>Larissa Mendonça</td><td>Mensalidade Jun/2025</td><td>05/06/2025</td><td><strong style="color:var(--green)">R$ 420,00</strong></td><td><span class="tag tg">Pago</span></td></tr>
+        <tr data-st="Pendente"><td>Eduardo Neves</td><td>Mensalidade Jun/2025</td><td>10/06/2025</td><td><strong style="color:var(--yellow)">R$ 350,00</strong></td><td><span class="tag ty">Pendente</span></td></tr>
+        <tr data-st="Atrasado"><td>Isabela Cruz</td><td>Mensalidade Mai/2025</td><td>05/05/2025</td><td><strong style="color:var(--red)">R$ 380,00</strong></td><td><span class="tag tr">Atrasado</span></td></tr>
+        <tr data-st="Pendente"><td>Vinicius Lopes</td><td>Mensalidade Jun/2025</td><td>15/06/2025</td><td><strong>R$ 400,00</strong></td><td><span class="tag tm">Aguardando</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
 
-<!-- ══════════════════════════ MODAL CONFIG ══════════════════════════ -->
-<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Configuração Inicial</span>
-      <button class="modal-close" onclick="closeModal()">&#215;</button>
-    </div>
-    <div class="modal-body">
-      <!-- Steps indicator -->
-      <div class="steps-indicator" id="steps-indicator"></div>
+<!-- ═══════════════════ MODAIS ═══════════════════ -->
 
-      <!-- Step 1 -->
-      <div class="step-content active" id="step-1">
-        <div class="step-title">Sobre sua escola</div>
-        <div class="step-desc">Informe os dados básicos da sua instituição de ensino.</div>
-        <div class="form-group"><label class="form-label">Nome da escola</label><input class="form-input" type="text" placeholder="Ex: Instituto ABA Brasil" /></div>
-        <div class="form-group"><label class="form-label">CNPJ</label><input class="form-input" type="text" placeholder="00.000.000/0001-00" /></div>
-        <div class="form-group"><label class="form-label">Cidade / Estado</label><input class="form-input" type="text" placeholder="Ex: São Paulo – SP" /></div>
-      </div>
-
-      <!-- Step 2 -->
-      <div class="step-content" id="step-2">
-        <div class="step-title">Segmento de atuação</div>
-        <div class="step-desc">Qual é o principal foco da sua escola?</div>
-        <div class="option-cards">
-          <div class="option-card selected" onclick="selectOption(this)"><div class="option-card-icon">&#129504;</div><div class="option-card-label">ABA / Autismo</div></div>
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#127836;</div><div class="option-card-label">Desenvolvimento Infantil</div></div>
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#128218;</div><div class="option-card-label">Reforço Escolar</div></div>
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#127925;</div><div class="option-card-label">Música / Artes</div></div>
-        </div>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="step-content" id="step-3">
-        <div class="step-title">Tamanho da escola</div>
-        <div class="step-desc">Quantos alunos você atende atualmente?</div>
-        <div class="option-cards">
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#128578;</div><div class="option-card-label">Até 50 alunos</div></div>
-          <div class="option-card selected" onclick="selectOption(this)"><div class="option-card-icon">&#128512;</div><div class="option-card-label">50 – 200 alunos</div></div>
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#128525;</div><div class="option-card-label">200 – 500 alunos</div></div>
-          <div class="option-card" onclick="selectOption(this)"><div class="option-card-icon">&#127881;</div><div class="option-card-label">Mais de 500</div></div>
-        </div>
-      </div>
-
-      <!-- Step 4 -->
-      <div class="step-content" id="step-4">
-        <div class="step-title">Conectar WhatsApp</div>
-        <div class="step-desc">Integre o WhatsApp Business para receber e responder mensagens pelo ABA Edu.</div>
-        <div class="form-group"><label class="form-label">Número do WhatsApp Business</label><input class="form-input" type="text" placeholder="+55 (11) 9 0000-0000" /></div>
-        <div class="form-group"><label class="form-label">Token de Acesso (opcional)</label><input class="form-input" type="text" placeholder="Deixe em branco para configurar depois" /></div>
-        <div style="background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);border-radius:8px;padding:12px;font-size:12px;color:var(--muted)">
-          &#128274; Seus dados são criptografados e seguros. Você pode configurar isso depois nas configurações.
-        </div>
-      </div>
-
-      <!-- Step 5 -->
-      <div class="step-content" id="step-5">
-        <div class="step-title">Configurar equipe</div>
-        <div class="step-desc">Adicione os membros da sua equipe que vão usar o sistema.</div>
-        <div class="form-group"><label class="form-label">Nome do colaborador</label><input class="form-input" type="text" placeholder="Nome completo" /></div>
-        <div class="form-group"><label class="form-label">E-mail</label><input class="form-input" type="email" placeholder="email@escola.com.br" /></div>
-        <div class="form-group"><label class="form-label">Função</label>
-          <select class="form-input">
-            <option>Atendimento / Secretaria</option>
-            <option>Terapeuta</option>
-            <option>Coordenador</option>
-            <option>Financeiro</option>
-            <option>Administrador</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Step 6 -->
-      <div class="step-content" id="step-6">
-        <div class="step-title">Personalizar visual</div>
-        <div class="step-desc">Escolha o tema e a cor principal do sistema.</div>
-        <div class="form-group"><label class="form-label">Tema</label>
-          <div style="display:flex;gap:10px;margin-top:4px">
-            <div class="option-card selected" style="flex:1;padding:12px" onclick="selectOption(this)"><div class="option-card-icon">&#127762;</div><div class="option-card-label">Dark</div></div>
-            <div class="option-card" style="flex:1;padding:12px" onclick="selectOption(this)"><div class="option-card-icon">&#9728;</div><div class="option-card-label">Light</div></div>
-          </div>
-        </div>
-        <div class="form-group"><label class="form-label">Cor principal</label>
-          <div style="display:flex;gap:10px;margin-top:6px">
-            <div onclick="selectColor(this,'#6c63ff')" style="width:36px;height:36px;border-radius:50%;background:#6c63ff;cursor:pointer;border:3px solid #fff;flex-shrink:0"></div>
-            <div onclick="selectColor(this,'#10b981')" style="width:36px;height:36px;border-radius:50%;background:#10b981;cursor:pointer;border:3px solid transparent;flex-shrink:0"></div>
-            <div onclick="selectColor(this,'#3b82f6')" style="width:36px;height:36px;border-radius:50%;background:#3b82f6;cursor:pointer;border:3px solid transparent;flex-shrink:0"></div>
-            <div onclick="selectColor(this,'#ef4444')" style="width:36px;height:36px;border-radius:50%;background:#ef4444;cursor:pointer;border:3px solid transparent;flex-shrink:0"></div>
-            <div onclick="selectColor(this,'#f59e0b')" style="width:36px;height:36px;border-radius:50%;background:#f59e0b;cursor:pointer;border:3px solid transparent;flex-shrink:0"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 7 -->
-      <div class="step-content" id="step-7">
-        <div style="text-align:center;padding:20px 0">
-          <div style="font-size:64px;margin-bottom:16px">&#127881;</div>
-          <div class="step-title" style="font-size:22px">Tudo pronto!</div>
-          <div class="step-desc" style="margin-top:8px">Sua escola está configurada e pronta para usar o ABA Edu. Você pode ajustar essas configurações a qualquer momento.</div>
-          <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-top:20px;text-align:left">
-            <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px">RESUMO</div>
-            <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
-              <div>&#128994; Escola configurada com sucesso</div>
-              <div>&#128994; Segmento: ABA / Autismo</div>
-              <div>&#128994; Tema: Dark Mode</div>
-              <div>&#128308; WhatsApp: pendente de configuração</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="btn-prev" onclick="changeStep(-1)">&#8592; Anterior</button>
-        <div style="color:var(--muted);font-size:13px;align-self:center" id="step-counter">Passo 1 de 7</div>
-        <button class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Próximo &#8594;</button>
-      </div>
-    </div>
-  </div>
+<!-- Modal: Novo Lead -->
+<div class="ov hide" id="ov-new-lead" onclick="closeOv(event,'new-lead')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Lead</div><div class="m-sub">Adicione um novo potencial aluno ao funil</div></div><button class="m-x" onclick="closeModal('new-lead')">✕</button></div>
+  <div class="m-b">
+    <div class="frow"><div class="fg"><label class="fl">Nome completo</label><input class="fi" id="l-nm" type="text" placeholder="Nome do lead"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="l-tel" type="text" placeholder="(11) 9 0000-0000"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="l-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option><option>Anúncio</option></select></div><div class="fg"><label class="fl">Etapa inicial</label><select class="fi" id="l-etapa"><option value="novo">Novo Lead</option><option value="contato">Contato Feito</option></select></div></div>
+    <div class="fg"><label class="fl">Observações</label><textarea class="fi" rows="2" placeholder="Informações adicionais..." id="l-obs"></textarea></div>
+    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-lead')">Cancelar</button><button class="btn btn-p" onclick="addLead()">Adicionar Lead</button></div>
+  </div></div>
 </div>
 
+<!-- Modal: Novo Contato -->
+<div class="ov hide" id="ov-new-contato" onclick="closeOv(event,'new-contato')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Contato</div><div class="m-sub">Cadastre um novo contato no sistema</div></div><button class="m-x" onclick="closeModal('new-contato')">✕</button></div>
+  <div class="m-b">
+    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="c-nm" type="text" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="c-tel" type="text" placeholder="(11) 9 0000-0000"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="c-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="c-st"><option value="Lead">Lead</option><option value="Em contato">Em contato</option><option value="Matriculado">Matriculado</option><option value="Pendente">Pendente</option></select></div></div>
+    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-contato')">Cancelar</button><button class="btn btn-p" onclick="addContato()">Salvar Contato</button></div>
+  </div></div>
+</div>
+
+<!-- Modal: Novo Aluno -->
+<div class="ov hide" id="ov-new-aluno" onclick="closeOv(event,'new-aluno')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Aluno</div><div class="m-sub">Cadastre um novo aluno</div></div><button class="m-x" onclick="closeModal('new-aluno')">✕</button></div>
+  <div class="m-b">
+    <div class="frow"><div class="fg"><label class="fl">Nome completo</label><input class="fi" id="a-nm" type="text" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Data de Nasc.</label><input class="fi" id="a-dt" type="date"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="a-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turma</label><select class="fi" id="a-tur"><option>ABA Avançado – Manhã</option><option>ABA Básico – Tarde</option><option>Autismo Básico – Tarde</option><option>Autismo Avançado – Manhã</option><option>Desenvolvimento – Manhã</option></select></div></div>
+    <div class="fg"><label class="fl">Responsável</label><input class="fi" id="a-resp" type="text" placeholder="Nome do responsável"/></div>
+    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-aluno')">Cancelar</button><button class="btn btn-p" onclick="addAluno()">Matricular Aluno</button></div>
+  </div></div>
+</div>
+
+<!-- Modal: Nova Turma -->
+<div class="ov hide" id="ov-new-turma" onclick="closeOv(event,'new-turma')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Nova Turma</div><div class="m-sub">Configure uma nova turma</div></div><button class="m-x" onclick="closeModal('new-turma')">✕</button></div>
+  <div class="m-b">
+    <div class="fg"><label class="fl">Nome da Turma</label><input class="fi" id="t-nm" type="text" placeholder="Ex: ABA Avançado – Manhã"/></div>
+    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turno</label><select class="fi"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Máx. Alunos</label><input class="fi" type="number" placeholder="10"/></div><div class="fg"><label class="fl">Dias da Semana</label><select class="fi"><option>Seg/Qua/Sex</option><option>Ter/Qui</option><option>Seg a Sex</option></select></div></div>
+    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-turma')">Cancelar</button><button class="btn btn-p" onclick="addTurma()">Criar Turma</button></div>
+  </div></div>
+</div>
+
+<!-- Modal: Novo Lançamento -->
+<div class="ov hide" id="ov-new-lancamento" onclick="closeOv(event,'new-lancamento')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Novo Lançamento</div><div class="m-sub">Registre uma cobrança ou pagamento</div></div><button class="m-x" onclick="closeModal('new-lancamento')">✕</button></div>
+  <div class="m-b">
+    <div class="frow"><div class="fg"><label class="fl">Aluno</label><input class="fi" type="text" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Valor</label><input class="fi" type="text" placeholder="R$ 0,00"/></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date"/></div><div class="fg"><label class="fl">Tipo</label><select class="fi"><option>Mensalidade</option><option>Matrícula</option><option>Material</option></select></div></div>
+    <div class="m-ft"><button class="btn btn-g" onclick="closeModal('new-lancamento')">Cancelar</button><button class="btn btn-p" onclick="toast('💰 Lançamento registrado!','g');closeModal('new-lancamento')">Salvar</button></div>
+  </div></div>
+</div>
+
+<!-- Modal: Configurações (7 passos) -->
+<div class="ov hide" id="ov-cfg" onclick="closeOv(event,'cfg')">
+  <div class="modal"><div class="m-h"><div><div class="m-t">Configuração Inicial</div><div class="m-sub" id="cfg-sub">Passo 1 de 7</div></div><button class="m-x" onclick="closeModal('cfg')">✕</button></div>
+  <div class="m-b">
+    <div class="stps" id="cfg-steps"></div>
+    <div class="stp on" id="stp1"><div class="s-t">Sobre sua escola</div><div class="s-d">Informe os dados básicos da sua instituição.</div><div class="fg"><label class="fl">Nome da escola</label><input class="fi" type="text" placeholder="Instituto ABA Brasil"/></div><div class="frow"><div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" placeholder="00.000.000/0001-00"/></div><div class="fg"><label class="fl">Cidade/Estado</label><input class="fi" type="text" placeholder="São Paulo – SP"/></div></div></div>
+    <div class="stp" id="stp2"><div class="s-t">Segmento de atuação</div><div class="s-d">Qual é o principal foco da sua escola?</div><div class="opt-g"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🧠</div><div class="opt-l">ABA / Autismo</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🌱</div><div class="opt-l">Desenv. Infantil</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">📚</div><div class="opt-l">Reforço Escolar</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎵</div><div class="opt-l">Música / Artes</div></div></div></div>
+    <div class="stp" id="stp3"><div class="s-t">Tamanho da escola</div><div class="s-d">Quantos alunos você atende atualmente?</div><div class="opt-g"><div class="opt" onclick="selOpt(this)"><div class="opt-ic">😊</div><div class="opt-l">Até 50 alunos</div></div><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">😄</div><div class="opt-l">50 – 200 alunos</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🏫</div><div class="opt-l">200 – 500</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎉</div><div class="opt-l">Mais de 500</div></div></div></div>
+    <div class="stp" id="stp4"><div class="s-t">Conectar WhatsApp</div><div class="s-d">Integre o WhatsApp Business para receber mensagens.</div><div class="fg"><label class="fl">Número WhatsApp Business</label><input class="fi" type="text" placeholder="+55 (11) 9 0000-0000"/></div><div class="fg"><label class="fl">Token de acesso (opcional)</label><input class="fi" type="text" placeholder="Deixe em branco para configurar depois"/></div><div class="info-box">🔒 Seus dados são criptografados. Você pode configurar isso depois.</div></div>
+    <div class="stp" id="stp5"><div class="s-t">Configurar equipe</div><div class="s-d">Adicione membros da equipe ao sistema.</div><div class="fg"><label class="fl">Nome do colaborador</label><input class="fi" type="text" placeholder="Nome completo"/></div><div class="frow"><div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" placeholder="email@escola.com.br"/></div><div class="fg"><label class="fl">Função</label><select class="fi"><option>Atendimento</option><option>Terapeuta</option><option>Coordenador</option><option>Financeiro</option><option>Admin</option></select></div></div></div>
+    <div class="stp" id="stp6"><div class="s-t">Personalizar visual</div><div class="s-d">Escolha a aparência do sistema.</div><div class="fg"><label class="fl">Tema</label><div class="opt-g" style="grid-template-columns:1fr 1fr"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🌙</div><div class="opt-l">Dark</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">☀️</div><div class="opt-l">Light</div></div></div></div><div class="fg"><label class="fl">Cor principal</label><div style="display:flex;gap:10px;margin-top:6px" id="clr-pick"><div onclick="pickColor(this,'#2563eb')" style="width:36px;height:36px;border-radius:50%;background:#2563eb;cursor:pointer;border:3px solid #fff;transition:transform .15s" title="Azul"></div><div onclick="pickColor(this,'#7c3aed')" style="width:36px;height:36px;border-radius:50%;background:#7c3aed;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Roxo"></div><div onclick="pickColor(this,'#059669')" style="width:36px;height:36px;border-radius:50%;background:#059669;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Verde"></div><div onclick="pickColor(this,'#dc2626')" style="width:36px;height:36px;border-radius:50%;background:#dc2626;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Vermelho"></div><div onclick="pickColor(this,'#0891b2')" style="width:36px;height:36px;border-radius:50%;background:#0891b2;cursor:pointer;border:3px solid transparent;transition:transform .15s" title="Ciano"></div></div></div></div>
+    <div class="stp" id="stp7"><div style="text-align:center;padding:14px 0"><div style="font-size:56px;margin-bottom:12px">🎉</div><div class="s-t" style="font-size:20px">Tudo pronto!</div><div class="s-d">Sua escola está configurada e pronta para usar o ABA Edu.</div><div style="background:var(--s2);border-radius:9px;padding:14px;margin-top:14px;text-align:left;font-size:13px;display:flex;flex-direction:column;gap:7px"><div>✅ Escola configurada com sucesso</div><div>✅ Segmento: ABA / Autismo</div><div>✅ Tema: Dark Mode ativo</div><div>🔔 WhatsApp: pendente de configuração</div></div></div></div>
+    <div class="s-ft"><button class="btn btn-g" id="cfg-prev" onclick="cfgStep(-1)">← Anterior</button><div class="s-ctr" id="cfg-ctr">1 / 7</div><button class="btn btn-p" id="cfg-next" onclick="cfgStep(1)">Próximo →</button></div>
+  </div></div>
+</div>
+
+<!-- Toast container -->
+<div id="toasts"></div>
+
 <script>
-  let currentStep = 1;
-  const totalSteps = 7;
+// ─── NAVIGATION ───
+const titles={dashboard:'Dashboard',captacao:'Captação',chat:'Chat Ao Vivo',contatos:'Contatos',alunos:'Alunos',turmas:'Turmas',financeiro:'Financeiro'};
+function go(pg,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('pg-'+pg).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('ptitle').textContent=titles[pg];
+  if(pg==='dashboard') animChart();
+  document.getElementById('gsrch').value='';
+}
+function toggleSB(){document.getElementById('sb').classList.toggle('col')}
 
-  function buildSteps() {
-    const ind = document.getElementById('steps-indicator');
-    ind.innerHTML = '';
-    for (let i = 1; i <= totalSteps; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'step-dot' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
-      dot.textContent = i < currentStep ? '✓' : i;
-      ind.appendChild(dot);
-      if (i < totalSteps) {
-        const line = document.createElement('div');
-        line.className = 'step-line' + (i < currentStep ? ' done' : '');
-        ind.appendChild(line);
-      }
-    }
+// ─── CHART ANIMATION ───
+function animChart(){
+  setTimeout(()=>{
+    document.querySelectorAll('.cb').forEach(b=>{
+      b.style.height=b.dataset.h+'%';
+    });
+  },100);
+}
+window.onload=()=>animChart();
+
+// ─── TOAST ───
+function toast(msg,type='b'){
+  const icons={g:'✅',r:'❌',y:'⚠️',b:'ℹ️'};
+  const colors={g:'var(--green)',r:'var(--red)',y:'var(--yellow)',b:'var(--accent)'};
+  const el=document.createElement('div');
+  el.className='toast';
+  el.innerHTML=`<span class="toast-ic">${icons[type]}</span><span style="flex:1">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  el.style.borderLeft=`3px solid ${colors[type]}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('exit');setTimeout(()=>el.remove(),200)},3500);
+}
+
+// ─── MODALS ───
+function openModal(id){document.getElementById('ov-'+id).classList.remove('hide')}
+function closeModal(id){document.getElementById('ov-'+id).classList.add('hide')}
+function closeOv(e,id){if(e.target===document.getElementById('ov-'+id))closeModal(id)}
+
+// ─── KANBAN DRAG & DROP ───
+let dragged=null;
+function kDragStart(e,el){dragged=el;setTimeout(()=>el.classList.add('dragging'),0)}
+document.addEventListener('dragend',()=>{if(dragged){dragged.classList.remove('dragging');dragged=null}});
+function kDragOver(e,col){e.preventDefault();col.classList.add('drag-over')}
+function kDragLeave(col){col.classList.remove('drag-over')}
+function kDrop(e,col){
+  e.preventDefault();col.classList.remove('drag-over');
+  if(!dragged)return;
+  const cid=col.dataset.col;
+  const body=document.getElementById('kcards-'+cid);
+  body.appendChild(dragged);
+  updateKanCounts();
+  toast('Card movido para '+col.querySelector('.kc-t').textContent.trim(),'b');
+}
+function updateKanCounts(){
+  ['novo','contato','proposta','matriculado','perdido'].forEach(c=>{
+    const n=document.getElementById('kcards-'+c).querySelectorAll('.kk').length;
+    document.getElementById('kn-'+c).textContent=n;
+  });
+}
+
+// ─── ADD LEAD ───
+function addLead(){
+  const nm=document.getElementById('l-nm').value.trim();
+  const tel=document.getElementById('l-tel').value.trim();
+  const orig=document.getElementById('l-orig').value;
+  const col=document.getElementById('l-etapa').value;
+  if(!nm){toast('Informe o nome do lead','r');return}
+  const div=document.createElement('div');
+  div.className='kk';div.draggable=true;
+  div.setAttribute('ondragstart','kDragStart(event,this)');
+  div.dataset.id=Date.now();
+  div.innerHTML=`<div class="kk-nm">${nm}</div><div class="kk-inf">📱 ${tel||'Sem telefone'}</div><span class="kk-tag" style="background:rgba(37,99,235,.12);color:#60a5fa">${orig}</span>`;
+  document.getElementById('kcards-'+col).appendChild(div);
+  updateKanCounts();
+  closeModal('new-lead');
+  toast('Lead "'+nm+'" adicionado!','g');
+  document.getElementById('l-nm').value='';document.getElementById('l-tel').value='';
+}
+
+// ─── ADD CONTATO ───
+const avCls=['av-a','av-b','av-c','av-d','av-e','av-f'];
+let avIdx=0;
+function addContato(){
+  const nm=document.getElementById('c-nm').value.trim();
+  const tel=document.getElementById('c-tel').value.trim();
+  const orig=document.getElementById('c-orig').value;
+  const st=document.getElementById('c-st').value;
+  if(!nm){toast('Informe o nome do contato','r');return}
+  const ini=nm.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  const cls=avCls[avIdx++%avCls.length];
+  const stMap={Lead:'tp',Matriculado:'tg','Em contato':'tb',Pendente:'ty'};
+  const stLbl={Lead:'Lead',Matriculado:'Matriculado','Em contato':'Em contato',Pendente:'Pendente'};
+  const row=document.createElement('tr');
+  row.dataset.nm=nm;row.dataset.st=st;
+  row.innerHTML=`<td><div style="display:flex;align-items:center;gap:9px"><div class="av ${cls}" style="width:30px;height:30px;font-size:11px">${ini}</div>${nm}</div></td><td>${tel||'—'}</td><td>${orig}</td><td>Agora</td><td><span class="tag ${stMap[st]||'tm'}">${stLbl[st]||st}</span></td><td><button class="btn btn-g" style="padding:5px 10px;font-size:11px">Editar</button></td>`;
+  document.getElementById('contatos-body').prepend(row);
+  const cnt=document.querySelectorAll('#contatos-body tr').length;
+  document.getElementById('cnt-count').textContent=`(${cnt} registros)`;
+  closeModal('new-contato');
+  toast('Contato "'+nm+'" cadastrado!','g');
+  document.getElementById('c-nm').value='';document.getElementById('c-tel').value='';
+}
+
+// ─── ADD ALUNO ───
+function addAluno(){
+  const nm=document.getElementById('a-nm').value.trim();
+  const seg=document.getElementById('a-seg').value;
+  const tur=document.getElementById('a-tur').value;
+  if(!nm){toast('Informe o nome do aluno','r');return}
+  const segMap={ABA:'tp',Autismo:'tg','Desenvolvimento':'tb'};
+  const row=document.createElement('tr');
+  row.dataset.nm=nm;
+  row.innerHTML=`<td>${nm}</td><td>${tur}</td><td><span class="tag ${segMap[seg]||'tp'}">${seg}</span></td><td>${new Date().toLocaleDateString('pt-BR',{month:'short',year:'numeric'})}</td><td><span class="tag tg">Ativo</span></td>`;
+  document.getElementById('alunos-body').prepend(row);
+  closeModal('new-aluno');
+  toast('Aluno "'+nm+'" matriculado!','g');
+  document.getElementById('a-nm').value='';
+}
+
+// ─── ADD TURMA ───
+function addTurma(){
+  const nm=document.getElementById('t-nm').value.trim();
+  if(!nm){toast('Informe o nome da turma','r');return}
+  document.getElementById('pg-turmas').querySelector('.empty').style.display='none';
+  closeModal('new-turma');
+  toast('Turma "'+nm+'" criada!','g');
+}
+
+// ─── FILTERS ───
+function filterContatos(val){
+  const rows=document.querySelectorAll('#contatos-body tr');
+  const sel=document.querySelector('#pg-contatos select').value;
+  let v=(val||document.querySelector('#pg-contatos .srch input').value||'').toLowerCase();
+  let vis=0;
+  rows.forEach(r=>{
+    const nm=(r.dataset.nm||'').toLowerCase();
+    const st=r.dataset.st||'';
+    const showNm=nm.includes(v);
+    const showSt=!sel||st===sel;
+    r.style.display=(showNm&&showSt)?'':'none';
+    if(showNm&&showSt)vis++;
+  });
+  document.getElementById('cnt-count').textContent=`(${vis} registros)`;
+}
+function filterAlunos(val){
+  const v=val.toLowerCase();
+  document.querySelectorAll('#alunos-body tr').forEach(r=>{r.style.display=(r.dataset.nm||'').toLowerCase().includes(v)?'':'none'});
+}
+function filterFin(val){
+  document.querySelectorAll('#fin-body tr').forEach(r=>{r.style.display=(!val||r.dataset.st===val)?'':'none'});
+}
+function globalSearch(v){
+  if(!v)return;
+  const pages=['contatos','alunos'];
+  pages.forEach(pg=>{
+    document.querySelectorAll('#pg-'+pg+' tbody tr').forEach(r=>{
+      r.style.display=(r.textContent.toLowerCase().includes(v.toLowerCase()))?'':'none';
+    });
+  });
+}
+
+// ─── CHAT ───
+const autoReplies=['Obrigado pela informação! Vou pensar e entrar em contato.','Qual o valor da mensalidade?','Tem turma disponível para o mês que vem?','Posso visitar a escola antes de matricular?','Vocês aceitam plano de saúde?'];
+let replyIdx=0;
+function selChat(el,nm,avCls,ini,status){
+  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('cnm').textContent=nm;
+  const av=document.getElementById('cav');
+  av.className='ci-av '+avCls;av.textContent=ini;
+  const st=document.getElementById('cst');
+  st.className='cw-status '+(status==='online'?'online':'offline');
+  st.textContent=(status==='online'?'● Online':'● Offline');
+  el.querySelector('.ci-unread')&&el.querySelector('.ci-unread').remove();
+  document.getElementById('nb-chat').textContent=Math.max(0,parseInt(document.getElementById('nb-chat').textContent)-1)||'0';
+}
+function sendMsg(e){
+  if(e.key!=='Enter'||e.shiftKey)return;
+  const inp=document.getElementById('minput');
+  const txt=inp.value.trim();if(!txt)return;
+  const msgs=document.getElementById('msgs');
+  const now=new Date();
+  const t=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const m=document.createElement('div');m.className='msg tx';
+  m.innerHTML=`<div class="mb">${txt}</div><div class="mt">${t} ✓✓</div>`;
+  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
+  inp.value='';
+  const typing=document.getElementById('typing');
+  typing.textContent=document.getElementById('cnm').textContent+' está digitando...';
+  setTimeout(()=>{
+    typing.textContent='';
+    const r=document.createElement('div');r.className='msg rx';
+    r.innerHTML=`<div class="mb">${autoReplies[replyIdx++%autoReplies.length]}</div><div class="mt">${t}</div>`;
+    msgs.appendChild(r);msgs.scrollTop=msgs.scrollHeight;
+  },1200+Math.random()*800);
+}
+
+// ─── NOTIFICAÇÕES ───
+function showNotifs(){
+  toast('3 novas mensagens no chat','b');
+  toast('João Pedro fez matrícula','g');
+  toast('Pagamento de Carlos em atraso','y');
+  document.querySelector('.notif-dot').style.display='none';
+}
+
+// ─── CONFIG STEPS ───
+let cfgStep_=1;const cfgTotal=7;
+function buildCfgSteps(){
+  const ind=document.getElementById('cfg-steps');ind.innerHTML='';
+  for(let i=1;i<=cfgTotal;i++){
+    const d=document.createElement('div');
+    d.className='sd'+(i<cfgStep_?' dn':i===cfgStep_?' on':'');
+    d.textContent=i<cfgStep_?'✓':i;
+    ind.appendChild(d);
+    if(i<cfgTotal){const l=document.createElement('div');l.className='sl'+(i<cfgStep_?' dn':'');ind.appendChild(l)}
   }
+  document.getElementById('cfg-ctr').textContent=cfgStep_+' / '+cfgTotal;
+  document.getElementById('cfg-prev').style.visibility=cfgStep_===1?'hidden':'visible';
+  document.getElementById('cfg-next').innerHTML=cfgStep_===cfgTotal?'✓ Concluir':'Próximo →';
+  document.getElementById('cfg-sub').textContent='Passo '+cfgStep_+' de '+cfgTotal;
+}
+function cfgStep(d){
+  if(cfgStep_+d<1)return;
+  if(cfgStep_+d>cfgTotal){closeModal('cfg');toast('Configuração salva com sucesso!','g');return}
+  document.getElementById('stp'+cfgStep_).classList.remove('on');
+  cfgStep_+=d;
+  document.getElementById('stp'+cfgStep_).classList.add('on');
+  buildCfgSteps();
+}
+function openCfg(){cfgStep_=1;document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));document.getElementById('stp1').classList.add('on');buildCfgSteps();openModal('cfg')}
 
-  function updateModal() {
-    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-    document.getElementById('step-' + currentStep).classList.add('active');
-    document.getElementById('step-counter').textContent = 'Passo ' + currentStep + ' de ' + totalSteps;
-    const prev = document.getElementById('btn-prev');
-    const next = document.getElementById('btn-next');
-    prev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
-    next.textContent = currentStep === totalSteps ? '&#10003; Concluir' : 'Próximo &#8594;';
-    next.innerHTML = currentStep === totalSteps ? '&#10003; Concluir' : 'Próximo &#8594;';
-    buildSteps();
-  }
-
-  function changeStep(dir) {
-    if (currentStep + dir < 1) return;
-    if (currentStep + dir > totalSteps) { closeModal(); return; }
-    currentStep += dir;
-    updateModal();
-  }
-
-  function openModal() {
-    currentStep = 1;
-    updateModal();
-    document.getElementById('modal-overlay').classList.remove('hidden');
-  }
-
-  function closeModal() {
-    document.getElementById('modal-overlay').classList.add('hidden');
-  }
-
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('modal-overlay')) closeModal();
-  }
-
-  function selectOption(el) {
-    const group = el.closest('.option-cards, div');
-    el.closest('.option-cards') && el.closest('.option-cards').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-
-  function selectColor(el, color) {
-    el.parentElement.querySelectorAll('div').forEach(d => d.style.border = '3px solid transparent');
-    el.style.border = '3px solid #fff';
-    document.documentElement.style.setProperty('--accent', color);
-  }
-
-  // Sidebar
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('collapsed');
-  }
-
-  // Navigation
-  const pageTitles = {
-    dashboard: 'Dashboard', captacao: 'Captação', chat: 'Chat Ao Vivo',
-    contatos: 'Contatos', alunos: 'Alunos', turmas: 'Turmas', financeiro: 'Financeiro'
-  };
-
-  function navigate(page, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('page-title').textContent = pageTitles[page];
-  }
-
-  // Chat
-  function selectChat(el, name, avClass) {
-    document.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('chat-name').textContent = name;
-    const av = document.getElementById('chat-avatar');
-    av.className = 'chat-item-avatar ' + avClass;
-    av.textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
-  }
-
-  function sendMessage(e) {
-    if (e.key !== 'Enter') return;
-    const input = document.getElementById('msg-input');
-    const text = input.value.trim();
-    if (!text) return;
-    const msgs = document.querySelector('.chat-messages');
-    const msg = document.createElement('div');
-    msg.className = 'msg sent';
-    msg.innerHTML = '<div class="msg-bubble">' + text + '</div><div class="msg-time">Agora</div>';
-    msgs.appendChild(msg);
-    msgs.scrollTop = msgs.scrollHeight;
-    input.value = '';
-  }
-
-  // Init
-  buildSteps();
+// ─── OPTION SELECTOR ───
+function selOpt(el){el.closest('.opt-g').querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));el.classList.add('on')}
+function pickColor(el,c){document.getElementById('clr-pick').querySelectorAll('div').forEach(d=>d.style.border='3px solid transparent');el.style.border='3px solid #fff';el.style.transform='scale(1.15)';setTimeout(()=>el.style.transform='',200);document.documentElement.style.setProperty('--accent',c);document.documentElement.style.setProperty('--accent-h',c);toast('Cor atualizada!','b')}
 </script>
 </body>
 </html>
