@@ -295,19 +295,36 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
 
   <!-- ══ CHAT ══ -->
   <div class="pg" id="pg-chat">
-    <div class="chat-lay">
+    <!-- Banner WhatsApp -->
+    <div id="wa-banner" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:12px">
+      <div id="wa-led" style="width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0;box-shadow:0 0 0 3px rgba(100,116,139,.15)"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700" id="wa-status-txt">WhatsApp desconectado</div>
+        <div style="font-size:11px;color:var(--muted)" id="wa-phone-txt">Conecte para receber e enviar mensagens reais</div>
+      </div>
+      <button class="btn bp" id="wa-connect-btn" onclick="openQR()" style="font-size:12px">📱 Conectar WhatsApp</button>
+      <button class="btn br" id="wa-disconnect-btn" onclick="waLogout()" style="font-size:12px;display:none">Desconectar</button>
+    </div>
+
+    <div class="chat-lay" style="height:calc(100vh - 205px)">
       <div class="cl">
-        <div class="cl-h">Conversas <span class="bx">5</span></div>
-        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar..."/></div></div>
+        <div class="cl-h">
+          <span>Conversas</span>
+          <span class="bx" id="chat-count">0</span>
+        </div>
+        <div class="cl-srch"><div class="srch" style="height:32px"><span style="color:var(--muted);font-size:13px">🔍</span><input type="text" placeholder="Buscar..." oninput="filterChats(this.value)"/></div></div>
         <div class="cl-list" id="cl-list"></div>
       </div>
       <div class="cw">
         <div class="cw-h">
           <div class="ci-av ava" id="cav">?</div>
-          <div><div style="font-size:14px;font-weight:800" id="cnm">Selecione uma conversa</div><div style="font-size:11px;color:var(--green)" id="cst">● Online</div></div>
+          <div>
+            <div style="font-size:14px;font-weight:800" id="cnm">Selecione uma conversa</div>
+            <div style="font-size:11px" id="cst" style="color:var(--muted)">—</div>
+          </div>
           <div style="margin-left:auto;display:flex;gap:7px">
             <button class="btn bg" style="font-size:12px" onclick="toast('Perfil aberto!','b')">Ver perfil</button>
-            <button class="btn bp" style="font-size:12px" onclick="openM('aluno',null);toast('Formulário de matrícula aberto','b')">Matricular</button>
+            <button class="btn bp" style="font-size:12px" onclick="openM('aluno',null)">Matricular</button>
           </div>
         </div>
         <div class="cm" id="msgs"><div style="text-align:center;color:var(--muted);margin-top:60px;font-size:13px">Selecione uma conversa ao lado</div></div>
@@ -315,6 +332,46 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
         <div class="ci-bar">
           <textarea class="ci-in" id="minput" rows="1" placeholder="Digite uma mensagem... (Enter envia)" onkeydown="sendMsg(event)"></textarea>
           <button class="btn bp" onclick="sendMsg({key:'Enter'})">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal QR Code WhatsApp -->
+  <div class="ov hide" id="ov-qr">
+    <div class="modal" style="width:420px;text-align:center">
+      <div class="m-h" style="justify-content:center;padding-top:24px">
+        <div>
+          <div class="m-t" style="font-size:20px">📱 Conectar WhatsApp</div>
+          <div class="m-sub" style="text-align:center;margin-top:4px" id="qr-sub">Gerando QR Code...</div>
+        </div>
+      </div>
+      <div class="m-b" style="padding-top:16px">
+        <!-- QR aguardando -->
+        <div id="qr-waiting" style="padding:30px 0">
+          <div style="font-size:48px;margin-bottom:12px">⏳</div>
+          <div style="color:var(--muted);font-size:13px">Aguardando QR Code do servidor...</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:8px">Certifique-se que o servidor está rodando:<br/><code style="background:var(--s2);padding:4px 8px;border-radius:6px;font-size:12px">npm start</code></div>
+        </div>
+        <!-- QR Code -->
+        <div id="qr-box" style="display:none">
+          <img id="qr-img" src="" alt="QR Code" style="width:240px;height:240px;border-radius:12px;border:4px solid var(--s2)"/>
+          <div style="margin-top:14px;font-size:13px;color:var(--sub);line-height:1.6">
+            1. Abra o <strong>WhatsApp</strong> no celular<br/>
+            2. Toque em <strong>⋮ Mais opções</strong> → <strong>Dispositivos Conectados</strong><br/>
+            3. Toque em <strong>Conectar um dispositivo</strong><br/>
+            4. Aponte a câmera para o QR Code acima
+          </div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted)">O QR Code expira em 60 segundos</div>
+        </div>
+        <!-- Conectado -->
+        <div id="qr-done" style="display:none;padding:20px 0">
+          <div style="font-size:52px;margin-bottom:12px">✅</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:6px">WhatsApp Conectado!</div>
+          <div style="color:var(--muted);font-size:13px" id="qr-phone">Número conectado com sucesso</div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
+          <button class="btn bg" onclick="closeM('qr')">Fechar</button>
         </div>
       </div>
     </div>
@@ -1034,6 +1091,226 @@ function gSearch(v){
 }
 
 // ════════════════════════════════
+//  WHATSAPP via Socket.io
+// ════════════════════════════════
+let socket = null
+let waOk   = false
+let activeJid = null   // JID do contato WhatsApp selecionado (null = mock)
+const waChats = {}     // { jid: { name, phone, msgs:[], unread } }
+
+function initSocket(){
+  if(typeof io === 'undefined') return // Socket.io não disponível (aberto como arquivo)
+  try {
+    socket = io('http://localhost:3000', { timeout: 3000 })
+
+    socket.on('connect', () => {
+      toast('Servidor ABA Edu conectado','g')
+    })
+    socket.on('connect_error', () => {
+      // Servidor offline — modo demo
+    })
+
+    socket.on('wa-status', ({ connected, phone }) => {
+      waOk = connected
+      const led  = document.getElementById('wa-led')
+      const stxt = document.getElementById('wa-status-txt')
+      const ptxt = document.getElementById('wa-phone-txt')
+      const cBtn = document.getElementById('wa-connect-btn')
+      const dBtn = document.getElementById('wa-disconnect-btn')
+      if(connected){
+        led.style.background   = 'var(--green)'
+        led.style.boxShadow    = '0 0 0 4px rgba(16,185,129,.2)'
+        stxt.textContent       = '● WhatsApp Conectado'
+        stxt.style.color       = 'var(--green)'
+        ptxt.textContent       = phone ? `+${phone}` : 'Conectado'
+        cBtn.style.display     = 'none'
+        dBtn.style.display     = ''
+        // Fechar QR modal e mostrar sucesso
+        document.getElementById('qr-waiting').style.display='none'
+        document.getElementById('qr-box').style.display='none'
+        document.getElementById('qr-done').style.display=''
+        document.getElementById('qr-phone').textContent=phone?`Número: +${phone}`:'Conectado com sucesso'
+        document.getElementById('qr-sub').textContent='Conectado!'
+        toast('WhatsApp conectado com sucesso!','g')
+      } else {
+        led.style.background   = 'var(--muted)'
+        led.style.boxShadow    = '0 0 0 3px rgba(100,116,139,.15)'
+        stxt.textContent       = 'WhatsApp desconectado'
+        stxt.style.color       = ''
+        ptxt.textContent       = 'Conecte para receber e enviar mensagens reais'
+        cBtn.style.display     = ''
+        dBtn.style.display     = 'none'
+      }
+    })
+
+    socket.on('qr', (dataUrl) => {
+      document.getElementById('qr-waiting').style.display='none'
+      document.getElementById('qr-box').style.display=''
+      document.getElementById('qr-done').style.display='none'
+      document.getElementById('qr-img').src=dataUrl
+      document.getElementById('qr-sub').textContent='Escaneie com seu WhatsApp'
+      document.getElementById('ov-qr').classList.remove('hide')
+    })
+
+    socket.on('qr-done', () => {
+      document.getElementById('qr-waiting').style.display='none'
+      document.getElementById('qr-box').style.display='none'
+      document.getElementById('qr-done').style.display=''
+    })
+
+    // Nova mensagem do WhatsApp real
+    socket.on('new-message', ({ jid, name, phone, text, ts }) => {
+      if(!waChats[jid]) waChats[jid]={ jid, name, phone, msgs:[], unread:0 }
+      waChats[jid].msgs.push({ rx:true, text, ts })
+      waChats[jid].lastMsg = text
+      waChats[jid].lastTs  = ts
+      if(activeJid!==jid) waChats[jid].unread=(waChats[jid].unread||0)+1
+      else appendMsg(true, text, ts)
+      refreshWaList()
+      toast(`💬 ${name}: ${text.substring(0,40)}...`,'b')
+      document.getElementById('nb-cht').textContent=
+        Object.values(waChats).reduce((s,c)=>s+(c.unread||0),0)||'0'
+    })
+
+    socket.on('contacts-update', (list) => {
+      list.forEach(c=>{
+        if(!waChats[c.jid]) waChats[c.jid]={ ...c, msgs:[], unread:0 }
+        else { waChats[c.jid].name=c.name; waChats[c.jid].phone=c.phone }
+      })
+      refreshWaList()
+    })
+
+    socket.on('message-history', ({ jid, messages: msgs }) => {
+      if(waChats[jid]) waChats[jid].msgs=msgs
+      if(activeJid===jid) renderWaMsgs(jid)
+    })
+
+    socket.on('message-sent', ({ jid, text, ts }) => {
+      if(!waChats[jid]) waChats[jid]={ jid, msgs:[], unread:0 }
+      waChats[jid].msgs.push({ rx:false, text, ts })
+      if(activeJid===jid) appendMsg(false, text, ts)
+    })
+
+    socket.on('send-error', (msg) => toast('Erro ao enviar: '+msg,'r'))
+
+  } catch(e){}
+}
+
+function openQR(){
+  document.getElementById('qr-waiting').style.display=''
+  document.getElementById('qr-box').style.display='none'
+  document.getElementById('qr-done').style.display='none'
+  document.getElementById('qr-sub').textContent='Gerando QR Code...'
+  document.getElementById('ov-qr').classList.remove('hide')
+}
+
+function waLogout(){
+  if(socket) socket.emit('wa-logout')
+  waOk=false; activeJid=null; waChats={}
+  refreshWaList()
+  toast('WhatsApp desconectado','y')
+}
+
+function refreshWaList(){
+  const waList=Object.values(waChats)
+  if(!waList.length){ renderChatList(); return }
+  // Mesclar contatos reais do WhatsApp com os mocks
+  const realItems = waList.map((c,i)=>`
+    <div class="ci ${activeJid===c.jid?'on':''}" onclick="selWaChat('${c.jid}',this)">
+      <div class="ci-av ${avColors[c.name?.charCodeAt(0)%avColors.length]||'ava'}">${(c.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ci-nm">${c.name||c.phone}</div>
+        <div class="ci-pv">${c.lastMsg||'Nova conversa'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="ci-tm">${c.lastTs||''}</div>
+        ${c.unread?`<div class="ci-unr">${c.unread}</div>`:''}
+      </div>
+    </div>`).join('')
+  document.getElementById('cl-list').innerHTML=
+    `<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em">📱 WhatsApp Real</div>`
+    +realItems
+    +`<div style="padding:6px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--border);margin-top:4px">Demo</div>`
+    +chats.map((c,i)=>`<div class="ci" onclick="selChat(${i},this)"><div class="ci-av ${c.av}">${c.ini}</div><div style="flex:1;min-width:0"><div class="ci-nm">${c.nm}</div><div class="ci-pv">${c.msgs[c.msgs.length-1].t}</div></div><div class="ci-tm">${c.msgs[c.msgs.length-1].ts}</div></div>`).join('')
+  document.getElementById('chat-count').textContent=waList.length+chats.length
+}
+
+function selWaChat(jid, el){
+  document.querySelectorAll('.ci').forEach(c=>c.classList.remove('on'))
+  if(el) el.classList.add('on')
+  activeJid = jid
+  const c = waChats[jid]
+  if(!c) return
+  c.unread=0
+  const nm=c.name||c.phone
+  const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
+  const clsCl=avColors[nm.charCodeAt(0)%avColors.length]||'ava'
+  document.getElementById('cav').className='ci-av '+clsCl
+  document.getElementById('cav').textContent=ini
+  document.getElementById('cnm').textContent=nm
+  document.getElementById('cst').textContent=`📱 +${c.phone}`
+  document.getElementById('cst').style.color='var(--green)'
+  if(socket) socket.emit('get-messages', jid)
+  else renderWaMsgs(jid)
+  refreshWaList()
+}
+
+function renderWaMsgs(jid){
+  const c=waChats[jid]
+  if(!c) return
+  const msgs=document.getElementById('msgs')
+  msgs.innerHTML=c.msgs.map(m=>`<div class="msg ${m.rx?'rx':'tx'}"><div class="mb">${m.text}</div><div class="mt">${m.ts}${!m.rx?' ✓✓':''}</div></div>`).join('')
+  msgs.scrollTop=msgs.scrollHeight
+}
+
+function appendMsg(rx, text, ts){
+  const msgs=document.getElementById('msgs')
+  const m=document.createElement('div')
+  m.className='msg '+(rx?'rx':'tx')
+  m.innerHTML=`<div class="mb">${text}</div><div class="mt">${ts}${!rx?' ✓✓':''}</div>`
+  msgs.appendChild(m)
+  msgs.scrollTop=msgs.scrollHeight
+}
+
+function filterChats(v){
+  document.querySelectorAll('.cl-list .ci').forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes(v.toLowerCase())?'':'none'
+  })
+}
+
+// Override sendMsg para suportar WhatsApp real
+const _origSendMsg = sendMsg
+function sendMsg(e){
+  if(e.key!=='Enter'||e.shiftKey) return
+  const inp=document.getElementById('minput')
+  const txt=inp.value.trim()
+  if(!txt) return
+  inp.value=''
+  const ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+  if(activeJid && waOk && socket){
+    // Enviar via WhatsApp real
+    socket.emit('send-message',{ jid:activeJid, text:txt })
+    // Mensagem aparece ao receber o event 'message-sent' do servidor
+  } else if(activeJid && !waOk){
+    toast('WhatsApp não conectado. Conecte primeiro.','y')
+  } else {
+    // Modo demo (chat mock)
+    if(activeChat===null){ toast('Selecione uma conversa','y'); return }
+    const c=chats[activeChat]
+    c.msgs.push({rx:false,t:txt,ts})
+    appendMsg(false,txt,ts)
+    const ti=document.getElementById('typing')
+    ti.textContent=c.nm+' está digitando...'
+    setTimeout(()=>{
+      ti.textContent=''
+      const reply=autoReplies[rIdx++%autoReplies.length]
+      c.msgs.push({rx:true,t:reply,ts})
+      appendMsg(true,reply,ts)
+    },900+Math.random()*600)
+  }
+}
+
+// ════════════════════════════════
 //  INIT
 // ════════════════════════════════
 (function init(){
@@ -1053,7 +1330,16 @@ function gSearch(v){
   document.querySelectorAll('.ov').forEach(ov=>{
     ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.add('hide')});
   });
+  initSocket();
 })();
+</script>
+<!-- Socket.io client (carregado apenas quando servidor está rodando) -->
+<script>
+  // Tenta carregar Socket.io do servidor local
+  const s=document.createElement('script')
+  s.src='http://localhost:3000/socket.io/socket.io.js'
+  s.onload=()=>{ if(typeof initSocket==='function') initSocket() }
+  document.head.appendChild(s)
 </script>
 </body>
 </html>
