@@ -1005,26 +1005,37 @@ function selChat(i,el){
 function sendMsg(e){
   if(e.key!=='Enter'||e.shiftKey)return;
   const inp=document.getElementById('minput');
-  const txt=inp.value.trim();if(!txt||activeChat===null)return;
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';
   const now=new Date();
   const ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  // WhatsApp real
+  if(typeof activeJid!=='undefined' && activeJid && typeof waOk!=='undefined' && waOk && typeof socket!=='undefined' && socket){
+    socket.emit('send-message',{jid:activeJid,text:txt});
+    return;
+  }
+  if(typeof activeJid!=='undefined' && activeJid && !(typeof waOk!=='undefined' && waOk)){
+    toast('WhatsApp não conectado. Conecte primeiro.','y');return;
+  }
+  // Modo demo
+  if(activeChat===null){toast('Selecione uma conversa','y');return;}
   const c=chats[activeChat];
   c.msgs.push({rx:false,t:txt,ts});
-  inp.value='';
-  const msgs=document.getElementById('msgs');
-  const m=document.createElement('div');m.className='msg tx';
-  m.innerHTML=`<div class="mb">${txt}</div><div class="mt">${ts} ✓✓</div>`;
-  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
+  appendChatMsg(false,txt,ts);
   const ti=document.getElementById('typing');
   ti.textContent=c.nm+' está digitando...';
   setTimeout(()=>{
     ti.textContent='';
     const reply=autoReplies[rIdx++%autoReplies.length];
     c.msgs.push({rx:true,t:reply,ts});
-    const r=document.createElement('div');r.className='msg rx';
-    r.innerHTML=`<div class="mb">${reply}</div><div class="mt">${ts}</div>`;
-    msgs.appendChild(r);msgs.scrollTop=msgs.scrollHeight;
+    appendChatMsg(true,reply,ts);
   },900+Math.random()*600);
+}
+function appendChatMsg(rx,text,ts){
+  const msgs=document.getElementById('msgs');
+  const m=document.createElement('div');m.className='msg '+(rx?'rx':'tx');
+  m.innerHTML=`<div class="mb">${text}</div><div class="mt">${ts}${!rx?' ✓✓':''}</div>`;
+  msgs.appendChild(m);msgs.scrollTop=msgs.scrollHeight;
 }
 
 // ════════════════════════════════
@@ -1096,7 +1107,7 @@ function gSearch(v){
 let socket = null
 let waOk   = false
 let activeJid = null   // JID do contato WhatsApp selecionado (null = mock)
-const waChats = {}     // { jid: { name, phone, msgs:[], unread } }
+let waChats = {}       // { jid: { name, phone, msgs:[], unread } }
 
 function initSocket(){
   if(typeof io === 'undefined') return // Socket.io não disponível (aberto como arquivo)
@@ -1165,7 +1176,7 @@ function initSocket(){
       waChats[jid].lastMsg = text
       waChats[jid].lastTs  = ts
       if(activeJid!==jid) waChats[jid].unread=(waChats[jid].unread||0)+1
-      else appendMsg(true, text, ts)
+      else appendChatMsg(true, text, ts)
       refreshWaList()
       toast(`💬 ${name}: ${text.substring(0,40)}...`,'b')
       document.getElementById('nb-cht').textContent=
@@ -1263,14 +1274,7 @@ function renderWaMsgs(jid){
   msgs.scrollTop=msgs.scrollHeight
 }
 
-function appendMsg(rx, text, ts){
-  const msgs=document.getElementById('msgs')
-  const m=document.createElement('div')
-  m.className='msg '+(rx?'rx':'tx')
-  m.innerHTML=`<div class="mb">${text}</div><div class="mt">${ts}${!rx?' ✓✓':''}</div>`
-  msgs.appendChild(m)
-  msgs.scrollTop=msgs.scrollHeight
-}
+function appendMsg(rx, text, ts){ appendChatMsg(rx, text, ts) }
 
 function filterChats(v){
   document.querySelectorAll('.cl-list .ci').forEach(el=>{
@@ -1278,37 +1282,7 @@ function filterChats(v){
   })
 }
 
-// Override sendMsg para suportar WhatsApp real
-const _origSendMsg = sendMsg
-function sendMsg(e){
-  if(e.key!=='Enter'||e.shiftKey) return
-  const inp=document.getElementById('minput')
-  const txt=inp.value.trim()
-  if(!txt) return
-  inp.value=''
-  const ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
-  if(activeJid && waOk && socket){
-    // Enviar via WhatsApp real
-    socket.emit('send-message',{ jid:activeJid, text:txt })
-    // Mensagem aparece ao receber o event 'message-sent' do servidor
-  } else if(activeJid && !waOk){
-    toast('WhatsApp não conectado. Conecte primeiro.','y')
-  } else {
-    // Modo demo (chat mock)
-    if(activeChat===null){ toast('Selecione uma conversa','y'); return }
-    const c=chats[activeChat]
-    c.msgs.push({rx:false,t:txt,ts})
-    appendMsg(false,txt,ts)
-    const ti=document.getElementById('typing')
-    ti.textContent=c.nm+' está digitando...'
-    setTimeout(()=>{
-      ti.textContent=''
-      const reply=autoReplies[rIdx++%autoReplies.length]
-      c.msgs.push({rx:true,t:reply,ts})
-      appendMsg(true,reply,ts)
-    },900+Math.random()*600)
-  }
-}
+// sendMsg já está definido acima com suporte a WhatsApp + demo
 
 // ════════════════════════════════
 //  INIT
@@ -1330,7 +1304,6 @@ function sendMsg(e){
   document.querySelectorAll('.ov').forEach(ov=>{
     ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.add('hide')});
   });
-  initSocket();
 })();
 </script>
 <!-- Socket.io client (carregado apenas quando servidor está rodando) -->
