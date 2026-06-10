@@ -611,7 +611,7 @@ const uid=()=>Date.now()+Math.random().toString(36).slice(2);
 // ════════════════════════════════
 const avColors=['ava','avb','avc','avd','ave','avf'];
 const av=(nm,sz=30)=>{const ini=(nm||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const cl=avColors[nm.charCodeAt(0)%avColors.length];return `<div class="av ${cl}" style="width:${sz}px;height:${sz}px;font-size:${sz*.35}px;flex-shrink:0">${ini}</div>`};
-const stMap={Matriculado:'tg',Pago:'tg',Ativo:'tg',Em contato:'tb',Lead:'tp',Pendente:'ty',Aguardando:'tm',Atrasado:'tr',Inativo:'tr',Perdido:'tm'};
+const stMap={Matriculado:'tg',Pago:'tg',Ativo:'tg','Em contato':'tb',Lead:'tp',Pendente:'ty',Aguardando:'tm',Atrasado:'tr',Inativo:'tr',Perdido:'tm'};
 const stTag=(st)=>`<span class="tag ${stMap[st]||'tm'}">${st}</span>`;
 const segMap={ABA:'tp',Autismo:'tg',Desenvolvimento:'tb'};
 const fmtVal=(v)=>`R$ ${parseFloat(v).toFixed(2).replace('.',',')}`;
