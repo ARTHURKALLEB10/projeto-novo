@@ -481,6 +481,24 @@ tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody t
   <div class="pg" id="pg-financeiro">
     <div class="sh"><span class="sh-t">Financeiro</span><button class="btn bp" onclick="openM('fin',null)">＋ Novo Lançamento</button></div>
     <div class="fcards" id="fin-cards"></div>
+    <!-- Gráficos -->
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px;margin-top:14px">
+      <div class="card" style="padding:20px">
+        <div class="c-h" style="margin-bottom:16px">
+          <span class="c-l">Receita por Mês</span>
+          <div style="display:flex;gap:6px">
+            <button id="fin-btn-bar" class="btn bp" style="font-size:11px;padding:3px 10px" onclick="setFinView('bar')">Barras</button>
+            <button id="fin-btn-line" class="btn bg" style="font-size:11px;padding:3px 10px" onclick="setFinView('line')">Linha</button>
+          </div>
+        </div>
+        <div style="position:relative;height:230px"><canvas id="fin-chart-main"></canvas></div>
+      </div>
+      <div class="card" style="padding:20px;display:flex;flex-direction:column">
+        <div class="c-h" style="margin-bottom:16px"><span class="c-l">Distribuição</span></div>
+        <div style="position:relative;flex:1;max-height:200px"><canvas id="fin-chart-donut"></canvas></div>
+        <div id="fin-legend" style="margin-top:14px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
     <div class="tw" style="margin-top:14px">
       <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
         <span class="sh-t">Transações</span>
@@ -952,6 +970,15 @@ function renderTurmas(){
 }
 function delTurma(id){confirm2('Excluir esta turma?',()=>{S.turmas=S.turmas.filter(t=>t.id!=id);save();renderTurmas();toast('Turma excluída','r');})}
 
+let _finView='bar', _finChartMain=null, _finChartDonut=null;
+
+function setFinView(type){
+  _finView=type;
+  document.getElementById('fin-btn-bar').className=type==='bar'?'btn bp':'btn bg';
+  document.getElementById('fin-btn-line').className=type==='line'?'btn bp':'btn bg';
+  renderFinCharts();
+}
+
 function renderFin(filter=''){
   const list=S.financeiro.filter(f=>!filter||f.status===filter);
   const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+f.value,0);
@@ -974,6 +1001,45 @@ function renderFin(filter=''){
         <button class="btn br" style="padding:4px 8px;font-size:11px" onclick="delFin('${f.id}')">🗑</button>
       </div></td>
     </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento</td></tr>';
+  renderFinCharts();
+}
+
+function renderFinCharts(){
+  if(typeof Chart==='undefined') return;
+  const months=[];
+  const now=new Date();
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({label:d.toLocaleString('pt-BR',{month:'short',year:'2-digit'}),key:`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`,pago:0,pendente:0,atrasado:0});
+  }
+  S.financeiro.forEach(f=>{
+    if(!f.due) return;
+    const parts=f.due.split('/');
+    if(parts.length<3) return;
+    const key=`${parts[1]}/${parts[2]}`;
+    const m=months.find(m=>m.key===key);
+    if(!m) return;
+    if(f.status==='Pago') m.pago+=f.value;
+    else if(f.status==='Pendente') m.pendente+=f.value;
+    else if(f.status==='Atrasado') m.atrasado+=f.value;
+  });
+  const labels=months.map(m=>m.label);
+  const dsPago={label:'Recebido',data:months.map(m=>m.pago),backgroundColor:'rgba(16,185,129,.75)',borderColor:'#10b981',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#10b981',pointRadius:5,pointHoverRadius:7};
+  const dsPend={label:'Pendente',data:months.map(m=>m.pendente),backgroundColor:'rgba(245,158,11,.75)',borderColor:'#f59e0b',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#f59e0b',pointRadius:5,pointHoverRadius:7};
+  const dsLate={label:'Atrasado',data:months.map(m=>m.atrasado),backgroundColor:'rgba(239,68,68,.75)',borderColor:'#ef4444',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#ef4444',pointRadius:5,pointHoverRadius:7};
+  const chartOpts={responsive:true,maintainAspectRatio:false,animation:{duration:600,easing:'easeInOutQuart'},interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1f2937',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'#374151',borderWidth:1,padding:12,callbacks:{label:ctx=>' '+ctx.dataset.label+': R$ '+ctx.parsed.y.toFixed(2).replace('.',',')} }}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$ '+v.toLocaleString('pt-BR')},beginAtZero:true}}};
+  const mainCtx=document.getElementById('fin-chart-main');
+  if(_finChartMain) _finChartMain.destroy();
+  _finChartMain=new Chart(mainCtx,{type:_finView==='line'?'line':'bar',data:{labels,datasets:_finView==='line'?[dsPago,dsPend,dsLate]:[{...dsPago,stack:'s'},{...dsPend,stack:'s'},{...dsLate,stack:'s'}]},options:{...chartOpts,plugins:{...chartOpts.plugins,legend:{display:true,position:'top',labels:{color:'#94a3b8',boxWidth:12,padding:16,font:{size:11}}}}}});
+  // Donut
+  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+f.value,0);
+  const pend=S.financeiro.filter(f=>f.status==='Pendente').reduce((s,f)=>s+f.value,0);
+  const late=S.financeiro.filter(f=>f.status==='Atrasado').reduce((s,f)=>s+f.value,0);
+  const dCtx=document.getElementById('fin-chart-donut');
+  if(_finChartDonut) _finChartDonut.destroy();
+  _finChartDonut=new Chart(dCtx,{type:'doughnut',data:{labels:['Recebido','Pendente','Atrasado'],datasets:[{data:[paid,pend,late],backgroundColor:['rgba(16,185,129,.85)','rgba(245,158,11,.85)','rgba(239,68,68,.85)'],borderColor:['#10b981','#f59e0b','#ef4444'],borderWidth:2,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',animation:{duration:700,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1f2937',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'#374151',borderWidth:1,padding:12,callbacks:{label:ctx=>' '+ctx.label+': R$ '+ctx.parsed.toFixed(2).replace('.',',')} }}}}});
+  const total=paid+pend+late;
+  document.getElementById('fin-legend').innerHTML=[['#10b981','Recebido',paid],['#f59e0b','Pendente',pend],['#ef4444','Atrasado',late]].map(([c,l,v])=>`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--sub)">${l}</span><span style="font-size:12px;font-weight:700;color:var(--text)">${total?Math.round(v/total*100):0}%</span></div>`).join('');
 }
 function markPago(id){const f=S.financeiro.find(f=>f.id==id);if(f){f.status='Pago';save();renderFin();toast('Pagamento confirmado!','g');}}
 function delFin(id){confirm2('Excluir este lançamento?',()=>{S.financeiro=S.financeiro.filter(f=>f.id!=id);save();renderFin();toast('Lançamento excluído','r');})}
@@ -1411,6 +1477,8 @@ function iniciarConversa(){
   });
 })();
 </script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <!-- Socket.io client (carregado apenas quando servidor está rodando) -->
 <script>
   // Tenta carregar Socket.io do servidor local
