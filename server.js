@@ -7,6 +7,13 @@ const path     = require('path')
 const fs       = require('fs')
 const { exec } = require('child_process')
 const P        = require('pino')
+const { createClient } = require('@supabase/supabase-js')
+
+// Supabase service_role para criar usuários pelo admin
+// Configure as variáveis de ambiente SUPABASE_URL e SUPABASE_SERVICE_KEY
+const sbAdmin = (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY)
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null
 
 const app        = express()
 const httpServer = createServer(app)
@@ -155,6 +162,19 @@ app.post('/api/send', async (req, res) => {
   }
 })
 
+// Criar usuário via admin (requer SUPABASE_SERVICE_KEY)
+app.post('/api/create-user', async (req, res) => {
+  if (!sbAdmin) return res.status(503).json({ error: 'SUPABASE_SERVICE_KEY não configurada no servidor.' })
+  const { nome, email, password, role } = req.body
+  if (!nome || !email || !password || !role) return res.status(400).json({ error: 'Campos obrigatórios faltando.' })
+  const { data, error } = await sbAdmin.auth.admin.createUser({
+    email, password, email_confirm: true,
+    user_metadata: { nome, role }
+  })
+  if (error) return res.status(400).json({ error: error.message })
+  res.json({ ok: true, id: data.user?.id })
+})
+
 app.post('/api/logout', async (req, res) => {
   if (sock) { try { await sock.logout() } catch (e) {} }
   waConnected = false; qrData = null; connectedPhone = null
@@ -201,6 +221,11 @@ io.on('connection', (socket) => {
   // Buscar histórico de um contato
   socket.on('get-messages', (jid) => {
     socket.emit('message-history', { jid, messages: messages[jid] || [] })
+  })
+
+  // Reconectar WhatsApp a pedido do cliente
+  socket.on('wa-connect-request', () => {
+    if (!waConnected) startWA()
   })
 
   // Desconectar WhatsApp

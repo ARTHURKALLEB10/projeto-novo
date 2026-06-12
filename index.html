@@ -1,1491 +1,1414 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ABA Edu</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Clínica ABA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0d14;--s1:#111827;--s2:#1f2937;--s3:#374151;
-  --border:#2d3748;--accent:#2563eb;--al:rgba(37,99,235,.13);
-  --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--cyan:#38bdf8;
-  --text:#f1f5f9;--sub:#94a3b8;--muted:#64748b;
-  --sw:250px;--sc:66px;--r:10px;--sh:0 4px 24px rgba(0,0,0,.45);
+  --teal:#0d9488;--teal-dark:#0f766e;--teal-light:#ccfbf1;--teal-mid:#14b8a6;
+  --sidebar-w:240px;--bg:#f0fdf9;--surface:#ffffff;--border:#d1fae5;
+  --text:#134e4a;--text-muted:#6b7280;--danger:#ef4444;--warning:#f59e0b;
+  --success:#10b981;--radius:10px;--shadow:0 1px 4px rgba(0,0,0,.08);
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d9488 0%,#0891b2 100%)}
+.login-card{background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo span{font-size:2.2rem;font-weight:800;color:var(--teal)}
+.login-logo small{display:block;color:var(--text-muted);font-size:.85rem;margin-top:2px}
+.login-card h2{font-size:1.15rem;color:var(--text);margin-bottom:20px;text-align:center}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.form-group input{width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s}
+.form-group input:focus{border-color:var(--teal)}
+.btn-login{width:100%;padding:12px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;transition:background .2s;margin-top:4px}
+.btn-login:hover{background:var(--teal-dark)}
+#login-error{color:var(--danger);font-size:.85rem;text-align:center;margin-top:10px;display:none}
+
+/* APP SHELL */
+#app{display:none;height:100vh;overflow:hidden}
+
 /* SIDEBAR */
-#sb{width:var(--sw);background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;flex-shrink:0}
-#sb.col{width:var(--sc)}
-.sb-top{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border);white-space:nowrap}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 0 0 3px var(--al)}
-.logo-t{font-size:16px;font-weight:800;letter-spacing:-.3px} .logo-t b{color:#60a5fa}
-.tog{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;flex-shrink:0;padding:2px;transition:color .15s} .tog:hover{color:var(--text)}
-.nav{padding:6px 0;flex:1;overflow-y:auto;overflow-x:hidden}
-.nl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:10px 18px 3px;white-space:nowrap;letter-spacing:.08em;transition:opacity .15s}
-#sb.col .nl{opacity:0}
-.ni{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;white-space:nowrap;position:relative;transition:background .12s}
-.ni:hover{background:var(--s2)} .ni.on{background:var(--al)}
-.ni.on::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
-.ni-ic{font-size:17px;flex-shrink:0;color:var(--muted);width:22px;text-align:center}
-.ni.on .ni-ic{color:var(--accent)} .ni.on .ni-tx{color:var(--accent);font-weight:600}
-.ni-tx{font-size:13px;font-weight:500}
-.bx{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;flex-shrink:0}
-#sb.col .ni-tx,#sb.col .bx{opacity:0;pointer-events:none}
-.sb-foot{border-top:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:background .12s}
-.sb-foot:hover{background:var(--s2)}
-.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0}
-.u-nm{font-size:13px;font-weight:700} .u-rl{font-size:11px;color:var(--muted)}
-#sb.col .sb-foot>*:not(.av){opacity:0}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--teal-dark);color:#fff;display:flex;flex-direction:column;z-index:100}
+.sidebar-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sidebar-brand .brand-name{font-size:1.25rem;font-weight:800;letter-spacing:.02em}
+.sidebar-brand .brand-sub{font-size:.72rem;opacity:.65;margin-top:2px}
+.sidebar-user{padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.12)}
+.sidebar-user .avatar{width:34px;height:34px;border-radius:50%;background:var(--teal-mid);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+.sidebar-user .user-info{min-width:0}
+.sidebar-user .user-nome{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user .user-role{font-size:.7rem;opacity:.6;text-transform:uppercase;letter-spacing:.06em}
+nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-section{padding:10px 18px 4px;font-size:.65rem;opacity:.5;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;transition:background .15s;font-size:.9rem;font-weight:500;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.08)}
+.nav-item.active{background:rgba(255,255,255,.14);border-left-color:#fff}
+.nav-item .icon{width:18px;text-align:center;opacity:.8}
+.nav-item.active .icon{opacity:1}
+.sidebar-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,.12)}
+.btn-logout{width:100%;padding:8px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:6px;font-size:.82rem;font-weight:600;transition:background .2s}
+.btn-logout:hover{background:rgba(255,255,255,.2)}
+
 /* MAIN */
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.topbar{background:var(--s1);border-bottom:1px solid var(--border);height:58px;padding:0 22px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.tb-t{font-size:17px;font-weight:800;flex:1;letter-spacing:-.3px}
-.tb-a{display:flex;align-items:center;gap:8px}
-.content{flex:1;overflow-y:auto;padding:22px}
-/* BUTTONS */
-.btn{padding:8px 15px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.btn:hover{filter:brightness(1.1)} .btn:active{transform:scale(.97)}
-.bp{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35)}
-.bg{background:var(--s2);color:var(--text);border:1px solid var(--border)}
-.br{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
-.bic{width:36px;height:36px;border-radius:8px;background:var(--s2);border:1px solid var(--border);color:var(--sub);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative}
-.bic:hover{background:var(--s3);color:var(--text)}
-.nd{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1)}
-/* SEARCH */
-.srch{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0 11px;height:36px;transition:border-color .15s}
-.srch:focus-within{border-color:var(--accent)}
-.srch input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:170px}
-.srch input::placeholder{color:var(--muted)}
-/* PAGES */
-.pg{display:none;animation:fi .18s ease} .pg.on{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-/* GRID */
-.grid{display:grid;gap:14px} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
-/* CARD */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:border-color .15s,box-shadow .15s}
-.card:hover{border-color:var(--s3);box-shadow:var(--sh)}
-.c-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.c-l{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
-.c-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.ib{background:rgba(37,99,235,.15)} .ig{background:rgba(16,185,129,.15)} .iy{background:rgba(245,158,11,.15)} .ir{background:rgba(239,68,68,.15)}
-.c-v{font-size:28px;font-weight:900;letter-spacing:-1px}
-.c-d{font-size:12px;margin-top:3px} .up{color:var(--green)} .dn{color:var(--red)}
-/* SECTION HEADER */
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
-.sh-t{font-size:15px;font-weight:800;letter-spacing:-.2px}
-/* CHART */
-.chart-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-top:14px}
-.chart-bars{display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:12px}
-.cb-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
-.cb{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),#60a5fa);opacity:.7;min-height:4px;transition:opacity .2s,height .8s cubic-bezier(.4,0,.2,1)}
-.cb:hover{opacity:1} .cb-l{font-size:10px;color:var(--muted)}
-/* TABLE */
-.tw{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:14px}
+#main{margin-left:var(--sidebar-w);height:100vh;overflow-y:auto}
+.topbar{position:sticky;top:0;z-index:90;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1.1rem;font-weight:700;color:var(--text)}
+.topbar-date{font-size:.8rem;color:var(--text-muted)}
+.page-content{padding:24px;max-width:1300px}
+
+/* CARDS */
+.cards-row{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:24px}
+.card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-stat .label{font-size:.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.card-stat .value{font-size:1.9rem;font-weight:800;color:var(--teal)}
+.card-stat .sub{font-size:.78rem;color:var(--text-muted)}
+.card-stat .icon-wrap{margin-bottom:6px;font-size:1.4rem}
+
+/* TABLES */
+.table-wrap{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.table-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.table-head h3{font-size:.95rem;font-weight:700}
 table{width:100%;border-collapse:collapse}
-thead tr{border-bottom:1px solid var(--border);background:var(--s2)}
-th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
-td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:none} tbody tr{transition:background .1s} tbody tr:hover{background:var(--s2)}
-/* TAGS */
-.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
-.tg{background:rgba(16,185,129,.12);color:var(--green)} .tr{background:rgba(239,68,68,.12);color:var(--red)}
-.ty{background:rgba(245,158,11,.12);color:var(--yellow)} .tb{background:rgba(56,189,248,.12);color:var(--cyan)}
-.tp{background:rgba(37,99,235,.12);color:#60a5fa} .tm{background:rgba(100,116,139,.12);color:var(--muted)}
-/* KANBAN */
-.kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
-.kc{min-width:228px;max-width:228px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:13px;transition:box-shadow .15s}
-.kc.dov{box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)}
-.kc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-.kc-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px}
-.kc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.kc-n{background:var(--s2);color:var(--muted);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px}
-.kk{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:7px;cursor:grab;transition:all .15s;user-select:none;position:relative}
-.kk:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(37,99,235,.18)}
-.kk:active{cursor:grabbing;opacity:.7}
-.kk.drag{opacity:.35}
-.kk-acts{position:absolute;top:7px;right:7px;display:none;gap:4px}
-.kk:hover .kk-acts{display:flex}
-.kk-nm{font-size:12px;font-weight:700;margin-bottom:4px;padding-right:48px}
-.kk-inf{font-size:11px;color:var(--muted)}
-.kk-tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-top:5px}
-.kan-add{width:100%;background:none;border:1px dashed var(--border);color:var(--muted);border-radius:7px;padding:7px;cursor:pointer;font-size:12px;transition:all .15s;margin-top:2px}
-.kan-add:hover{border-color:var(--accent);color:var(--accent)}
-/* CHAT - WhatsApp Web Style */
-.content:has(#pg-chat.on){padding:0!important;overflow:hidden}
-#pg-chat.on{display:flex!important;flex-direction:column;height:calc(100vh - 58px)}
-.wa-root{display:flex;height:100%;overflow:hidden}
-/* left */
-.wa-left{width:380px;background:#111b21;border-right:1px solid #2a3942;display:flex;flex-direction:column;flex-shrink:0;position:relative}
-.wa-lhd{height:59px;background:#202c33;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
-.wa-srch-wrap{padding:8px 12px;background:#111b21;flex-shrink:0}
-.wa-srch-i{display:flex;align-items:center;gap:8px;background:#202c33;border-radius:8px;padding:8px 12px;height:35px}
-.wa-srch-i input{background:none;border:none;outline:none;color:#e9edef;font-size:13px;flex:1}
-.wa-srch-i input::placeholder{color:#8696a0}
-.wa-list{overflow-y:auto;flex:1}
-.wa-ci{display:flex;align-items:center;padding:10px 13px;gap:13px;cursor:pointer;border-bottom:1px solid #1a2026;transition:background .1s;min-height:72px}
-.wa-ci:hover{background:#202c33}.wa-ci.on{background:#2a3942}
-.wa-av{width:49px;height:49px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0}
-.wa-ci-info{flex:1;min-width:0}
-.wa-ci-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
-.wa-ci-nm{font-size:15px;font-weight:400;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
-.wa-ci-ts{font-size:11px;color:#8696a0;flex-shrink:0}
-.wa-ci-bot{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
-.wa-ci-pv{font-size:13px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
-.wa-ci-unr{min-width:20px;height:20px;background:#00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#111b21;flex-shrink:0;padding:0 5px}
-.wa-fab{position:absolute;bottom:16px;right:16px;width:56px;height:56px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(0,168,132,.45);display:flex;align-items:center;justify-content:center;transition:all .15s}
-.wa-fab:hover{background:#06cf9c;transform:scale(1.06)}
-/* right */
-.wa-right{flex:1;display:flex;flex-direction:column;min-width:0;background:#0b141a}
-.wa-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b141a;text-align:center;padding:40px}
-.wa-rhd{height:59px;background:#202c33;display:flex;align-items:center;padding:0 16px;gap:13px;flex-shrink:0}
-.wa-rhd-info{flex:1;min-width:0}
-.wa-rhd-nm{font-size:15px;color:#e9edef;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wa-rhd-st{font-size:12px;color:#8696a0}
-.wa-ic-btn{width:40px;height:40px;border-radius:50%;background:none;border:none;color:#aebac1;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
-.wa-ic-btn:hover{background:rgba(255,255,255,.08)}
-.wa-msgs{flex:1;overflow-y:auto;padding:20px 8%;display:flex;flex-direction:column;gap:1px;background:#0b141a}
-.wa-msg{max-width:65%;display:flex;flex-direction:column;margin-bottom:2px}
-.wa-msg.rx{align-self:flex-start}.wa-msg.tx{align-self:flex-end}
-.wa-mb{padding:6px 7px 8px 9px;border-radius:7.5px;font-size:14.2px;line-height:1.5;color:#e9edef;word-wrap:break-word;position:relative}
-.wa-msg.rx .wa-mb{background:#202c33;border-radius:0 7.5px 7.5px 7.5px}
-.wa-msg.tx .wa-mb{background:#005c4b;border-radius:7.5px 7.5px 0 7.5px}
-.wa-msg.rx .wa-mb::before{content:'';position:absolute;left:-8px;top:0;border-top:8px solid #202c33;border-left:8px solid transparent}
-.wa-msg.tx .wa-mb::after{content:'';position:absolute;right:-8px;top:0;border-top:8px solid #005c4b;border-right:8px solid transparent}
-.wa-mt{display:flex;align-items:center;gap:3px;justify-content:flex-end;margin-top:1px;padding:0 2px}
-.wa-mt span{font-size:11px;color:#8696a0}
-.wa-mt .ck{color:#53bdeb}
-.wa-foot{background:#202c33;display:flex;align-items:flex-end;padding:10px 16px;gap:10px;flex-shrink:0}
-.wa-inp{flex:1;background:#2a3942;border:none;border-radius:8px;padding:11px 14px;color:#e9edef;font-size:15px;outline:none;font-family:inherit;resize:none;max-height:100px;min-height:42px;line-height:1.4}
-.wa-inp::placeholder{color:#8696a0}
-.wa-send-btn{width:52px;height:52px;border-radius:50%;background:#00a884;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
-.wa-send-btn:hover{background:#06cf9c}
-/* status bar */
-.wa-stbar{padding:7px 16px;font-size:12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-/* EMPTY */
-.empty{text-align:center;padding:65px 20px}
-.e-ic{font-size:52px;margin-bottom:12px;opacity:.3}
-.e-t{font-size:17px;font-weight:800;margin-bottom:6px}
-.e-d{color:var(--muted);font-size:13px;margin-bottom:20px;max-width:300px;margin-left:auto;margin-right:auto}
-/* FIN CARDS */
-.fcards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.fc{border-radius:var(--r);padding:18px;color:#fff;position:relative;overflow:hidden}
-.fc::before{content:'';position:absolute;right:-20px;top:-20px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.08)}
-.fc.g{background:linear-gradient(135deg,#065f46,#10b981)} .fc.y{background:linear-gradient(135deg,#92400e,#f59e0b)}
-.fc.r{background:linear-gradient(135deg,#991b1b,#ef4444)} .fc.bl{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
-.fc-l{font-size:11px;font-weight:700;opacity:.85;margin-bottom:7px;text-transform:uppercase;letter-spacing:.07em}
-.fc-v{font-size:24px;font-weight:900;letter-spacing:-1px} .fc-s{font-size:11px;opacity:.75;margin-top:3px}
+th{background:#f0fdf9;text-align:left;padding:10px 14px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;font-size:.88rem;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9fafb}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:600}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-yellow{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f3f4f6;color:#374151}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:7px;font-size:.85rem;font-weight:600;transition:all .2s;cursor:pointer}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-secondary{background:#f3f4f6;color:var(--text)}
+.btn-secondary:hover{background:#e5e7eb}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:5px 11px;font-size:.78rem}
+.btn-icon{padding:6px 8px}
+
 /* MODAL */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:ovin .15s}
-.ov.hide{display:none} @keyframes ovin{from{opacity:0}to{opacity:1}}
-.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--sh);animation:min .2s cubic-bezier(.4,0,.2,1)}
-.modal.wide{width:680px}
-@keyframes min{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
-.m-h{padding:20px 22px 0;display:flex;align-items:flex-start;justify-content:space-between}
-.m-t{font-size:16px;font-weight:800;letter-spacing:-.3px} .m-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.m-x{background:none;border:none;color:var(--muted);font-size:21px;cursor:pointer;line-height:1;padding:2px;transition:color .15s} .m-x:hover{color:var(--text)}
-.m-b{padding:18px 22px 22px}
-.fg{margin-bottom:13px}
-.fl{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
-.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;font-family:inherit}
-.fi:focus{border-color:var(--accent)} select.fi{cursor:pointer}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.m-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
-/* CONFIRM */
-.confirm-modal{background:var(--s1);border:1px solid rgba(239,68,68,.3);border-radius:14px;width:380px;padding:24px;box-shadow:var(--sh);animation:min .2s}
-.cf-ic{font-size:38px;margin-bottom:12px;text-align:center}
-.cf-t{font-size:15px;font-weight:800;text-align:center;margin-bottom:6px}
-.cf-d{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px}
-.cf-ft{display:flex;gap:10px;justify-content:center}
-/* STEPS */
-.stps{display:flex;align-items:center;gap:5px;margin-bottom:22px}
-.sd{width:28px;height:28px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--s2);border:2px solid var(--border);color:var(--muted);flex-shrink:0;transition:all .2s}
-.sd.on{background:var(--accent);border-color:var(--accent);color:#fff} .sd.dn{background:var(--green);border-color:var(--green);color:#fff}
-.sl{flex:1;height:2px;background:var(--border);transition:background .3s} .sl.dn{background:var(--green)}
-.stp{display:none} .stp.on{display:block}
-.s-t{font-size:14px;font-weight:800;margin-bottom:3px} .s-d{font-size:12px;color:var(--muted);margin-bottom:16px}
-.opt-g{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.opt{background:var(--s2);border:2px solid var(--border);border-radius:9px;padding:13px 11px;cursor:pointer;text-align:center;transition:all .15s}
-.opt:hover,.opt.on{border-color:var(--accent);background:var(--al)}
-.opt-ic{font-size:20px;margin-bottom:4px} .opt-l{font-size:12px;font-weight:700}
-.s-ft{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
-/* SETTINGS PAGE */
-.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.cfg-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px}
-.cfg-card-t{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:7px;color:var(--sub)}
-.clr-row{display:flex;gap:9px;flex-wrap:wrap}
-.clr-dot{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .18s;flex-shrink:0}
-.clr-dot:hover{transform:scale(1.12)} .clr-dot.on{border-color:#fff;transform:scale(1.1)}
-/* TURMAS */
-.turma-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color .15s}
-.turma-card:hover{border-color:var(--accent)} .turma-name{font-size:14px;font-weight:800;margin-bottom:5px}
-.turma-info{font-size:12px;color:var(--muted)}
-/* TOAST */
-#toasts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:7px;z-index:200}
-.toast{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:11px 15px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;box-shadow:var(--sh);animation:tin .2s;min-width:250px;max-width:340px}
-.toast.out{animation:tout .2s forwards}
-@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes tout{to{opacity:0;transform:translateX(20px)}}
-.toast-x{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1}
-/* AVATAR */
-.ava{background:linear-gradient(135deg,var(--accent),#60a5fa)}
-.avb{background:linear-gradient(135deg,#059669,#34d399)} .avc{background:linear-gradient(135deg,#d97706,#fbbf24)}
-.avd{background:linear-gradient(135deg,#dc2626,#f87171)} .ave{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
-.avf{background:linear-gradient(135deg,#0891b2,#22d3ee)}
-/* INLINE EDIT */
-[contenteditable]{outline:none;border-radius:4px;padding:1px 3px;transition:background .15s}
-[contenteditable]:hover{background:var(--s2)} [contenteditable]:focus{background:var(--s2);box-shadow:0 0 0 2px var(--accent)}
-/* MISC */
-.divider{height:1px;background:var(--border);margin:14px 0}
-.info-box{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:11px;font-size:12px;color:var(--sub)}
-::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px} ::-webkit-scrollbar-thumb:hover{background:var(--s3)}
-@media(max-width:960px){.g4{grid-template-columns:1fr 1fr}.fcards{grid-template-columns:1fr 1fr}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;font-size:1.3rem;color:var(--text-muted);line-height:1;padding:2px 6px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-row{display:grid;gap:14px;grid-template-columns:1fr 1fr;margin-bottom:14px}
+.form-row.single{grid-template-columns:1fr}
+.form-field label{display:block;font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:.88rem;outline:none;transition:border .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--teal)}
+.form-field textarea{resize:vertical;min-height:80px}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block}
+
+/* DASHBOARD */
+.chart-row{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin-top:16px}
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.chart-card h4{font-size:.88rem;font-weight:700;margin-bottom:14px;color:var(--text)}
+.sessions-list{display:flex;flex-direction:column;gap:8px}
+.session-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f9fafb;border-radius:8px}
+.session-time{font-size:.78rem;font-weight:700;color:var(--teal);min-width:48px}
+.session-info{flex:1;min-width:0}
+.session-name{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-ter{font-size:.76rem;color:var(--text-muted)}
+
+/* AGENDA */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.cal-day-head{background:#f0fdf9;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+.cal-day{background:#fff;min-height:90px;padding:5px;font-size:.75rem}
+.cal-day.other-month{background:#f9fafb;color:#d1d5db}
+.cal-day.today{background:#f0fdf9}
+.cal-day-num{font-weight:600;color:var(--text-muted);margin-bottom:3px}
+.cal-day.today .cal-day-num{background:var(--teal);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem}
+.cal-event{background:var(--teal);color:#fff;border-radius:4px;padding:2px 5px;margin-bottom:2px;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.cal-event.status-realizada{background:#10b981}
+.cal-event.status-falta{background:#f59e0b}
+.cal-event.status-cancelada{background:#ef4444}
+.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cal-nav h3{font-size:1rem;font-weight:700;min-width:160px;text-align:center}
+
+/* CHAT */
+.chat-layout{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 120px);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.chat-contacts{border-right:1px solid var(--border);overflow-y:auto}
+.chat-contact-item{padding:12px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background .15s}
+.chat-contact-item:hover,.chat-contact-item.active{background:var(--teal-light)}
+.chat-contact-name{font-size:.88rem;font-weight:600}
+.chat-contact-last{font-size:.76rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-window{display:flex;flex-direction:column}
+.chat-window-header{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:70%;padding:9px 13px;border-radius:12px;font-size:.88rem;line-height:1.45}
+.msg.sent{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.msg.recv{background:#f3f4f6;color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.msg-time{font-size:.68rem;opacity:.65;margin-top:3px;text-align:right}
+.chat-input-bar{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-input-bar input{flex:1;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;outline:none}
+.chat-input-bar input:focus{border-color:var(--teal)}
+
+/* FINANCEIRO */
+.fin-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.fin-card{background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.fin-card .fc-label{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.fin-card .fc-value{font-size:1.7rem;font-weight:800;margin-top:4px}
+.fin-card.receita .fc-value{color:var(--success)}
+.fin-card.despesa .fc-value{color:var(--danger)}
+.fin-card.saldo .fc-value{color:var(--teal)}
+
+/* ADMIN PANEL */
+.admin-panel{background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:16px;margin-bottom:20px}
+.admin-panel h3{font-size:.9rem;font-weight:700;color:#856404;margin-bottom:12px}
+
+/* LOADER / TOAST */
+.loader{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1f2937;color:#fff;padding:11px 18px;border-radius:9px;font-size:.88rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.success{background:var(--success)}
+#toast.error{background:var(--danger)}
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:10px 20px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.modal-lg{max-width:760px}
+.evolucao-item{background:#f9fafb;border-radius:8px;padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--teal)}
+.evolucao-item .ev-meta{font-size:.72rem;color:var(--text-muted);margin-bottom:4px}
+.evolucao-item .ev-text{font-size:.88rem;line-height:1.5}
+.aluno-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#f9fafb;border-radius:8px;margin-bottom:6px}
+.presenca-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#f9fafb;border-radius:8px;margin-bottom:6px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
 </style>
 </head>
 <body>
 
-<!-- ════════ SIDEBAR ════════ -->
-<nav id="sb">
-  <div class="sb-top">
-    <div class="logo" id="logo-ic">A</div>
-    <span class="logo-t" id="logo-nm">ABA <b>Edu</b></span>
-    <button class="tog" onclick="toggleSB()">☰</button>
-  </div>
-  <div class="nav">
-    <div class="nl">Principal</div>
-    <div class="ni on" onclick="go('dashboard',this)"><span class="ni-ic">◈</span><span class="ni-tx">Dashboard</span></div>
-    <div class="ni" onclick="go('captacao',this)"><span class="ni-ic">⚡</span><span class="ni-tx">Captação</span><span class="bx" id="nb-cap">0</span></div>
-    <div class="ni" onclick="go('chat',this)"><span class="ni-ic">💬</span><span class="ni-tx">Chat Ao Vivo</span><span class="bx" id="nb-cht">3</span></div>
-    <div class="ni" onclick="go('contatos',this)"><span class="ni-ic">👤</span><span class="ni-tx">Contatos</span></div>
-    <div class="nl">Gestão</div>
-    <div class="ni" onclick="go('alunos',this)"><span class="ni-ic">🎓</span><span class="ni-tx">Alunos</span></div>
-    <div class="ni" onclick="go('turmas',this)"><span class="ni-ic">📚</span><span class="ni-tx">Turmas</span></div>
-    <div class="ni" onclick="go('financeiro',this)"><span class="ni-ic">💰</span><span class="ni-tx">Financeiro</span></div>
-    <div class="nl">Admin</div>
-    <div class="ni" onclick="go('config',this)"><span class="ni-ic">⚙</span><span class="ni-tx">Configurações</span></div>
-  </div>
-  <div class="sb-foot" onclick="go('config',document.querySelector('.ni:last-of-type'))">
-    <div class="av" id="u-av">AK</div>
-    <div><div class="u-nm" id="u-nm">Arthur Kalleb</div><div class="u-rl" id="u-rl">Administrador</div></div>
-  </div>
-</nav>
-
-<!-- ════════ MAIN ════════ -->
-<div id="main">
-  <div class="topbar">
-    <span class="tb-t" id="ptitle">Dashboard</span>
-    <div class="tb-a">
-      <div class="srch"><span style="color:var(--muted)">🔍</span><input id="gsrch" type="text" placeholder="Pesquisar..." oninput="gSearch(this.value)"/></div>
-      <button class="bic" onclick="showNotifs()" title="Notificações"><span>🔔</span><span class="nd" id="nd"></span></button>
-      <button class="btn bp" onclick="go('config',document.querySelectorAll('.ni')[8])">⚙ Admin</button>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span>ABA</span>
+      <small>Sistema de Gestão — Clínica de Terapias</small>
     </div>
-  </div>
-  <div class="content">
-
-  <!-- ══ DASHBOARD ══ -->
-  <div class="pg on" id="pg-dashboard">
-    <div class="grid g4">
-      <div class="card"><div class="c-h"><span class="c-l">Total Contatos</span><div class="c-ic ib">👤</div></div><div class="c-v" id="d-cont">0</div><div class="c-d up">↑ atualizado ao vivo</div></div>
-      <div class="card"><div class="c-h"><span class="c-l">Alunos Ativos</span><div class="c-ic ig">🎓</div></div><div class="c-v" id="d-alun">0</div><div class="c-d up">↑ do banco de dados</div></div>
-      <div class="card"><div class="c-h"><span class="c-l">Chats Abertos</span><div class="c-ic iy">💬</div></div><div class="c-v" id="d-chat">5</div><div class="c-d dn">↓ 3 sem resposta</div></div>
-      <div class="card"><div class="c-h"><span class="c-l">Receita Mensal</span><div class="c-ic ib">💰</div></div><div class="c-v" id="d-rev">R$0</div><div class="c-d up">↑ calculado automaticamente</div></div>
+    <h2>Acesse sua conta</h2>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"/>
     </div>
-    <div class="chart-wrap">
-      <div class="sh"><span class="sh-t">Atendimentos por Mês</span><span class="tag tp">2025</span></div>
-      <div class="chart-bars" id="chart">
-        <div class="cb-w"><div class="cb" data-h="55" style="height:0%"></div><span class="cb-l">Jan</span></div>
-        <div class="cb-w"><div class="cb" data-h="70" style="height:0%"></div><span class="cb-l">Fev</span></div>
-        <div class="cb-w"><div class="cb" data-h="45" style="height:0%"></div><span class="cb-l">Mar</span></div>
-        <div class="cb-w"><div class="cb" data-h="82" style="height:0%"></div><span class="cb-l">Abr</span></div>
-        <div class="cb-w"><div class="cb" data-h="63" style="height:0%"></div><span class="cb-l">Mai</span></div>
-        <div class="cb-w"><div class="cb" data-h="95" style="height:0%"></div><span class="cb-l">Jun</span></div>
-        <div class="cb-w"><div class="cb" data-h="78" style="height:0%"></div><span class="cb-l">Jul</span></div>
-        <div class="cb-w"><div class="cb" data-h="88" style="height:0%"></div><span class="cb-l">Ago</span></div>
-        <div class="cb-w"><div class="cb" data-h="67" style="height:0%"></div><span class="cb-l">Set</span></div>
-        <div class="cb-w"><div class="cb" data-h="74" style="height:0%"></div><span class="cb-l">Out</span></div>
-        <div class="cb-w"><div class="cb" data-h="52" style="height:0%"></div><span class="cb-l">Nov</span></div>
-        <div class="cb-w"><div class="cb" data-h="38" style="height:0%"></div><span class="cb-l">Dez</span></div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-login" id="btn-login">Entrar</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name">ABA</div>
+      <div class="brand-sub">Clínica de Terapias</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sb-avatar">?</div>
+      <div class="user-info">
+        <div class="user-nome" id="sb-nome">Carregando…</div>
+        <div class="user-role" id="sb-role">–</div>
       </div>
     </div>
-    <div class="tw">
-      <div style="padding:13px 15px 0"><span class="sh-t">Atividades Recentes</span></div>
-      <table><thead><tr><th>Nome</th><th>Evento</th><th>Origem</th><th>Horário</th><th>Status</th></tr></thead>
-      <tbody id="dash-recentes"></tbody></table>
+    <nav>
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" data-page="dashboard"><span class="icon">📊</span>Dashboard</div>
+      <div class="nav-item" data-page="agenda"><span class="icon">📅</span>Agenda</div>
+      <div class="nav-section">Clínica</div>
+      <div class="nav-item" data-page="pacientes"><span class="icon">🧑‍⚕️</span>Pacientes</div>
+      <div class="nav-item" data-page="turmas"><span class="icon">👥</span>Turmas</div>
+      <div class="nav-section">Comunicação</div>
+      <div class="nav-item" data-page="chat"><span class="icon">💬</span>Chat Interno</div>
+      <div class="nav-item" data-page="whatsapp"><span class="icon">📱</span>WhatsApp</div>
+      <div class="nav-section">Gestão</div>
+      <div class="nav-item" data-page="financeiro"><span class="icon">💰</span>Financeiro</div>
+      <div class="nav-item admin-only" data-page="usuarios" style="display:none"><span class="icon">⚙️</span>Usuários</div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="btn-logout">Sair</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- ══ CAPTAÇÃO ══ -->
-  <div class="pg" id="pg-captacao">
-    <div class="sh"><span class="sh-t">Funil de Captação</span><button class="btn bp" onclick="openM('lead',null)">＋ Novo Lead</button></div>
-    <div class="kan" id="kanban"></div>
-  </div>
+  <main id="main">
+    <div class="topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <span class="topbar-date" id="topbar-date"></span>
+    </div>
+    <div class="page-content">
 
-  <!-- ══ CHAT ══ -->
-  <div class="pg" id="pg-chat">
-    <div class="wa-root">
-      <!-- ── Painel Esquerdo ── -->
-      <div class="wa-left">
-        <div class="wa-lhd">
-          <div class="wa-av" style="width:40px;height:40px;font-size:14px;background:#2a3942;cursor:pointer" id="wa-my-av">AK</div>
-          <div style="flex:1"></div>
-          <button class="wa-ic-btn" title="Nova conversa" onclick="openM('nova-conversa',null)" style="font-size:20px">✏</button>
-          <button class="wa-ic-btn" id="wa-connect-btn" onclick="openQR()" title="Conectar WhatsApp">📱</button>
-          <button class="wa-ic-btn" id="wa-disconnect-btn" onclick="waLogout()" title="Desconectar" style="display:none;color:#ef4444">⏻</button>
+      <!-- DASHBOARD -->
+      <section class="section active" id="page-dashboard">
+        <div class="admin-panel" id="admin-logins-panel" style="display:none">
+          <h3>🔐 Histórico de Acessos — Admin Master</h3>
+          <table><thead><tr><th>Usuário</th><th>Papel</th><th>IP</th><th>Data/Hora</th></tr></thead>
+          <tbody id="login-history-body"></tbody></table>
         </div>
-        <div class="wa-stbar" id="wa-status-bar" style="background:#1a2026;border-bottom:1px solid #2a3942">
-          <div id="wa-led" style="width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0"></div>
-          <span id="wa-status-txt" style="color:#8696a0">Desconectado</span>
-          <span id="wa-phone-txt" style="color:#00a884;margin-left:auto;font-weight:600"></span>
+        <div class="cards-row">
+          <div class="card card-stat"><div class="icon-wrap">📅</div><div class="label">Sessões hoje</div><div class="value" id="d-sessoes">–</div><div class="sub">agendadas</div></div>
+          <div class="card card-stat"><div class="icon-wrap">✅</div><div class="label">Realizadas</div><div class="value" id="d-realizadas">–</div><div class="sub">hoje</div></div>
+          <div class="card card-stat"><div class="icon-wrap">🧑‍⚕️</div><div class="label">Pacientes ativos</div><div class="value" id="d-pacientes">–</div><div class="sub">cadastrados</div></div>
+          <div class="card card-stat"><div class="icon-wrap">💰</div><div class="label">Receita do mês</div><div class="value" id="d-receita">–</div><div class="sub">recebido</div></div>
         </div>
-        <div class="wa-srch-wrap">
-          <div class="wa-srch-i">
-            <span style="color:#8696a0;font-size:14px">🔍</span>
-            <input type="text" placeholder="Buscar ou começar nova conversa" oninput="filterChats(this.value)"/>
-          </div>
+        <div class="chart-row">
+          <div class="chart-card"><h4>Sessões da semana</h4><canvas id="chart-sessoes" height="180"></canvas></div>
+          <div class="chart-card"><h4>Próximas sessões hoje</h4><div class="sessions-list" id="sessions-today-list"></div></div>
         </div>
-        <div class="wa-list" id="cl-list"></div>
-        <button class="wa-fab" onclick="openM('nova-conversa',null)" title="Nova conversa">✏</button>
-      </div>
-      <!-- ── Painel Direito ── -->
-      <div class="wa-right">
-        <!-- Tela vazia -->
-        <div class="wa-empty" id="wa-empty-screen">
-          <div style="font-size:72px;opacity:.15;margin-bottom:24px">💬</div>
-          <h2 style="font-size:28px;font-weight:300;color:#e9edef;margin-bottom:10px">ABA Edu Chat</h2>
-          <p style="font-size:14px;color:#8696a0;max-width:360px;line-height:1.7">Envie e receba mensagens reais do WhatsApp pelo sistema. Selecione uma conversa ou inicie uma nova.</p>
-          <button style="margin-top:22px;padding:10px 28px;background:#00a884;border:none;border-radius:24px;color:#111b21;font-size:14px;font-weight:700;cursor:pointer" onclick="openM('nova-conversa',null)">✏ Nova Conversa</button>
+      </section>
+
+      <!-- PACIENTES -->
+      <section class="section" id="page-pacientes">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Pacientes</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-paciente')">+ Novo paciente</button></div>
+          <table><thead><tr><th>Nome</th><th>Responsável</th><th>Telefone</th><th>Diagnóstico</th><th>Status</th><th></th></tr></thead>
+          <tbody id="pacientes-body"></tbody></table>
         </div>
-        <!-- Chat ativo -->
-        <div id="wa-chat-panel" style="display:none;flex-direction:column;height:100%">
-          <div class="wa-rhd">
-            <div class="wa-av" style="width:40px;height:40px;font-size:14px" id="cav">?</div>
-            <div class="wa-rhd-info">
-              <div class="wa-rhd-nm" id="cnm">—</div>
-              <div class="wa-rhd-st" id="cst">—</div>
+      </section>
+
+      <!-- TURMAS -->
+      <section class="section" id="page-turmas">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Turmas / Grupos</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-turma')">+ Nova turma</button></div>
+          <table><thead><tr><th>Nome</th><th>Terapeuta</th><th>Status</th><th></th></tr></thead>
+          <tbody id="turmas-body"></tbody></table>
+        </div>
+      </section>
+
+      <!-- AGENDA -->
+      <section class="section" id="page-agenda">
+        <div class="cal-nav">
+          <button class="btn btn-secondary btn-sm" onclick="calPrev()">‹</button>
+          <h3 id="cal-month-label"></h3>
+          <button class="btn btn-secondary btn-sm" onclick="calNext()">›</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-sessao')" style="margin-left:auto">+ Nova sessão</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="table-wrap" style="margin-top:16px">
+          <div class="table-head"><h3>Sessões do mês</h3></div>
+          <table><thead><tr><th>Data/Hora</th><th>Paciente</th><th>Terapeuta</th><th>Status</th><th></th></tr></thead>
+          <tbody id="sessoes-body"></tbody></table>
+        </div>
+      </section>
+
+      <!-- CHAT INTERNO -->
+      <section class="section" id="page-chat">
+        <div class="chat-layout">
+          <div class="chat-contacts" id="chat-contacts-list"></div>
+          <div class="chat-window">
+            <div class="chat-window-header" id="chat-window-title">Selecione um contato</div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-bar">
+              <input type="text" id="chat-input" placeholder="Mensagem…" onkeydown="if(event.key==='Enter')sendInternalMsg()"/>
+              <button class="btn btn-primary btn-sm" onclick="sendInternalMsg()">Enviar</button>
             </div>
-            <div style="display:flex;gap:4px">
-              <button class="wa-ic-btn" onclick="openM('aluno',null)" title="Matricular" style="font-size:13px;color:#00a884">+ Matricular</button>
-              <button class="wa-ic-btn">⋮</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- WHATSAPP -->
+      <section class="section" id="page-whatsapp">
+        <div class="chat-layout">
+          <div class="chat-contacts" id="wa-contacts-list"></div>
+          <div class="chat-window">
+            <div class="chat-window-header">
+              <span id="wa-status-badge">⚪ Desconectado</span>
+              <button class="btn btn-secondary btn-sm" id="wa-connect-btn" onclick="waConnect()">Conectar</button>
+            </div>
+            <div class="chat-messages" id="wa-messages"></div>
+            <div class="chat-input-bar">
+              <input type="text" id="wa-input" placeholder="Mensagem…" onkeydown="if(event.key==='Enter')sendWaMsg()"/>
+              <button class="btn btn-primary btn-sm" onclick="sendWaMsg()">Enviar</button>
             </div>
           </div>
-          <div class="wa-msgs" id="msgs"></div>
-          <div id="typing" style="font-size:12px;color:#8696a0;padding:2px 16px;min-height:16px;background:#0b141a"></div>
-          <div class="wa-foot">
-            <button class="wa-ic-btn" style="flex-shrink:0">😊</button>
-            <textarea class="wa-inp" id="minput" rows="1" placeholder="Digite uma mensagem" onkeydown="sendMsg(event)"></textarea>
-            <button class="wa-send-btn" onclick="sendMsg({key:'Enter'})">➤</button>
+        </div>
+        <div id="wa-qr-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:14px;padding:30px;text-align:center">
+            <h3 style="margin-bottom:16px">Escanear QR Code</h3>
+            <img id="wa-qr-img" src="" alt="QR" style="width:220px;height:220px"/>
+            <p style="margin-top:12px;font-size:.82rem;color:var(--text-muted)">Abra o WhatsApp → Aparelhos Conectados → Conectar</p>
+            <button class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="document.getElementById('wa-qr-overlay').style.display='none'">Fechar</button>
           </div>
         </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section class="section" id="page-financeiro">
+        <div class="fin-summary">
+          <div class="fin-card receita"><div class="fc-label">Receita do mês</div><div class="fc-value" id="fin-receita">R$ 0,00</div></div>
+          <div class="fin-card despesa"><div class="fc-label">Despesas do mês</div><div class="fc-value" id="fin-despesa">R$ 0,00</div></div>
+          <div class="fin-card saldo"><div class="fc-label">Saldo</div><div class="fc-value" id="fin-saldo">R$ 0,00</div></div>
+        </div>
+        <div class="chart-row" style="margin-bottom:20px">
+          <div class="chart-card"><h4>Receita × Despesa (6 meses)</h4><canvas id="chart-fin" height="180"></canvas></div>
+          <div class="chart-card"><h4>Distribuição do mês</h4><canvas id="chart-fin-donut" height="180"></canvas></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head"><h3>Lançamentos</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-lancamento')">+ Novo lançamento</button></div>
+          <table><thead><tr><th>Data</th><th>Descrição</th><th>Paciente</th><th>Tipo</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+          <tbody id="lancamentos-body"></tbody></table>
+        </div>
+      </section>
+
+      <!-- USUÁRIOS -->
+      <section class="section" id="page-usuarios">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Usuários</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-usuario')">+ Novo usuário</button></div>
+          <table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th></th></tr></thead>
+          <tbody id="usuarios-body"></tbody></table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-paciente" style="display:none" onclick="closeModalOutside(event,'modal-paciente')">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-pac-title">Novo Paciente</h3><button class="modal-close" onclick="closeModal('modal-paciente')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field"><label>Nome completo</label><input type="text" id="pac-nome"/></div>
+        <div class="form-field"><label>Data de Nascimento</label><input type="date" id="pac-dn"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Responsável</label><input type="text" id="pac-resp"/></div>
+        <div class="form-field"><label>Telefone</label><input type="tel" id="pac-tel"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>E-mail</label><input type="email" id="pac-email"/></div>
+        <div class="form-field"><label>Diagnóstico</label><input type="text" id="pac-diag"/></div>
+      </div>
+      <div class="form-row single"><div class="form-field"><label>Observações</label><textarea id="pac-obs"></textarea></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-paciente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePaciente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-turma" style="display:none" onclick="closeModalOutside(event,'modal-turma')">
+  <div class="modal">
+    <div class="modal-header"><h3>Nova Turma</h3><button class="modal-close" onclick="closeModal('modal-turma')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row single"><div class="form-field"><label>Nome da turma</label><input type="text" id="turma-nome"/></div></div>
+      <div class="form-row single"><div class="form-field"><label>Terapeuta responsável</label><select id="turma-terapeuta"><option value="">Selecionar…</option></select></div></div>
+      <div class="form-row single"><div class="form-field"><label>Descrição</label><textarea id="turma-desc"></textarea></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-turma')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTurma()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-sessao" style="display:none" onclick="closeModalOutside(event,'modal-sessao')">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-ses-title">Nova Sessão</h3><button class="modal-close" onclick="closeModal('modal-sessao')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field"><label>Paciente</label><select id="ses-paciente"><option value="">Selecionar…</option></select></div>
+        <div class="form-field"><label>Terapeuta</label><select id="ses-terapeuta"><option value="">Selecionar…</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Início</label><input type="datetime-local" id="ses-inicio"/></div>
+        <div class="form-field"><label>Fim</label><input type="datetime-local" id="ses-fim"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Status</label>
+          <select id="ses-status"><option value="agendada">Agendada</option><option value="realizada">Realizada</option><option value="falta">Falta</option><option value="cancelada">Cancelada</option></select>
+        </div>
+        <div class="form-field"><label>Turma (opcional)</label><select id="ses-turma"><option value="">–</option></select></div>
+      </div>
+      <div class="form-row single"><div class="form-field"><label>Observações</label><textarea id="ses-obs"></textarea></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-sessao')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSessao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-lancamento" style="display:none" onclick="closeModalOutside(event,'modal-lancamento')">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Lançamento</h3><button class="modal-close" onclick="closeModal('modal-lancamento')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field"><label>Tipo</label><select id="lan-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select></div>
+        <div class="form-field"><label>Valor (R$)</label><input type="number" id="lan-valor" step="0.01" min="0"/></div>
+      </div>
+      <div class="form-row single"><div class="form-field"><label>Descrição</label><input type="text" id="lan-desc"/></div></div>
+      <div class="form-row">
+        <div class="form-field"><label>Paciente (opcional)</label><select id="lan-paciente"><option value="">–</option></select></div>
+        <div class="form-field"><label>Vencimento</label><input type="date" id="lan-venc"/></div>
+      </div>
+      <div class="form-row single"><div class="form-field"><label style="cursor:pointer"><input type="checkbox" id="lan-pago" style="width:auto;margin-right:6px"/>Já pago / recebido</label></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-lancamento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLancamento()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-usuario" style="display:none" onclick="closeModalOutside(event,'modal-usuario')">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Usuário</h3><button class="modal-close" onclick="closeModal('modal-usuario')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row single"><div class="form-field"><label>Nome</label><input type="text" id="usr-nome"/></div></div>
+      <div class="form-row single"><div class="form-field"><label>E-mail</label><input type="email" id="usr-email"/></div></div>
+      <div class="form-row">
+        <div class="form-field"><label>Senha</label><input type="password" id="usr-pass"/></div>
+        <div class="form-field"><label>Papel</label><select id="usr-role"><option value="recepcao">Recepção</option><option value="terapeuta">Terapeuta</option><option value="admin">Admin</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-usuario')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUsuario()">Criar usuário</button>
+    </div>
+  </div>
+</div>
+
+<!-- FICHA PACIENTE -->
+<div class="modal-overlay" id="modal-ficha" style="display:none" onclick="closeModalOutside(event,'modal-ficha')">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 id="ficha-title">Ficha do Paciente</h3><button class="modal-close" onclick="closeModal('modal-ficha')">×</button></div>
+    <div class="modal-body" style="padding-top:0">
+      <div class="tabs">
+        <div class="tab active" onclick="switchFichaTab('dados')">Dados</div>
+        <div class="tab" onclick="switchFichaTab('sessoes')">Sessões</div>
+        <div class="tab" onclick="switchFichaTab('evolucoes')">Evoluções</div>
+        <div class="tab" onclick="switchFichaTab('financeiro')">Financeiro</div>
+      </div>
+      <div class="tab-panel active" id="ficha-tab-dados">
+        <div class="form-row">
+          <div class="form-field"><label>Nome completo</label><input type="text" id="ficha-nome"/></div>
+          <div class="form-field"><label>Data de Nascimento</label><input type="date" id="ficha-dn"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Responsável</label><input type="text" id="ficha-resp"/></div>
+          <div class="form-field"><label>Telefone</label><input type="tel" id="ficha-tel"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>E-mail</label><input type="email" id="ficha-email"/></div>
+          <div class="form-field"><label>Diagnóstico</label><input type="text" id="ficha-diag"/></div>
+        </div>
+        <div class="form-row single"><div class="form-field"><label>Observações</label><textarea id="ficha-obs"></textarea></div></div>
+        <button class="btn btn-primary" onclick="saveFichaDados()">Salvar alterações</button>
+      </div>
+      <div class="tab-panel" id="ficha-tab-sessoes">
+        <table><thead><tr><th>Data/Hora</th><th>Terapeuta</th><th>Status</th><th>Obs.</th></tr></thead>
+        <tbody id="ficha-sessoes-body"></tbody></table>
+      </div>
+      <div class="tab-panel" id="ficha-tab-evolucoes">
+        <div class="form-row single" style="margin-bottom:8px">
+          <div class="form-field"><label>Nova evolução</label><textarea id="ficha-ev-texto" placeholder="Registre a evolução da sessão…"></textarea></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveEvolucao()" style="margin-bottom:16px">Salvar evolução</button>
+        <div id="ficha-evolucoes-list"></div>
+      </div>
+      <div class="tab-panel" id="ficha-tab-financeiro">
+        <table><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody id="ficha-fin-body"></tbody></table>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal: Nova Conversa WhatsApp -->
-  <div class="ov hide" id="ov-nova-conversa">
-    <div class="modal" style="width:420px">
-      <div class="m-h"><div><div class="m-t">✏ Nova Conversa</div><div class="m-sub">Envie uma mensagem para qualquer número</div></div><button class="m-x" onclick="closeM('nova-conversa')">✕</button></div>
-      <div class="m-b">
-        <div class="fg">
-          <label class="fl">Número do WhatsApp</label>
-          <input class="fi" id="nc-num" type="text" placeholder="Ex: 11999887766 (só números, com DDD)"/>
-          <div style="font-size:11px;color:var(--muted);margin-top:5px">Digite o número com DDD sem espaços ou traços</div>
+<!-- TURMA DETALHE -->
+<div class="modal-overlay" id="modal-turma-det" style="display:none" onclick="closeModalOutside(event,'modal-turma-det')">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 id="turma-det-title">Turma</h3><button class="modal-close" onclick="closeModal('modal-turma-det')">×</button></div>
+    <div class="modal-body" style="padding-top:0">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTurmaTab('alunos')">Alunos Matriculados</div>
+        <div class="tab" onclick="switchTurmaTab('presenca')">Registrar Presença</div>
+      </div>
+      <div class="tab-panel active" id="turma-tab-alunos">
+        <div class="form-row" style="margin-bottom:12px;align-items:flex-end">
+          <div class="form-field"><label>Adicionar paciente</label><select id="turma-add-pac"><option value="">Selecionar…</option></select></div>
+          <div class="form-field"><button class="btn btn-primary" style="margin-top:22px" onclick="addMatricula()">Matricular</button></div>
         </div>
-        <div class="fg">
-          <label class="fl">Mensagem</label>
-          <textarea class="fi" id="nc-msg" rows="3" placeholder="Digite a mensagem..."></textarea>
+        <div id="turma-alunos-list"></div>
+      </div>
+      <div class="tab-panel" id="turma-tab-presenca">
+        <div class="form-row" style="margin-bottom:14px">
+          <div class="form-field"><label>Sessão da turma</label><select id="presenca-sessao" onchange="renderPresencaAlunos()"><option value="">Selecionar sessão…</option></select></div>
         </div>
-        <div class="m-ft">
-          <button class="btn bg" onclick="closeM('nova-conversa')">Cancelar</button>
-          <button class="btn bp" onclick="iniciarConversa()">📤 Enviar mensagem</button>
-        </div>
+        <div id="presenca-list"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal QR Code WhatsApp -->
-  <div class="ov hide" id="ov-qr">
-    <div class="modal" style="width:420px;text-align:center">
-      <div class="m-h" style="justify-content:center;padding-top:24px">
-        <div>
-          <div class="m-t" style="font-size:20px">📱 Conectar WhatsApp</div>
-          <div class="m-sub" style="text-align:center;margin-top:4px" id="qr-sub">Gerando QR Code...</div>
-        </div>
-      </div>
-      <div class="m-b" style="padding-top:16px">
-        <!-- QR aguardando -->
-        <div id="qr-waiting" style="padding:30px 0">
-          <div style="font-size:48px;margin-bottom:12px">⏳</div>
-          <div style="color:var(--muted);font-size:13px">Aguardando QR Code do servidor...</div>
-          <div style="color:var(--muted);font-size:12px;margin-top:8px">Certifique-se que o servidor está rodando:<br/><code style="background:var(--s2);padding:4px 8px;border-radius:6px;font-size:12px">npm start</code></div>
-        </div>
-        <!-- QR Code -->
-        <div id="qr-box" style="display:none">
-          <img id="qr-img" src="" alt="QR Code" style="width:240px;height:240px;border-radius:12px;border:4px solid var(--s2)"/>
-          <div style="margin-top:14px;font-size:13px;color:var(--sub);line-height:1.6">
-            1. Abra o <strong>WhatsApp</strong> no celular<br/>
-            2. Toque em <strong>⋮ Mais opções</strong> → <strong>Dispositivos Conectados</strong><br/>
-            3. Toque em <strong>Conectar um dispositivo</strong><br/>
-            4. Aponte a câmera para o QR Code acima
-          </div>
-          <div style="margin-top:12px;font-size:11px;color:var(--muted)">O QR Code expira em 60 segundos</div>
-        </div>
-        <!-- Conectado -->
-        <div id="qr-done" style="display:none;padding:20px 0">
-          <div style="font-size:52px;margin-bottom:12px">✅</div>
-          <div style="font-size:16px;font-weight:800;margin-bottom:6px">WhatsApp Conectado!</div>
-          <div style="color:var(--muted);font-size:13px" id="qr-phone">Número conectado com sucesso</div>
-        </div>
-        <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
-          <button class="btn bg" onclick="closeM('qr')">Fechar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ CONTATOS ══ -->
-  <div class="pg" id="pg-contatos">
-    <div class="sh">
-      <span class="sh-t">Contatos <span style="font-size:13px;color:var(--muted);font-weight:400" id="cnt-c">(0)</span></span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <div class="srch"><span style="color:var(--muted)">🔍</span><input type="text" placeholder="Buscar..." oninput="renderContatos(this.value)"/></div>
-        <select class="fi" style="width:auto;padding:0 10px;height:36px" onchange="renderContatos()">
-          <option value="">Todos</option><option>Matriculado</option><option>Em contato</option><option>Lead</option><option>Pendente</option>
-        </select>
-        <button class="btn bp" onclick="openM('contato',null)">＋ Novo Contato</button>
-      </div>
-    </div>
-    <div class="tw"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Origem</th><th>Status</th><th>Ações</th></tr></thead><tbody id="contatos-tb"></tbody></table></div>
-  </div>
-
-  <!-- ══ ALUNOS ══ -->
-  <div class="pg" id="pg-alunos">
-    <div class="sh"><span class="sh-t">Alunos</span><button class="btn bp" onclick="openM('aluno',null)">＋ Novo Aluno</button></div>
-    <div class="grid g4" id="aluno-stats" style="margin-bottom:14px"></div>
-    <div class="tw">
-      <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
-        <span class="sh-t">Lista de Alunos</span>
-        <div class="srch"><span style="color:var(--muted)">🔍</span><input type="text" placeholder="Buscar aluno..." oninput="renderAlunos(this.value)"/></div>
-      </div>
-      <table><thead><tr><th>Nome</th><th>Turma</th><th>Segmento</th><th>Matrícula</th><th>Status</th><th>Ações</th></tr></thead><tbody id="alunos-tb"></tbody></table>
-    </div>
-  </div>
-
-  <!-- ══ TURMAS ══ -->
-  <div class="pg" id="pg-turmas">
-    <div class="sh"><span class="sh-t">Turmas</span><button class="btn bp" onclick="openM('turma',null)">＋ Nova Turma</button></div>
-    <div id="turmas-grid" class="grid g2" style="margin-top:4px"></div>
-    <div class="empty" id="turmas-empty" style="display:none"><div class="e-ic">📚</div><div class="e-t">Nenhuma turma ainda</div><div class="e-d">Crie sua primeira turma para organizar os alunos.</div><button class="btn bp" onclick="openM('turma',null)">＋ Criar turma</button></div>
-  </div>
-
-  <!-- ══ FINANCEIRO ══ -->
-  <div class="pg" id="pg-financeiro">
-    <div class="sh"><span class="sh-t">Financeiro</span><button class="btn bp" onclick="openM('fin',null)">＋ Novo Lançamento</button></div>
-    <div class="fcards" id="fin-cards"></div>
-    <!-- Gráficos -->
-    <div style="display:grid;grid-template-columns:1fr 300px;gap:14px;margin-top:14px">
-      <div class="card" style="padding:20px">
-        <div class="c-h" style="margin-bottom:16px">
-          <span class="c-l">Receita por Mês</span>
-          <div style="display:flex;gap:6px">
-            <button id="fin-btn-bar" class="btn bp" style="font-size:11px;padding:3px 10px" onclick="setFinView('bar')">Barras</button>
-            <button id="fin-btn-line" class="btn bg" style="font-size:11px;padding:3px 10px" onclick="setFinView('line')">Linha</button>
-          </div>
-        </div>
-        <div style="position:relative;height:230px"><canvas id="fin-chart-main"></canvas></div>
-      </div>
-      <div class="card" style="padding:20px;display:flex;flex-direction:column">
-        <div class="c-h" style="margin-bottom:16px"><span class="c-l">Distribuição</span></div>
-        <div style="position:relative;flex:1;max-height:200px"><canvas id="fin-chart-donut"></canvas></div>
-        <div id="fin-legend" style="margin-top:14px;display:flex;flex-direction:column;gap:8px"></div>
-      </div>
-    </div>
-    <div class="tw" style="margin-top:14px">
-      <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
-        <span class="sh-t">Transações</span>
-        <select class="fi" style="width:auto;padding:0 10px;height:33px;font-size:12px" onchange="renderFin(this.value)">
-          <option value="">Todos</option><option>Pago</option><option>Pendente</option><option>Atrasado</option>
-        </select>
-      </div>
-      <table><thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="fin-tb"></tbody></table>
-    </div>
-  </div>
-
-  <!-- ══ CONFIGURAÇÕES ══ -->
-  <div class="pg" id="pg-config">
-    <div class="sh"><span class="sh-t">⚙ Configurações do Sistema</span></div>
-    <div class="cfg-grid">
-      <div class="cfg-card">
-        <div class="cfg-card-t">🏫 Escola</div>
-        <div class="fg"><label class="fl">Nome da escola</label><input class="fi" id="cfg-name" type="text" oninput="applySettings()"/></div>
-        <div class="fg"><label class="fl">Slogan / Subtítulo</label><input class="fi" id="cfg-slogan" type="text" oninput="applySettings()"/></div>
-        <div class="fg"><label class="fl">Letra do Logo</label><input class="fi" id="cfg-logoic" type="text" maxlength="2" oninput="applySettings()" style="text-transform:uppercase"/></div>
-      </div>
-      <div class="cfg-card">
-        <div class="cfg-card-t">👤 Perfil Admin</div>
-        <div class="fg"><label class="fl">Seu nome</label><input class="fi" id="cfg-user" type="text" oninput="applySettings()"/></div>
-        <div class="fg"><label class="fl">Cargo / Função</label><input class="fi" id="cfg-role" type="text" oninput="applySettings()"/></div>
-        <div class="fg"><label class="fl">Iniciais (avatar)</label><input class="fi" id="cfg-av" type="text" maxlength="2" oninput="applySettings()" style="text-transform:uppercase"/></div>
-      </div>
-      <div class="cfg-card">
-        <div class="cfg-card-t">🎨 Cores e Tema</div>
-        <div class="fg"><label class="fl">Cor de destaque</label>
-          <div class="clr-row" id="clr-row">
-            <div class="clr-dot on" style="background:#2563eb" data-c="#2563eb" onclick="pickClr(this)"></div>
-            <div class="clr-dot" style="background:#7c3aed" data-c="#7c3aed" onclick="pickClr(this)"></div>
-            <div class="clr-dot" style="background:#059669" data-c="#059669" onclick="pickClr(this)"></div>
-            <div class="clr-dot" style="background:#dc2626" data-c="#dc2626" onclick="pickClr(this)"></div>
-            <div class="clr-dot" style="background:#0891b2" data-c="#0891b2" onclick="pickClr(this)"></div>
-            <div class="clr-dot" style="background:#d97706" data-c="#d97706" onclick="pickClr(this)"></div>
-          </div>
-        </div>
-        <div class="fg"><label class="fl">Cor personalizada</label><div style="display:flex;gap:8px"><input class="fi" id="cfg-clr-custom" type="color" style="width:50px;height:36px;padding:2px;cursor:pointer" onchange="setCustomClr(this.value)"/><input class="fi" id="cfg-clr-hex" type="text" placeholder="#2563eb" style="flex:1" oninput="if(this.value.length===7)setCustomClr(this.value)"/></div></div>
-      </div>
-      <div class="cfg-card">
-        <div class="cfg-card-t">🗑 Gerenciar Dados</div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Gerencie os dados armazenados localmente no navegador.</p>
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <button class="btn bp" style="width:100%;justify-content:center" onclick="exportData()">📥 Exportar dados (JSON)</button>
-          <button class="btn bg" style="width:100%;justify-content:center" onclick="openM('setup',null)">🚀 Assistente de configuração</button>
-          <button class="btn br" style="width:100%;justify-content:center" onclick="confirmClear()">⚠ Resetar todos os dados</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- ════════ MODAIS ════════ -->
-<!-- Lead -->
-<div class="ov hide" id="ov-lead"><div class="modal">
-  <div class="m-h"><div><div class="m-t" id="lead-mt">Novo Lead</div><div class="m-sub">Funil de Captação</div></div><button class="m-x" onclick="closeM('lead')">✕</button></div>
-  <div class="m-b">
-    <input type="hidden" id="lead-id"/>
-    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="l-nm" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="l-tel" placeholder="(11) 9 0000-0000"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="l-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option><option>Anúncio</option></select></div><div class="fg"><label class="fl">Etapa</label><select class="fi" id="l-col"><option value="novo">Novo Lead</option><option value="contato">Contato Feito</option><option value="proposta">Proposta Enviada</option><option value="matriculado">Matriculado</option><option value="perdido">Perdido</option></select></div></div>
-    <div class="fg"><label class="fl">Observações</label><textarea class="fi" rows="2" id="l-obs" placeholder="Observações..."></textarea></div>
-    <div class="m-ft"><button class="btn bg" onclick="closeM('lead')">Cancelar</button><button class="btn bp" onclick="saveLead()">Salvar</button></div>
-  </div>
-</div></div>
-
-<!-- Contato -->
-<div class="ov hide" id="ov-contato"><div class="modal">
-  <div class="m-h"><div><div class="m-t" id="cnt-mt">Novo Contato</div><div class="m-sub">Cadastro de contato</div></div><button class="m-x" onclick="closeM('contato')">✕</button></div>
-  <div class="m-b">
-    <input type="hidden" id="cnt-id"/>
-    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="c-nm" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Telefone</label><input class="fi" id="c-tel" placeholder="(11) 9 0000-0000"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Origem</label><select class="fi" id="c-orig"><option>WhatsApp</option><option>Instagram</option><option>Site</option><option>Indicação</option><option>Google</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="c-st"><option>Lead</option><option>Em contato</option><option>Matriculado</option><option>Pendente</option></select></div></div>
-    <div class="m-ft"><button class="btn bg" onclick="closeM('contato')">Cancelar</button><button class="btn bp" onclick="saveContato()">Salvar</button></div>
-  </div>
-</div></div>
-
-<!-- Aluno -->
-<div class="ov hide" id="ov-aluno"><div class="modal">
-  <div class="m-h"><div><div class="m-t" id="aln-mt">Novo Aluno</div><div class="m-sub">Matrícula de aluno</div></div><button class="m-x" onclick="closeM('aluno')">✕</button></div>
-  <div class="m-b">
-    <input type="hidden" id="aln-id"/>
-    <div class="frow"><div class="fg"><label class="fl">Nome</label><input class="fi" id="a-nm" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Responsável</label><input class="fi" id="a-resp" placeholder="Nome do responsável"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="a-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Status</label><select class="fi" id="a-st"><option>Ativo</option><option>Pendente</option><option>Inativo</option></select></div></div>
-    <div class="fg"><label class="fl">Turma</label><select class="fi" id="a-tur"><option>— Sem turma —</option></select></div>
-    <div class="m-ft"><button class="btn bg" onclick="closeM('aluno')">Cancelar</button><button class="btn bp" onclick="saveAluno()">Salvar</button></div>
-  </div>
-</div></div>
-
-<!-- Turma -->
-<div class="ov hide" id="ov-turma"><div class="modal">
-  <div class="m-h"><div><div class="m-t" id="tur-mt">Nova Turma</div><div class="m-sub">Configurar turma</div></div><button class="m-x" onclick="closeM('turma')">✕</button></div>
-  <div class="m-b">
-    <input type="hidden" id="tur-id"/>
-    <div class="fg"><label class="fl">Nome da Turma</label><input class="fi" id="t-nm" placeholder="Ex: ABA Avançado – Manhã"/></div>
-    <div class="frow"><div class="fg"><label class="fl">Segmento</label><select class="fi" id="t-seg"><option>ABA</option><option>Autismo</option><option>Desenvolvimento</option></select></div><div class="fg"><label class="fl">Turno</label><select class="fi" id="t-trn"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Máx. Alunos</label><input class="fi" id="t-max" type="number" placeholder="10" min="1"/></div><div class="fg"><label class="fl">Dias</label><select class="fi" id="t-dias"><option>Seg/Qua/Sex</option><option>Ter/Qui</option><option>Seg a Sex</option><option>Todos os dias</option></select></div></div>
-    <div class="m-ft"><button class="btn bg" onclick="closeM('turma')">Cancelar</button><button class="btn bp" onclick="saveTurma()">Salvar</button></div>
-  </div>
-</div></div>
-
-<!-- Financeiro -->
-<div class="ov hide" id="ov-fin"><div class="modal">
-  <div class="m-h"><div><div class="m-t" id="fin-mt">Novo Lançamento</div><div class="m-sub">Registro financeiro</div></div><button class="m-x" onclick="closeM('fin')">✕</button></div>
-  <div class="m-b">
-    <input type="hidden" id="fin-id"/>
-    <div class="frow"><div class="fg"><label class="fl">Aluno</label><input class="fi" id="f-stu" placeholder="Nome do aluno"/></div><div class="fg"><label class="fl">Valor (R$)</label><input class="fi" id="f-val" type="number" placeholder="380.00" step="0.01"/></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Descrição</label><input class="fi" id="f-desc" placeholder="Ex: Mensalidade Jun/2025"/></div><div class="fg"><label class="fl">Vencimento</label><input class="fi" id="f-due" type="date"/></div></div>
-    <div class="fg"><label class="fl">Status</label><select class="fi" id="f-st"><option>Pendente</option><option>Pago</option><option>Atrasado</option></select></div>
-    <div class="m-ft"><button class="btn bg" onclick="closeM('fin')">Cancelar</button><button class="btn bp" onclick="saveFin()">Salvar</button></div>
-  </div>
-</div></div>
-
-<!-- Setup (7 passos) -->
-<div class="ov hide" id="ov-setup"><div class="modal">
-  <div class="m-h"><div><div class="m-t">Assistente de Configuração</div><div class="m-sub" id="setup-sub">Passo 1 de 7</div></div><button class="m-x" onclick="closeM('setup')">✕</button></div>
-  <div class="m-b">
-    <div class="stps" id="setup-stps"></div>
-    <div class="stp on" id="stp1"><div class="s-t">Sobre sua escola</div><div class="s-d">Informe os dados básicos.</div><div class="fg"><label class="fl">Nome</label><input class="fi" type="text" placeholder="Instituto ABA Brasil"/></div><div class="frow"><div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" placeholder="00.000.000/0001-00"/></div><div class="fg"><label class="fl">Cidade/UF</label><input class="fi" type="text" placeholder="São Paulo – SP"/></div></div></div>
-    <div class="stp" id="stp2"><div class="s-t">Segmento</div><div class="s-d">Foco principal da escola.</div><div class="opt-g"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🧠</div><div class="opt-l">ABA / Autismo</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🌱</div><div class="opt-l">Desenv. Infantil</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">📚</div><div class="opt-l">Reforço Escolar</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎵</div><div class="opt-l">Música / Artes</div></div></div></div>
-    <div class="stp" id="stp3"><div class="s-t">Tamanho</div><div class="s-d">Quantos alunos você atende?</div><div class="opt-g"><div class="opt" onclick="selOpt(this)"><div class="opt-ic">😊</div><div class="opt-l">Até 50</div></div><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🏫</div><div class="opt-l">50 – 200</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎓</div><div class="opt-l">200 – 500</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">🎉</div><div class="opt-l">Mais de 500</div></div></div></div>
-    <div class="stp" id="stp4"><div class="s-t">WhatsApp</div><div class="s-d">Conecte o WhatsApp Business.</div><div class="fg"><label class="fl">Número</label><input class="fi" type="text" placeholder="+55 (11) 9 0000-0000"/></div><div class="fg"><label class="fl">Token (opcional)</label><input class="fi" type="text" placeholder="Deixe em branco para depois"/></div><div class="info-box">🔒 Dados criptografados e seguros.</div></div>
-    <div class="stp" id="stp5"><div class="s-t">Equipe</div><div class="s-d">Adicione membros da equipe.</div><div class="fg"><label class="fl">Nome</label><input class="fi" type="text" placeholder="Nome completo"/></div><div class="frow"><div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" placeholder="email@escola.com.br"/></div><div class="fg"><label class="fl">Função</label><select class="fi"><option>Atendimento</option><option>Terapeuta</option><option>Coordenador</option><option>Financeiro</option><option>Admin</option></select></div></div></div>
-    <div class="stp" id="stp6"><div class="s-t">Visual</div><div class="s-d">Tema e cor do sistema.</div><div class="opt-g" style="margin-bottom:14px"><div class="opt on" onclick="selOpt(this)"><div class="opt-ic">🌙</div><div class="opt-l">Dark</div></div><div class="opt" onclick="selOpt(this)"><div class="opt-ic">☀️</div><div class="opt-l">Light (em breve)</div></div></div><div class="clr-row"><div class="clr-dot on" style="background:#2563eb" onclick="pickClr(this)" data-c="#2563eb"></div><div class="clr-dot" style="background:#7c3aed" onclick="pickClr(this)" data-c="#7c3aed"></div><div class="clr-dot" style="background:#059669" onclick="pickClr(this)" data-c="#059669"></div><div class="clr-dot" style="background:#dc2626" onclick="pickClr(this)" data-c="#dc2626"></div></div></div>
-    <div class="stp" id="stp7"><div style="text-align:center;padding:12px 0"><div style="font-size:52px;margin-bottom:11px">🎉</div><div class="s-t" style="font-size:19px">Tudo pronto!</div><div class="s-d">Seu sistema ABA Edu está configurado.</div><div style="background:var(--s2);border-radius:9px;padding:13px;margin-top:13px;text-align:left;font-size:13px;display:flex;flex-direction:column;gap:6px"><div>✅ Escola configurada</div><div>✅ Segmento definido</div><div>✅ Tema ativo</div><div>🔔 WhatsApp: pendente</div></div></div></div>
-    <div class="s-ft"><button class="btn bg" id="setup-prev" onclick="setupStep(-1)">← Anterior</button><div style="font-size:12px;color:var(--muted)" id="setup-ctr">1 / 7</div><button class="btn bp" id="setup-next" onclick="setupStep(1)">Próximo →</button></div>
-  </div>
-</div></div>
-
-<!-- Confirm delete -->
-<div class="ov hide" id="ov-confirm"><div class="confirm-modal">
-  <div class="cf-ic">⚠️</div>
-  <div class="cf-t">Confirmar exclusão</div>
-  <div class="cf-d" id="cf-msg">Tem certeza? Esta ação não pode ser desfeita.</div>
-  <div class="cf-ft"><button class="btn bg" onclick="closeM('confirm')">Cancelar</button><button class="btn br" id="cf-ok">Excluir</button></div>
-</div></div>
-
-<!-- Toasts -->
-<div id="toasts"></div>
+<div id="toast"></div>
 
 <script>
-// ════════════════════════════════
-//  STATE & PERSISTENCE
-// ════════════════════════════════
-const DEF = {
-  settings:{name:'ABA Edu',logoic:'A',slogan:'Sistema de Gestão Educacional',user:'Arthur Kalleb',role:'Administrador',av:'AK',accent:'#2563eb'},
-  contatos:[
-    {id:1,name:'Maria Silva',phone:'(11) 9 8765-4321',origin:'Instagram',status:'Em contato',dt:'Hoje, 14:32'},
-    {id:2,name:'João Pedro',phone:'(21) 9 9988-7766',origin:'WhatsApp',status:'Matriculado',dt:'Hoje, 14:05'},
-    {id:3,name:'Ana Beatriz',phone:'(31) 9 7654-3210',origin:'Site',status:'Lead',dt:'Hoje, 13:50'},
-    {id:4,name:'Carlos Melo',phone:'(41) 9 8899-0011',origin:'Indicação',status:'Matriculado',dt:'Ontem'},
-    {id:5,name:'Fernanda Lima',phone:'(11) 9 3344-5566',origin:'Anúncio',status:'Pendente',dt:'Ontem'},
-    {id:6,name:'Rafael Torres',phone:'(21) 9 6677-8899',origin:'Google',status:'Lead',dt:'2 dias atrás'}
-  ],
-  alunos:[
-    {id:1,name:'João Pedro Alves',resp:'Maria Alves',segment:'ABA',turma:'ABA Avançado – Manhã',status:'Ativo',dt:'Jan/2025'},
-    {id:2,name:'Larissa Mendonça',resp:'Carlos Mendonça',segment:'Autismo',turma:'Autismo Básico – Tarde',status:'Ativo',dt:'Mar/2025'},
-    {id:3,name:'Eduardo Neves',resp:'Fátima Neves',segment:'Desenvolvimento',turma:'Desenvolvimento – Manhã',status:'Pendente',dt:'Fev/2025'},
-    {id:4,name:'Isabela Cruz',resp:'Paulo Cruz',segment:'ABA',turma:'ABA Básico – Tarde',status:'Ativo',dt:'Abr/2025'},
-    {id:5,name:'Vinicius Lopes',resp:'Sandra Lopes',segment:'Autismo',turma:'Autismo Avançado – Manhã',status:'Inativo',dt:'Jan/2025'}
-  ],
-  turmas:[
-    {id:1,name:'ABA Avançado – Manhã',segment:'ABA',shift:'Manhã',max:10,days:'Seg/Qua/Sex'},
-    {id:2,name:'ABA Básico – Tarde',segment:'ABA',shift:'Tarde',max:8,days:'Ter/Qui'},
-    {id:3,name:'Autismo Básico – Tarde',segment:'Autismo',shift:'Tarde',max:6,days:'Seg/Qua/Sex'},
-    {id:4,name:'Autismo Avançado – Manhã',segment:'Autismo',shift:'Manhã',max:6,days:'Ter/Qui'},
-    {id:5,name:'Desenvolvimento – Manhã',segment:'Desenvolvimento',shift:'Manhã',max:12,days:'Seg a Sex'}
-  ],
-  financeiro:[
-    {id:1,student:'João Pedro Alves',desc:'Mensalidade Jun/2025',due:'05/06/2025',value:380,status:'Pago'},
-    {id:2,student:'Larissa Mendonça',desc:'Mensalidade Jun/2025',due:'05/06/2025',value:420,status:'Pago'},
-    {id:3,student:'Eduardo Neves',desc:'Mensalidade Jun/2025',due:'10/06/2025',value:350,status:'Pendente'},
-    {id:4,student:'Isabela Cruz',desc:'Mensalidade Mai/2025',due:'05/05/2025',value:380,status:'Atrasado'},
-    {id:5,student:'Vinicius Lopes',desc:'Mensalidade Jun/2025',due:'15/06/2025',value:400,status:'Pendente'}
-  ],
-  kanban:{
-    novo:[{id:1,name:'Luísa Campos',phone:'(11) 9 8765-4321',origin:'Instagram',obs:''},{id:2,name:'Rafael Torres',phone:'(21) 9 9988-7766',origin:'WhatsApp',obs:''},{id:3,name:'Patrícia Nunes',phone:'(31) 9 7654-3210',origin:'Site',obs:''},{id:4,name:'Diego Santos',phone:'(41) 9 8899-0011',origin:'Indicação',obs:''}],
-    contato:[{id:5,name:'Mariana Costa',phone:'(11) 9 3344-5566',origin:'Anúncio',obs:''},{id:6,name:'Bruno Alves',phone:'(21) 9 6677-8899',origin:'WhatsApp',obs:''},{id:7,name:'Camila Rocha',phone:'(31) 9 1122-3344',origin:'Site',obs:''}],
-    proposta:[{id:8,name:'Felipe Mendes',phone:'(41) 9 5566-7788',origin:'E-mail',obs:''},{id:9,name:'Juliana Freitas',phone:'(11) 9 9900-1122',origin:'Instagram',obs:''},{id:10,name:'Roberto Lima',phone:'(21) 9 8877-6655',origin:'Indicação',obs:''}],
-    matriculado:[{id:11,name:'Aline Ferreira',phone:'(31) 9 4455-6677',origin:'WhatsApp',obs:''},{id:12,name:'Thiago Ribeiro',phone:'(41) 9 3322-1100',origin:'Site',obs:''}],
-    perdido:[{id:13,name:'Vanessa Pinto',phone:'(11) 9 2211-3344',origin:'Instagram',obs:'Sem interesse'}]
+// ─── SUPABASE CONFIG ─────────────────────────────────────────
+// Substitua com suas credenciais do painel do Supabase
+const SUPABASE_URL = 'https://hrbinyrtzvsvdcvevvsb.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_rLwJQJfdehVCnX8BxEZgKg_jNlwzqtM'
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const ADMIN_MASTER = 'cronograma@universoaba.com.br'
+
+// ─── ESTADO ──────────────────────────────────────────────────
+let currentUser    = null
+let currentProfile = null
+let calYear        = new Date().getFullYear()
+let calMonth       = new Date().getMonth()
+let allPacientes   = []
+let allSessoes     = []
+let allTurmas      = []
+let allProfiles    = []
+let editingId      = null
+let chatTarget     = null
+let waCurrentJid   = null
+const socket       = io()
+
+// ─── BOOT ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})
+  checkSession()
+  document.querySelectorAll('.nav-item[data-page]').forEach(item =>
+    item.addEventListener('click', () => navigateTo(item.dataset.page)))
+  setupWA()
+})
+
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (session) await enterApp(session.user)
+}
+
+// ─── AUTH ────────────────────────────────────────────────────
+document.getElementById('btn-login').addEventListener('click', doLogin)
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin() })
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim()
+  const pass  = document.getElementById('login-pass').value
+  const btn   = document.getElementById('btn-login')
+  const err   = document.getElementById('login-error')
+  err.style.display = 'none'
+  if (!email || !pass) { showLoginErr('Preencha e-mail e senha.'); return }
+  btn.innerHTML = '<span class="loader"></span>'
+  btn.disabled  = true
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass })
+  if (error) { btn.textContent='Entrar'; btn.disabled=false; showLoginErr('E-mail ou senha inválidos.'); return }
+  await enterApp(data.user)
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-error')
+  el.textContent = msg; el.style.display = 'block'
+}
+
+async function enterApp(user) {
+  currentUser = user
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single()
+  currentProfile = profile
+  // Registrar acesso
+  sb.from('login_history').insert({
+    user_id: user.id, email: user.email,
+    nome: profile?.nome||user.email, role: profile?.role||'recepcao',
+    user_agent: navigator.userAgent.slice(0,200)
+  }).then(() => {})
+
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'flex'
+
+  const nome = profile?.nome || user.email
+  const role = profile?.role || 'recepcao'
+  document.getElementById('sb-nome').textContent = nome
+  document.getElementById('sb-role').textContent = roleLabel(role)
+  document.getElementById('sb-avatar').textContent = nome[0].toUpperCase()
+
+  if (role === 'admin') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.removeProperty('display'))
   }
-};
-let S = JSON.parse(localStorage.getItem('aba-state')) || JSON.parse(JSON.stringify(DEF));
-const save=()=>localStorage.setItem('aba-state',JSON.stringify(S));
-const uid=()=>Date.now()+Math.random().toString(36).slice(2);
+  if (user.email === ADMIN_MASTER) {
+    document.getElementById('admin-logins-panel').style.display = 'block'
+    loadLoginHistory()
+  }
 
-// ════════════════════════════════
-//  RENDER HELPERS
-// ════════════════════════════════
-const avColors=['ava','avb','avc','avd','ave','avf'];
-const av=(nm,sz=30)=>{const ini=(nm||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const cl=avColors[nm.charCodeAt(0)%avColors.length];return `<div class="av ${cl}" style="width:${sz}px;height:${sz}px;font-size:${sz*.35}px;flex-shrink:0">${ini}</div>`};
-const stMap={Matriculado:'tg',Pago:'tg',Ativo:'tg','Em contato':'tb',Lead:'tp',Pendente:'ty',Aguardando:'tm',Atrasado:'tr',Inativo:'tr',Perdido:'tm'};
-const stTag=(st)=>`<span class="tag ${stMap[st]||'tm'}">${st}</span>`;
-const segMap={ABA:'tp',Autismo:'tg',Desenvolvimento:'tb'};
-const fmtVal=(v)=>`R$ ${parseFloat(v).toFixed(2).replace('.',',')}`;
-
-// ════════════════════════════════
-//  NAVIGATION
-// ════════════════════════════════
-const pgTitles={dashboard:'Dashboard',captacao:'Captação',chat:'Chat Ao Vivo',contatos:'Contatos',alunos:'Alunos',turmas:'Turmas',financeiro:'Financeiro',config:'⚙ Configurações'};
-function go(pg,el){
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('pg-'+pg).classList.add('on');
-  if(el) el.classList.add('on');
-  document.getElementById('ptitle').textContent=pgTitles[pg]||pg;
-  document.getElementById('gsrch').value='';
-  if(pg==='dashboard'){updateDash();setTimeout(animChart,120);}
-  if(pg==='captacao') renderKanban();
-  if(pg==='contatos') renderContatos();
-  if(pg==='alunos'){renderAlunos();renderAlunoStats();}
-  if(pg==='turmas') renderTurmas();
-  if(pg==='financeiro') renderFin();
-  if(pg==='config') loadCfg();
+  await loadAllData()
+  renderDashboard()
 }
-function toggleSB(){document.getElementById('sb').classList.toggle('col')}
 
-// ════════════════════════════════
-//  DASHBOARD
-// ════════════════════════════════
-function updateDash(){
-  document.getElementById('d-cont').textContent=S.contatos.length;
-  document.getElementById('d-alun').textContent=S.alunos.filter(a=>a.status==='Ativo').length;
-  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+parseFloat(f.value),0);
-  document.getElementById('d-rev').textContent='R$'+Math.round(paid/1000)+'k';
-  const rows=S.contatos.slice(-5).reverse().map(c=>`<tr><td><div style="display:flex;align-items:center;gap:8px">${av(c.name,26)}${c.name}</div></td><td>Contato adicionado</td><td>${c.origin}</td><td>${c.dt||'Recente'}</td><td>${stTag(c.status)}</td></tr>`).join('');
-  document.getElementById('dash-recentes').innerHTML=rows||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Nenhuma atividade</td></tr>';
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await sb.auth.signOut(); location.reload()
+})
+
+// ─── DATA ─────────────────────────────────────────────────────
+async function loadAllData() {
+  const [pac, ses, tur, prof] = await Promise.all([
+    sb.from('pacientes').select('*').order('nome'),
+    sb.from('sessoes').select('*').order('inicio'),
+    sb.from('turmas').select('*').order('nome'),
+    sb.from('profiles').select('*').order('nome'),
+  ])
+  allPacientes = pac.data || []
+  allSessoes   = ses.data || []
+  allTurmas    = tur.data || []
+  allProfiles  = prof.data || []
 }
-function animChart(){document.querySelectorAll('.cb').forEach(b=>b.style.height=b.dataset.h+'%')}
 
-// ════════════════════════════════
-//  KANBAN
-// ════════════════════════════════
-const kanCols=[
-  {id:'novo',label:'Novo Lead',color:'#ef4444'},
-  {id:'contato',label:'Contato Feito',color:'#f59e0b'},
-  {id:'proposta',label:'Proposta Enviada',color:'#38bdf8'},
-  {id:'matriculado',label:'Matriculado',color:'#10b981'},
-  {id:'perdido',label:'Perdido',color:'#64748b'}
-];
-let dragId=null,dragCol=null;
-function renderKanban(){
-  const total=Object.values(S.kanban).reduce((s,a)=>s+a.length,0);
-  document.getElementById('nb-cap').textContent=total;
-  document.getElementById('kanban').innerHTML=kanCols.map(col=>`
-    <div class="kc" data-col="${col.id}" ondragover="kOver(event,this)" ondrop="kDrop(event,'${col.id}')" ondragleave="this.classList.remove('dov')">
-      <div class="kc-h"><span class="kc-t"><span class="kc-dot" style="background:${col.color}"></span>${col.label}</span><span class="kc-n">${S.kanban[col.id].length}</span></div>
-      <div id="kcards-${col.id}">
-        ${(S.kanban[col.id]||[]).map(k=>kanCard(k,col.id)).join('')}
+// ─── NAVIGATION ──────────────────────────────────────────────
+function navigateTo(page) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'))
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  const nav = document.querySelector(`.nav-item[data-page="${page}"]`)
+  if (nav) nav.classList.add('active')
+  const section = document.getElementById(`page-${page}`)
+  if (section) section.classList.add('active')
+  const titles = {dashboard:'Dashboard',pacientes:'Pacientes',turmas:'Turmas',agenda:'Agenda',chat:'Chat Interno',whatsapp:'WhatsApp',financeiro:'Financeiro',usuarios:'Usuários'}
+  document.getElementById('page-title').textContent = titles[page] || page
+  if (page==='pacientes')  renderPacientes()
+  if (page==='turmas')     renderTurmas()
+  if (page==='agenda')     renderAgenda()
+  if (page==='financeiro') renderFinanceiro()
+  if (page==='usuarios')   renderUsuarios()
+  if (page==='chat')       renderChat()
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────
+function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0]
+  const sesHoje = allSessoes.filter(s => s.inicio?.startsWith(today))
+  document.getElementById('d-sessoes').textContent    = sesHoje.length
+  document.getElementById('d-realizadas').textContent = sesHoje.filter(s=>s.status==='realizada').length
+  document.getElementById('d-pacientes').textContent  = allPacientes.filter(p=>p.ativo).length
+
+  const now = new Date()
+  const mes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  sb.from('lancamentos').select('tipo,valor,pago').like('created_at',`${mes}%`).then(({data}) => {
+    const rec = (data||[]).filter(l=>l.tipo==='receita'&&l.pago).reduce((s,l)=>s+Number(l.valor),0)
+    document.getElementById('d-receita').textContent = 'R$ '+rec.toLocaleString('pt-BR',{minimumFractionDigits:2})
+  })
+
+  const list = document.getElementById('sessions-today-list')
+  if (!sesHoje.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">Nenhuma sessão hoje.</p>'
+  } else {
+    list.innerHTML = sesHoje.slice(0,8).map(s => {
+      const pac = allPacientes.find(p=>p.id===s.paciente_id)
+      const ter = allProfiles.find(p=>p.id===s.terapeuta_id)
+      const h   = s.inicio ? new Date(s.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''
+      return `<div class="session-item"><span class="session-time">${h}</span>
+        <div class="session-info"><div class="session-name">${pac?.nome||'Paciente'}</div><div class="session-ter">${ter?.nome||''}</div></div>
+        ${statusBadge(s.status)}</div>`
+    }).join('')
+  }
+
+  const ctx = document.getElementById('chart-sessoes')
+  if (ctx) {
+    const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+    const counts = Array(7).fill(0)
+    const d = new Date()
+    allSessoes.forEach(s => {
+      if (!s.inicio) return
+      const sd = new Date(s.inicio)
+      const diff = Math.round((sd - d)/(1000*60*60*24))
+      if (diff >= -3 && diff <= 3) counts[sd.getDay()]++
+    })
+    if (window._chartSessoes) window._chartSessoes.destroy()
+    window._chartSessoes = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:dias, datasets:[{label:'Sessões',data:counts,backgroundColor:'#0d9488',borderRadius:6}] },
+      options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}, responsive:true }
+    })
+  }
+}
+
+async function loadLoginHistory() {
+  const { data } = await sb.from('login_history').select('*').order('created_at',{ascending:false}).limit(50)
+  const tbody = document.getElementById('login-history-body')
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted)">Nenhum acesso registrado.</td></tr>'; return }
+  tbody.innerHTML = data.map(l => `<tr>
+    <td><strong>${l.nome||''}</strong><br><small style="color:var(--text-muted)">${l.email||''}</small></td>
+    <td><span class="badge badge-blue">${l.role||''}</span></td>
+    <td>${l.ip||'–'}</td>
+    <td>${l.created_at ? new Date(l.created_at).toLocaleString('pt-BR') : ''}</td>
+  </tr>`).join('')
+}
+
+// ─── PACIENTES ───────────────────────────────────────────────
+function renderPacientes() {
+  const tbody = document.getElementById('pacientes-body')
+  if (!allPacientes.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted);padding:20px">Nenhum paciente cadastrado.</td></tr>'
+    return
+  }
+  tbody.innerHTML = allPacientes.map(p => `<tr>
+    <td><strong style="cursor:pointer;color:var(--teal)" onclick="openFicha('${p.id}')">${p.nome}</strong></td><td>${p.responsavel||'–'}</td><td>${p.telefone||'–'}</td>
+    <td>${p.diagnostico||'–'}</td>
+    <td>${p.ativo?'<span class="badge badge-green">Ativo</span>':'<span class="badge badge-gray">Inativo</span>'}</td>
+    <td>
+      <button class="btn btn-secondary btn-sm btn-icon" onclick="editPaciente('${p.id}')">✏️</button>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deletePaciente('${p.id}')">🗑</button>
+    </td></tr>`).join('')
+}
+
+function openModal(id) { editingId=null; document.getElementById(id).style.display='flex' }
+function closeModal(id) { document.getElementById(id).style.display='none'; editingId=null }
+function closeModalOutside(e,id) { if(e.target.id===id) closeModal(id) }
+
+async function savePaciente() {
+  const nome = document.getElementById('pac-nome').value.trim()
+  if (!nome) { toast('Informe o nome.','error'); return }
+  const data = {
+    nome,
+    data_nascimento: document.getElementById('pac-dn').value||null,
+    responsavel: document.getElementById('pac-resp').value.trim(),
+    telefone:    document.getElementById('pac-tel').value.trim(),
+    email:       document.getElementById('pac-email').value.trim(),
+    diagnostico: document.getElementById('pac-diag').value.trim(),
+    observacoes: document.getElementById('pac-obs').value.trim(),
+  }
+  const { error } = editingId
+    ? await sb.from('pacientes').update(data).eq('id',editingId)
+    : await sb.from('pacientes').insert(data)
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  toast('Paciente salvo!','success')
+  closeModal('modal-paciente')
+  clearForm(['pac-nome','pac-dn','pac-resp','pac-tel','pac-email','pac-diag','pac-obs'])
+  const { data: fresh } = await sb.from('pacientes').select('*').order('nome')
+  allPacientes = fresh||[]
+  renderPacientes()
+}
+
+function editPaciente(id) {
+  const p = allPacientes.find(x=>x.id===id)
+  if (!p) return
+  editingId = id
+  document.getElementById('pac-nome').value  = p.nome||''
+  document.getElementById('pac-dn').value    = p.data_nascimento||''
+  document.getElementById('pac-resp').value  = p.responsavel||''
+  document.getElementById('pac-tel').value   = p.telefone||''
+  document.getElementById('pac-email').value = p.email||''
+  document.getElementById('pac-diag').value  = p.diagnostico||''
+  document.getElementById('pac-obs').value   = p.observacoes||''
+  document.getElementById('modal-pac-title').textContent = 'Editar Paciente'
+  document.getElementById('modal-paciente').style.display = 'flex'
+}
+
+async function deletePaciente(id) {
+  if (!confirm('Excluir este paciente?')) return
+  await sb.from('pacientes').delete().eq('id',id)
+  allPacientes = allPacientes.filter(p=>p.id!==id)
+  renderPacientes(); toast('Removido.','success')
+}
+
+// ─── TURMAS ──────────────────────────────────────────────────
+function renderTurmas() {
+  const sel = document.getElementById('turma-terapeuta')
+  const ters = allProfiles.filter(p=>p.role==='terapeuta'||p.role==='admin')
+  sel.innerHTML = '<option value="">Selecionar…</option>'+ters.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('')
+
+  const tbody = document.getElementById('turmas-body')
+  if (!allTurmas.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);padding:20px">Nenhuma turma.</td></tr>'
+    return
+  }
+  tbody.innerHTML = allTurmas.map(t => {
+    const ter = allProfiles.find(p=>p.id===t.terapeuta_id)
+    return `<tr>
+      <td><strong>${t.nome}</strong></td><td>${ter?.nome||'–'}</td>
+      <td>${t.ativa?'<span class="badge badge-green">Ativa</span>':'<span class="badge badge-gray">Inativa</span>'}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="openTurmaDetalhe('${t.id}')" title="Ver alunos e presença">👥</button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteTurma('${t.id}')">🗑</button>
+      </td></tr>`
+  }).join('')
+}
+
+async function saveTurma() {
+  const nome = document.getElementById('turma-nome').value.trim()
+  if (!nome) { toast('Informe o nome.','error'); return }
+  const { error } = await sb.from('turmas').insert({
+    nome, terapeuta_id: document.getElementById('turma-terapeuta').value||null,
+    descricao: document.getElementById('turma-desc').value.trim()
+  })
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  toast('Turma criada!','success'); closeModal('modal-turma')
+  const { data: fresh } = await sb.from('turmas').select('*').order('nome')
+  allTurmas = fresh||[]; renderTurmas()
+}
+
+async function deleteTurma(id) {
+  if (!confirm('Excluir?')) return
+  await sb.from('turmas').delete().eq('id',id)
+  allTurmas = allTurmas.filter(t=>t.id!==id); renderTurmas(); toast('Removido.')
+}
+
+// ─── AGENDA ──────────────────────────────────────────────────
+function renderAgenda() {
+  // preencher selects
+  const ters = allProfiles.filter(p=>p.role==='terapeuta'||p.role==='admin')
+  document.getElementById('ses-paciente').innerHTML = '<option value="">Selecionar…</option>'+allPacientes.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')
+  document.getElementById('ses-terapeuta').innerHTML = '<option value="">Selecionar…</option>'+ters.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('')
+  document.getElementById('ses-turma').innerHTML = '<option value="">–</option>'+allTurmas.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('')
+  renderCalendar(); renderSessoesTable()
+}
+
+function renderCalendar() {
+  const label = new Date(calYear,calMonth).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})
+  document.getElementById('cal-month-label').textContent = label.charAt(0).toUpperCase()+label.slice(1)
+  const grid  = document.getElementById('cal-grid')
+  const dias  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+  let html    = dias.map(d=>`<div class="cal-day-head">${d}</div>`).join('')
+  const first = new Date(calYear,calMonth,1).getDay()
+  const total = new Date(calYear,calMonth+1,0).getDate()
+  const prev  = new Date(calYear,calMonth,0).getDate()
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  for (let i=0; i<first; i++)
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${prev-first+i+1}</div></div>`
+
+  for (let d=1; d<=total; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const isT = ds===todayStr
+    const daySes = allSessoes.filter(s=>s.inicio?.startsWith(ds))
+    const evs = daySes.slice(0,3).map(s => {
+      const pac = allPacientes.find(p=>p.id===s.paciente_id)
+      return `<div class="cal-event status-${s.status}">${pac?.nome?.split(' ')[0]||'Sessão'}</div>`
+    }).join('')+(daySes.length>3?`<div class="cal-event" style="background:#6b7280">+${daySes.length-3}</div>`:'')
+    html += `<div class="cal-day${isT?' today':''}"><div class="cal-day-num">${d}</div>${evs}</div>`
+  }
+  const rem = 42-first-total
+  for (let i=1; i<=rem; i++)
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`
+  grid.innerHTML = html
+}
+
+function calPrev() { calMonth===0?(calMonth=11,calYear--):calMonth--; renderCalendar(); renderSessoesTable() }
+function calNext() { calMonth===11?(calMonth=0,calYear++):calMonth++; renderCalendar(); renderSessoesTable() }
+
+function renderSessoesTable() {
+  const mes   = `${calYear}-${String(calMonth+1).padStart(2,'0')}`
+  const tbody = document.getElementById('sessoes-body')
+  const sesMes = allSessoes.filter(s=>s.inicio?.startsWith(mes))
+  if (!sesMes.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted);padding:20px">Nenhuma sessão neste mês.</td></tr>'
+    return
+  }
+  tbody.innerHTML = sesMes.map(s => {
+    const pac = allPacientes.find(p=>p.id===s.paciente_id)
+    const ter = allProfiles.find(p=>p.id===s.terapeuta_id)
+    const dt  = s.inicio ? new Date(s.inicio).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
+    return `<tr><td>${dt}</td><td>${pac?.nome||'–'}</td><td>${ter?.nome||'–'}</td><td>${statusBadge(s.status)}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="editSessao('${s.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSessao('${s.id}')">🗑</button>
+      </td></tr>`
+  }).join('')
+}
+
+async function saveSessao() {
+  const inicio = document.getElementById('ses-inicio').value
+  const pacId  = document.getElementById('ses-paciente').value
+  if (!inicio||!pacId) { toast('Informe paciente e início.','error'); return }
+  const data = {
+    paciente_id:  pacId,
+    terapeuta_id: document.getElementById('ses-terapeuta').value||null,
+    turma_id:     document.getElementById('ses-turma').value||null,
+    inicio, fim:  document.getElementById('ses-fim').value||null,
+    status:       document.getElementById('ses-status').value,
+    observacoes:  document.getElementById('ses-obs').value.trim(),
+  }
+  const { error } = editingId
+    ? await sb.from('sessoes').update(data).eq('id',editingId)
+    : await sb.from('sessoes').insert(data)
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  toast('Sessão salva!','success'); closeModal('modal-sessao')
+  const { data: fresh } = await sb.from('sessoes').select('*').order('inicio')
+  allSessoes = fresh||[]; renderAgenda(); renderDashboard()
+}
+
+function editSessao(id) {
+  const s = allSessoes.find(x=>x.id===id)
+  if (!s) return
+  editingId = id
+  renderAgenda()
+  document.getElementById('ses-paciente').value  = s.paciente_id||''
+  document.getElementById('ses-terapeuta').value = s.terapeuta_id||''
+  document.getElementById('ses-turma').value     = s.turma_id||''
+  document.getElementById('ses-inicio').value    = s.inicio?s.inicio.slice(0,16):''
+  document.getElementById('ses-fim').value       = s.fim?s.fim.slice(0,16):''
+  document.getElementById('ses-status').value    = s.status||'agendada'
+  document.getElementById('ses-obs').value       = s.observacoes||''
+  document.getElementById('modal-ses-title').textContent = 'Editar Sessão'
+  document.getElementById('modal-sessao').style.display = 'flex'
+}
+
+async function deleteSessao(id) {
+  if (!confirm('Excluir?')) return
+  await sb.from('sessoes').delete().eq('id',id)
+  allSessoes = allSessoes.filter(s=>s.id!==id); renderAgenda(); renderDashboard(); toast('Removido.')
+}
+
+// ─── FINANCEIRO ──────────────────────────────────────────────
+async function renderFinanceiro() {
+  renderFinChart()
+  document.getElementById('lan-paciente').innerHTML =
+    '<option value="">–</option>'+allPacientes.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')
+
+  const now = new Date()
+  const mes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  const { data: lans } = await sb.from('lancamentos').select('*, pacientes(nome)').order('created_at',{ascending:false})
+  const all  = lans||[]
+  const mesD = all.filter(l=>l.created_at?.startsWith(mes))
+  const rec  = mesD.filter(l=>l.tipo==='receita').reduce((s,l)=>s+Number(l.valor),0)
+  const desp = mesD.filter(l=>l.tipo==='despesa').reduce((s,l)=>s+Number(l.valor),0)
+  const fmt  = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2})
+  document.getElementById('fin-receita').textContent = fmt(rec)
+  document.getElementById('fin-despesa').textContent = fmt(desp)
+  document.getElementById('fin-saldo').textContent   = fmt(rec-desp)
+
+  const tbody = document.getElementById('lancamentos-body')
+  if (!all.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-muted);padding:20px">Nenhum lançamento.</td></tr>'
+    return
+  }
+  tbody.innerHTML = all.map(l => `<tr>
+    <td>${l.created_at?new Date(l.created_at).toLocaleDateString('pt-BR'):''}</td>
+    <td>${l.descricao}</td><td>${l.pacientes?.nome||'–'}</td>
+    <td><span class="badge ${l.tipo==='receita'?'badge-green':'badge-red'}">${l.tipo}</span></td>
+    <td><strong>R$ ${Number(l.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+    <td>${l.pago?'<span class="badge badge-green">Pago</span>':'<span class="badge badge-yellow">Pendente</span>'}</td>
+    <td><button class="btn btn-danger btn-sm btn-icon" onclick="deleteLancamento('${l.id}')">🗑</button></td></tr>`).join('')
+}
+
+async function saveLancamento() {
+  const desc  = document.getElementById('lan-desc').value.trim()
+  const valor = parseFloat(document.getElementById('lan-valor').value)
+  if (!desc||isNaN(valor)) { toast('Preencha descrição e valor.','error'); return }
+  const { error } = await sb.from('lancamentos').insert({
+    tipo:        document.getElementById('lan-tipo').value,
+    descricao:   desc, valor,
+    paciente_id: document.getElementById('lan-paciente').value||null,
+    vencimento:  document.getElementById('lan-venc').value||null,
+    pago:        document.getElementById('lan-pago').checked,
+  })
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  toast('Salvo!','success'); closeModal('modal-lancamento'); renderFinanceiro()
+}
+
+async function deleteLancamento(id) {
+  if (!confirm('Excluir?')) return
+  await sb.from('lancamentos').delete().eq('id',id); renderFinanceiro(); toast('Removido.')
+}
+
+// ─── USUÁRIOS ────────────────────────────────────────────────
+async function renderUsuarios() {
+  const { data } = await sb.from('profiles').select('*').order('nome')
+  const tbody = document.getElementById('usuarios-body')
+  if (!data?.length) { tbody.innerHTML='<tr><td colspan="5">Nenhum usuário.</td></tr>'; return }
+  tbody.innerHTML = data.map(u=>`<tr>
+    <td><strong>${u.nome}</strong></td><td>${u.email}</td>
+    <td><span class="badge badge-blue">${roleLabel(u.role)}</span></td>
+    <td>${u.ativo?'<span class="badge badge-green">Ativo</span>':'<span class="badge badge-gray">Inativo</span>'}</td>
+    <td><button class="btn btn-secondary btn-sm btn-icon" onclick="toggleUsuario('${u.id}',${u.ativo})">${u.ativo?'🔒':'🔓'}</button></td></tr>`).join('')
+}
+
+async function saveUsuario() {
+  const nome  = document.getElementById('usr-nome').value.trim()
+  const email = document.getElementById('usr-email').value.trim()
+  const pass  = document.getElementById('usr-pass').value
+  const role  = document.getElementById('usr-role').value
+  if (!nome||!email||!pass) { toast('Preencha todos os campos.','error'); return }
+  const res  = await fetch('/api/create-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,password:pass,role})})
+  const json = await res.json()
+  if (!res.ok) { toast(json.error||'Erro.','error'); return }
+  toast('Usuário criado!','success'); closeModal('modal-usuario'); renderUsuarios()
+}
+
+async function toggleUsuario(id, ativo) {
+  await sb.from('profiles').update({ativo:!ativo}).eq('id',id); renderUsuarios(); toast(ativo?'Desativado.':'Ativado.')
+}
+
+// ─── CHAT INTERNO ────────────────────────────────────────────
+function renderChat() {
+  const list   = document.getElementById('chat-contacts-list')
+  const outros = allProfiles.filter(p=>p.id!==currentProfile?.id)
+  list.innerHTML = outros.length
+    ? outros.map(p=>`<div class="chat-contact-item${chatTarget?.id===p.id?' active':''}" onclick='selectChatContact(${JSON.stringify(p)})'>
+        <div class="chat-contact-name">${p.nome}</div>
+        <div class="chat-contact-last">${roleLabel(p.role)}</div>
+      </div>`).join('')
+    : '<p style="padding:16px;color:var(--text-muted);font-size:.82rem">Nenhum colega.</p>'
+}
+
+function selectChatContact(profile) {
+  chatTarget = profile
+  document.getElementById('chat-window-title').textContent = profile.nome
+  renderChatMessages(); renderChat()
+}
+
+async function renderChatMessages() {
+  if (!chatTarget) return
+  const me = currentProfile?.id
+  const { data } = await sb.from('chat_messages')
+    .select('*')
+    .or(`and(from_id.eq.${me},to_id.eq.${chatTarget.id}),and(from_id.eq.${chatTarget.id},to_id.eq.${me})`)
+    .order('created_at')
+  const c = document.getElementById('chat-messages')
+  c.innerHTML = (data||[]).map(m=>{
+    const sent = m.from_id===me
+    const ts   = m.created_at?new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
+    return `<div class="msg ${sent?'sent':'recv'}">${m.texto}<div class="msg-time">${ts}</div></div>`
+  }).join('')
+  c.scrollTop = c.scrollHeight
+}
+
+async function sendInternalMsg() {
+  if (!chatTarget) return
+  const input = document.getElementById('chat-input')
+  const texto = input.value.trim()
+  if (!texto) return
+  input.value = ''
+  const { error } = await sb.from('chat_messages').insert({from_id:currentProfile?.id,to_id:chatTarget.id,texto})
+  if (!error) renderChatMessages()
+}
+
+// ─── WHATSAPP ────────────────────────────────────────────────
+function setupWA() {
+  socket.on('wa-status', ({ connected, phone, waiting }) => {
+    const badge = document.getElementById('wa-status-badge')
+    const btn   = document.getElementById('wa-connect-btn')
+    if (!badge) return
+    if (connected) { badge.textContent=`🟢 Conectado: +${phone}`; if(btn) btn.style.display='none' }
+    else if (waiting) { badge.textContent='🟡 Aguardando QR…' }
+    else { badge.textContent='⚪ Desconectado'; if(btn) btn.style.display='' }
+  })
+  socket.on('qr', data => {
+    const ov = document.getElementById('wa-qr-overlay')
+    const im = document.getElementById('wa-qr-img')
+    if (ov&&im) { im.src=data; ov.style.display='flex' }
+  })
+  socket.on('qr-done', () => {
+    const ov = document.getElementById('wa-qr-overlay')
+    if (ov) ov.style.display='none'
+  })
+  socket.on('contacts-update', contacts => {
+    const list = document.getElementById('wa-contacts-list')
+    if (!list) return
+    list.innerHTML = contacts.map(c=>`<div class="chat-contact-item${waCurrentJid===c.jid?' active':''}"
+      onclick="selectWaContact('${c.jid}','${(c.name||'').replace(/'/g,'\\'')}')">
+      <div class="chat-contact-name">${c.name||c.phone}</div>
+      <div class="chat-contact-last">${c.lastMsg||'–'}</div></div>`).join('')
+  })
+  socket.on('new-message', ({ jid }) => { if (waCurrentJid===jid) socket.emit('get-messages',jid) })
+  socket.on('message-sent', ({ jid }) => { if (waCurrentJid===jid) socket.emit('get-messages',jid) })
+  socket.on('message-history', ({ jid, messages: msgs }) => {
+    if (jid!==waCurrentJid) return
+    const c = document.getElementById('wa-messages')
+    c.innerHTML = msgs.map(m=>`<div class="msg ${m.rx?'recv':'sent'}">${m.text}<div class="msg-time">${m.ts||''}</div></div>`).join('')
+    c.scrollTop = c.scrollHeight
+  })
+}
+
+function waConnect() { socket.emit('wa-connect-request'); toast('Aguardando QR Code…') }
+
+function selectWaContact(jid, name) {
+  waCurrentJid = jid
+  document.getElementById('wa-window-title').querySelector
+    ? (document.getElementById('wa-window-title').childNodes[0].textContent = `📱 ${name}`)
+    : null
+  socket.emit('get-messages', jid)
+}
+
+function sendWaMsg() {
+  if (!waCurrentJid) return
+  const input = document.getElementById('wa-input')
+  const text  = input.value.trim()
+  if (!text) return
+  input.value = ''
+  socket.emit('send-message', { jid:waCurrentJid, text })
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+// ─── FICHA PACIENTE ──────────────────────────────────────────
+let fichaId = null
+
+function openFicha(id) {
+  const p = allPacientes.find(x=>x.id===id)
+  if (!p) return
+  fichaId = id
+  document.getElementById('ficha-title').textContent = p.nome
+  document.getElementById('ficha-nome').value  = p.nome||''
+  document.getElementById('ficha-dn').value    = p.data_nascimento||''
+  document.getElementById('ficha-resp').value  = p.responsavel||''
+  document.getElementById('ficha-tel').value   = p.telefone||''
+  document.getElementById('ficha-email').value = p.email||''
+  document.getElementById('ficha-diag').value  = p.diagnostico||''
+  document.getElementById('ficha-obs').value   = p.observacoes||''
+  // Reset tabs
+  document.querySelectorAll('#modal-ficha .tab').forEach((t,i)=>t.classList.toggle('active',i===0))
+  document.querySelectorAll('#modal-ficha .tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0))
+  document.getElementById('modal-ficha').style.display = 'flex'
+}
+
+function switchFichaTab(tab) {
+  const tabs = ['dados','sessoes','evolucoes','financeiro']
+  document.querySelectorAll('#modal-ficha .tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab))
+  document.querySelectorAll('#modal-ficha .tab-panel').forEach(p=>p.classList.remove('active'))
+  document.getElementById(`ficha-tab-${tab}`).classList.add('active')
+  if (tab==='sessoes')   loadFichaSessoes()
+  if (tab==='evolucoes') loadFichaEvolucoes()
+  if (tab==='financeiro') loadFichaFinanceiro()
+}
+
+async function saveFichaDados() {
+  const data = {
+    nome:            document.getElementById('ficha-nome').value.trim(),
+    data_nascimento: document.getElementById('ficha-dn').value||null,
+    responsavel:     document.getElementById('ficha-resp').value.trim(),
+    telefone:        document.getElementById('ficha-tel').value.trim(),
+    email:           document.getElementById('ficha-email').value.trim(),
+    diagnostico:     document.getElementById('ficha-diag').value.trim(),
+    observacoes:     document.getElementById('ficha-obs').value.trim(),
+  }
+  const { error } = await sb.from('pacientes').update(data).eq('id',fichaId)
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  const { data: fresh } = await sb.from('pacientes').select('*').order('nome')
+  allPacientes = fresh||[]
+  renderPacientes()
+  document.getElementById('ficha-title').textContent = data.nome
+  toast('Dados atualizados!','success')
+}
+
+function loadFichaSessoes() {
+  const tbody = document.getElementById('ficha-sessoes-body')
+  const ses = allSessoes.filter(s=>s.paciente_id===fichaId)
+  if (!ses.length) { tbody.innerHTML='<tr><td colspan="4" style="color:var(--text-muted);padding:16px">Nenhuma sessão registrada.</td></tr>'; return }
+  tbody.innerHTML = ses.sort((a,b)=>new Date(b.inicio)-new Date(a.inicio)).map(s=>{
+    const ter = allProfiles.find(p=>p.id===s.terapeuta_id)
+    const dt  = s.inicio ? new Date(s.inicio).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''
+    return `<tr><td>${dt}</td><td>${ter?.nome||'–'}</td><td>${statusBadge(s.status)}</td>
+      <td style="font-size:.8rem;color:var(--text-muted);max-width:200px">${s.observacoes||''}</td></tr>`
+  }).join('')
+}
+
+async function loadFichaEvolucoes() {
+  const { data } = await sb.from('evolucoes')
+    .select('*, profiles(nome)')
+    .eq('paciente_id',fichaId)
+    .order('created_at',{ascending:false})
+  const list = document.getElementById('ficha-evolucoes-list')
+  if (!data?.length) { list.innerHTML='<p style="color:var(--text-muted);font-size:.85rem">Nenhuma evolução registrada.</p>'; return }
+  list.innerHTML = data.map(e=>`
+    <div class="evolucao-item">
+      <div class="ev-meta">${e.created_at?new Date(e.created_at).toLocaleString('pt-BR'):''} — ${e.profiles?.nome||'Terapeuta'}</div>
+      <div class="ev-text">${e.texto}</div>
+    </div>`).join('')
+}
+
+async function saveEvolucao() {
+  const texto = document.getElementById('ficha-ev-texto').value.trim()
+  if (!texto) { toast('Escreva a evolução.','error'); return }
+  const { error } = await sb.from('evolucoes').insert({
+    paciente_id: fichaId, terapeuta_id: currentProfile?.id, texto
+  })
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  document.getElementById('ficha-ev-texto').value = ''
+  toast('Evolução registrada!','success')
+  loadFichaEvolucoes()
+}
+
+async function loadFichaFinanceiro() {
+  const { data } = await sb.from('lancamentos').select('*').eq('paciente_id',fichaId).order('created_at',{ascending:false})
+  const tbody = document.getElementById('ficha-fin-body')
+  if (!data?.length) { tbody.innerHTML='<tr><td colspan="4" style="color:var(--text-muted);padding:16px">Nenhum lançamento.</td></tr>'; return }
+  tbody.innerHTML = data.map(l=>`<tr>
+    <td>${l.created_at?new Date(l.created_at).toLocaleDateString('pt-BR'):''}</td>
+    <td>${l.descricao}</td>
+    <td><strong style="color:${l.tipo==='receita'?'var(--success)':'var(--danger)'}">R$ ${Number(l.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+    <td>${l.pago?'<span class="badge badge-green">Pago</span>':'<span class="badge badge-yellow">Pendente</span>'}</td></tr>`).join('')
+}
+
+// ─── TURMA DETALHE ───────────────────────────────────────────
+let turmaDet = null
+
+async function openTurmaDetalhe(id) {
+  const t = allTurmas.find(x=>x.id===id)
+  if (!t) return
+  turmaDet = t
+  document.getElementById('turma-det-title').textContent = t.nome
+  document.querySelectorAll('#modal-turma-det .tab').forEach((t,i)=>t.classList.toggle('active',i===0))
+  document.querySelectorAll('#modal-turma-det .tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0))
+  document.getElementById('modal-turma-det').style.display = 'flex'
+  loadTurmaAlunos()
+}
+
+function switchTurmaTab(tab) {
+  document.querySelectorAll('#modal-turma-det .tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='alunos'?0:1)))
+  document.querySelectorAll('#modal-turma-det .tab-panel').forEach(p=>p.classList.remove('active'))
+  document.getElementById(`turma-tab-${tab}`).classList.add('active')
+  if (tab==='alunos')   loadTurmaAlunos()
+  if (tab==='presenca') loadPresenca()
+}
+
+async function loadTurmaAlunos() {
+  const { data: mats } = await sb.from('matriculas')
+    .select('*, pacientes(id,nome)')
+    .eq('turma_id',turmaDet.id).eq('ativa',true)
+
+  const enrolled = (mats||[]).map(m=>m.pacientes?.id)
+  const sel = document.getElementById('turma-add-pac')
+  sel.innerHTML = '<option value="">Selecionar…</option>'+
+    allPacientes.filter(p=>!enrolled.includes(p.id)).map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')
+
+  const list = document.getElementById('turma-alunos-list')
+  if (!mats?.length) { list.innerHTML='<p style="color:var(--text-muted);font-size:.85rem;padding:8px 0">Nenhum aluno matriculado.</p>'; return }
+  list.innerHTML = mats.map(m=>`
+    <div class="aluno-item">
+      <span style="font-size:.88rem;font-weight:600">${m.pacientes?.nome||'–'}</span>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="removeMatricula(${m.id})">✕ Remover</button>
+    </div>`).join('')
+}
+
+async function addMatricula() {
+  const pacId = document.getElementById('turma-add-pac').value
+  if (!pacId) { toast('Selecione um paciente.','error'); return }
+  const { error } = await sb.from('matriculas').insert({paciente_id:pacId,turma_id:turmaDet.id})
+  if (error) { toast('Erro: '+error.message,'error'); return }
+  toast('Aluno matriculado!','success')
+  loadTurmaAlunos()
+}
+
+async function removeMatricula(id) {
+  if (!confirm('Remover aluno da turma?')) return
+  await sb.from('matriculas').update({ativa:false}).eq('id',id)
+  toast('Removido.','success')
+  loadTurmaAlunos()
+}
+
+async function loadPresenca() {
+  const sesTurma = allSessoes.filter(s=>s.turma_id===turmaDet.id)
+  const sel = document.getElementById('presenca-sessao')
+  sel.innerHTML = '<option value="">Selecionar sessão…</option>'+
+    sesTurma.map(s=>{
+      const dt = s.inicio?new Date(s.inicio).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''
+      return `<option value="${s.id}">${dt} — ${statusBadge(s.status).replace(/<[^>]+>/g,'')}</option>`
+    }).join('')
+  document.getElementById('presenca-list').innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">Selecione uma sessão acima.</p>'
+}
+
+async function renderPresencaAlunos() {
+  const sesId = document.getElementById('presenca-sessao').value
+  const list  = document.getElementById('presenca-list')
+  if (!sesId) { list.innerHTML='<p style="color:var(--text-muted);font-size:.85rem">Selecione uma sessão acima.</p>'; return }
+
+  const { data: mats } = await sb.from('matriculas')
+    .select('*, pacientes(id,nome)').eq('turma_id',turmaDet.id).eq('ativa',true)
+  const { data: presencas } = await sb.from('sessoes').select('observacoes').eq('id',sesId).single()
+
+  list.innerHTML = (mats||[]).map(m=>`
+    <div class="presenca-item">
+      <span style="font-size:.88rem;font-weight:600">${m.pacientes?.nome||'–'}</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" style="background:#d1fae5;color:#065f46" onclick="marcaPresenca('${sesId}','${m.pacientes?.id}','presente',this)">✓ Presente</button>
+        <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b" onclick="marcaPresenca('${sesId}','${m.pacientes?.id}','falta',this)">✗ Falta</button>
       </div>
-      <button class="kan-add" onclick="openM('lead',null);document.getElementById('l-col').value='${col.id}'">＋ Adicionar</button>
-    </div>`).join('');
+    </div>`).join('')||'<p style="color:var(--text-muted)">Nenhum aluno matriculado.</p>'
 }
-function kanCard(k,col){
-  const origColors={WhatsApp:'rgba(37,99,235,.12)',Instagram:'rgba(239,68,68,.12)',Site:'rgba(16,185,129,.12)',Indicação:'rgba(245,158,11,.12)',Email:'rgba(56,189,248,.12)',Google:'rgba(16,185,129,.12)',Anúncio:'rgba(239,68,68,.12)',default:'rgba(100,116,139,.12)'};
-  const origTxt={WhatsApp:'#60a5fa',Instagram:'#f87171',Site:'#34d399',Indicação:'#fbbf24',Email:'#7dd3fc',Google:'#34d399',Anúncio:'#f87171',default:'#94a3b8'};
-  const bg=origColors[k.origin]||origColors.default;
-  const tc=origTxt[k.origin]||origTxt.default;
-  return `<div class="kk" draggable="true" data-id="${k.id}" data-col="${col}" ondragstart="kStart(event,'${k.id}','${col}')">
-    <div class="kk-acts"><button class="btn bg" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();openM('lead',${k.id})">✏</button><button class="btn br" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();delLead('${k.id}','${col}')">🗑</button></div>
-    <div class="kk-nm">${k.name}</div>
-    <div class="kk-inf">📱 ${k.phone||'—'}</div>
-    <span class="kk-tag" style="background:${bg};color:${tc}">${k.origin}</span>
-  </div>`;
-}
-function kStart(e,id,col){dragId=id;dragCol=col;setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('drag')},0)}
-document.addEventListener('dragend',()=>{document.querySelectorAll('.kk.drag').forEach(e=>e.classList.remove('drag'))});
-function kOver(e,el){e.preventDefault();el.classList.add('dov')}
-function kDrop(e,toCol){
-  e.preventDefault();document.querySelectorAll('.kc').forEach(c=>c.classList.remove('dov'));
-  if(!dragId||dragCol===toCol)return;
-  const idx=S.kanban[dragCol].findIndex(k=>k.id==dragId);
-  if(idx<0)return;
-  const item=S.kanban[dragCol].splice(idx,1)[0];
-  S.kanban[toCol].push(item);
-  save();renderKanban();
-  toast('Movido para "'+kanCols.find(c=>c.id===toCol)?.label+'"','b');
-  dragId=null;dragCol=null;
-}
-function delLead(id,col){
-  confirm2(`Excluir o lead?`,()=>{
-    S.kanban[col]=S.kanban[col].filter(k=>k.id!=id);
-    save();renderKanban();toast('Lead removido','r');
-  });
-}
-function openM(type,id){
-  if(type==='lead'){
-    const item=id?Object.values(S.kanban).flat().find(k=>k.id==id):null;
-    document.getElementById('lead-mt').textContent=item?'Editar Lead':'Novo Lead';
-    document.getElementById('lead-id').value=item?item.id:'';
-    document.getElementById('l-nm').value=item?item.name:'';
-    document.getElementById('l-tel').value=item?item.phone:'';
-    document.getElementById('l-orig').value=item?item.origin:'WhatsApp';
-    document.getElementById('l-obs').value=item?item.obs:'';
-    if(item){const col=Object.entries(S.kanban).find(([,arr])=>arr.some(k=>k.id==id));if(col)document.getElementById('l-col').value=col[0];}
+
+async function marcaPresenca(sesId, pacId, status, btn) {
+  // Atualiza status da sessão individual do paciente (cria sub-sessão se necessário)
+  const { error } = await sb.from('sessoes').update({status}).eq('id',sesId)
+  if (!error) {
+    toast(status==='presente'?'Presença marcada!':'Falta registrada.','success')
+    btn.closest('.presenca-item').style.background = status==='presente'?'#d1fae5':'#fee2e2'
   }
-  if(type==='contato'){
-    const item=id?S.contatos.find(c=>c.id==id):null;
-    document.getElementById('cnt-mt').textContent=item?'Editar Contato':'Novo Contato';
-    document.getElementById('cnt-id').value=item?item.id:'';
-    document.getElementById('c-nm').value=item?item.name:'';
-    document.getElementById('c-tel').value=item?item.phone:'';
-    document.getElementById('c-orig').value=item?item.origin:'WhatsApp';
-    document.getElementById('c-st').value=item?item.status:'Lead';
-  }
-  if(type==='aluno'){
-    const item=id?S.alunos.find(a=>a.id==id):null;
-    document.getElementById('aln-mt').textContent=item?'Editar Aluno':'Novo Aluno';
-    document.getElementById('aln-id').value=item?item.id:'';
-    document.getElementById('a-nm').value=item?item.name:'';
-    document.getElementById('a-resp').value=item?item.resp:'';
-    document.getElementById('a-seg').value=item?item.segment:'ABA';
-    document.getElementById('a-st').value=item?item.status:'Ativo';
-    const turSel=document.getElementById('a-tur');
-    turSel.innerHTML='<option>— Sem turma —</option>'+S.turmas.map(t=>`<option ${item&&item.turma===t.name?'selected':''}>${t.name}</option>`).join('');
-    if(item)turSel.value=item.turma;
-  }
-  if(type==='turma'){
-    const item=id?S.turmas.find(t=>t.id==id):null;
-    document.getElementById('tur-mt').textContent=item?'Editar Turma':'Nova Turma';
-    document.getElementById('tur-id').value=item?item.id:'';
-    document.getElementById('t-nm').value=item?item.name:'';
-    document.getElementById('t-seg').value=item?item.segment:'ABA';
-    document.getElementById('t-trn').value=item?item.shift:'Manhã';
-    document.getElementById('t-max').value=item?item.max:10;
-    document.getElementById('t-dias').value=item?item.days:'Seg/Qua/Sex';
-  }
-  if(type==='fin'){
-    const item=id?S.financeiro.find(f=>f.id==id):null;
-    document.getElementById('fin-mt').textContent=item?'Editar Lançamento':'Novo Lançamento';
-    document.getElementById('fin-id').value=item?item.id:'';
-    document.getElementById('f-stu').value=item?item.student:'';
-    document.getElementById('f-val').value=item?item.value:'';
-    document.getElementById('f-desc').value=item?item.desc:'';
-    document.getElementById('f-due').value=item?item.due:'';
-    document.getElementById('f-st').value=item?item.status:'Pendente';
-  }
-  if(type==='setup'){curStep=1;document.querySelectorAll('.stp').forEach(s=>s.classList.remove('on'));document.getElementById('stp1').classList.add('on');buildSteps();}
-  document.getElementById('ov-'+type).classList.remove('hide');
-}
-function closeM(t){document.getElementById('ov-'+t).classList.add('hide')}
-
-// ════════════════════════════════
-//  SAVE CRUD
-// ════════════════════════════════
-function saveLead(){
-  const nm=document.getElementById('l-nm').value.trim();
-  if(!nm){toast('Informe o nome','r');return}
-  const id=document.getElementById('lead-id').value;
-  const obj={id:id||uid(),name:nm,phone:document.getElementById('l-tel').value,origin:document.getElementById('l-orig').value,obs:document.getElementById('l-obs').value};
-  const col=document.getElementById('l-col').value;
-  if(id){
-    const oldCol=Object.entries(S.kanban).find(([,arr])=>arr.some(k=>k.id==id));
-    if(oldCol){S.kanban[oldCol[0]]=S.kanban[oldCol[0]].filter(k=>k.id!=id);}
-    S.kanban[col].push(obj);
-  } else {S.kanban[col].push(obj);}
-  save();renderKanban();closeM('lead');toast((id?'Lead atualizado':'Lead adicionado')+'!','g');
-}
-function saveContato(){
-  const nm=document.getElementById('c-nm').value.trim();
-  if(!nm){toast('Informe o nome','r');return}
-  const id=document.getElementById('cnt-id').value;
-  const obj={id:id||uid(),name:nm,phone:document.getElementById('c-tel').value,origin:document.getElementById('c-orig').value,status:document.getElementById('c-st').value,dt:'Agora'};
-  if(id){const i=S.contatos.findIndex(c=>c.id==id);if(i>=0)S.contatos[i]=obj;}
-  else S.contatos.push(obj);
-  save();renderContatos();closeM('contato');toast((id?'Contato atualizado':'Contato salvo')+'!','g');updateDash();
-}
-function saveAluno(){
-  const nm=document.getElementById('a-nm').value.trim();
-  if(!nm){toast('Informe o nome','r');return}
-  const id=document.getElementById('aln-id').value;
-  const now=new Date();
-  const obj={id:id||uid(),name:nm,resp:document.getElementById('a-resp').value,segment:document.getElementById('a-seg').value,turma:document.getElementById('a-tur').value,status:document.getElementById('a-st').value,dt:now.toLocaleDateString('pt-BR',{month:'short',year:'numeric'})};
-  if(id){const i=S.alunos.findIndex(a=>a.id==id);if(i>=0)S.alunos[i]=obj;}
-  else S.alunos.push(obj);
-  save();renderAlunos();renderAlunoStats();closeM('aluno');toast((id?'Aluno atualizado':'Aluno matriculado')+'!','g');updateDash();
-}
-function saveTurma(){
-  const nm=document.getElementById('t-nm').value.trim();
-  if(!nm){toast('Informe o nome da turma','r');return}
-  const id=document.getElementById('tur-id').value;
-  const obj={id:id||uid(),name:nm,segment:document.getElementById('t-seg').value,shift:document.getElementById('t-trn').value,max:document.getElementById('t-max').value||10,days:document.getElementById('t-dias').value};
-  if(id){const i=S.turmas.findIndex(t=>t.id==id);if(i>=0)S.turmas[i]=obj;}
-  else S.turmas.push(obj);
-  save();renderTurmas();closeM('turma');toast((id?'Turma atualizada':'Turma criada')+'!','g');
-}
-function saveFin(){
-  const stu=document.getElementById('f-stu').value.trim();
-  const val=document.getElementById('f-val').value;
-  if(!stu||!val){toast('Preencha aluno e valor','r');return}
-  const id=document.getElementById('fin-id').value;
-  const obj={id:id||uid(),student:stu,value:parseFloat(val),desc:document.getElementById('f-desc').value,due:document.getElementById('f-due').value,status:document.getElementById('f-st').value};
-  if(id){const i=S.financeiro.findIndex(f=>f.id==id);if(i>=0)S.financeiro[i]=obj;}
-  else S.financeiro.push(obj);
-  save();renderFin();closeM('fin');toast((id?'Lançamento atualizado':'Lançamento salvo')+'!','g');updateDash();
 }
 
-// ════════════════════════════════
-//  RENDERS
-// ════════════════════════════════
-function renderContatos(filter=''){
-  const q=(filter||document.querySelector('#pg-contatos .srch input')?.value||'').toLowerCase();
-  const st=document.querySelector('#pg-contatos select')?.value||'';
-  const list=S.contatos.filter(c=>(c.name||'').toLowerCase().includes(q)&&(!st||c.status===st));
-  document.getElementById('cnt-c').textContent=`(${list.length} registros)`;
-  document.getElementById('contatos-tb').innerHTML=list.length?list.map(c=>`
-    <tr>
-      <td><div style="display:flex;align-items:center;gap:8px">${av(c.name,28)}${c.name}</div></td>
-      <td>${c.phone||'—'}</td><td>${c.origin||'—'}</td><td>${stTag(c.status)}</td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn bg" style="padding:4px 9px;font-size:11px" onclick="openM('contato','${c.id}')">✏ Editar</button>
-        <button class="btn br" style="padding:4px 9px;font-size:11px" onclick="delContato('${c.id}')">🗑</button>
-      </div></td>
-    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato encontrado</td></tr>';
-}
-function delContato(id){confirm2('Excluir este contato?',()=>{S.contatos=S.contatos.filter(c=>c.id!=id);save();renderContatos();toast('Contato excluído','r');updateDash();})}
+// ─── GRÁFICOS FINANCEIRO ─────────────────────────────────────
+async function renderFinChart() {
+  const { data } = await sb.from('lancamentos').select('tipo,valor,created_at')
+  if (!data?.length) return
 
-function renderAlunos(filter=''){
-  const q=(filter||document.querySelector('#pg-alunos .srch input')?.value||'').toLowerCase();
-  const list=S.alunos.filter(a=>(a.name||'').toLowerCase().includes(q));
-  document.getElementById('alunos-tb').innerHTML=list.length?list.map(a=>`
-    <tr>
-      <td>${a.name}</td><td>${a.turma||'—'}</td>
-      <td><span class="tag ${segMap[a.segment]||'tm'}">${a.segment}</span></td>
-      <td>${a.dt||'—'}</td><td>${stTag(a.status)}</td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn bg" style="padding:4px 9px;font-size:11px" onclick="openM('aluno','${a.id}')">✏ Editar</button>
-        <button class="btn br" style="padding:4px 9px;font-size:11px" onclick="delAluno('${a.id}')">🗑</button>
-      </div></td>
-    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum aluno encontrado</td></tr>';
-}
-function delAluno(id){confirm2('Excluir este aluno?',()=>{S.alunos=S.alunos.filter(a=>a.id!=id);save();renderAlunos();renderAlunoStats();toast('Aluno excluído','r');updateDash();})}
-
-function renderAlunoStats(){
-  const total=S.alunos.length;
-  const aba=S.alunos.filter(a=>a.segment==='ABA').length;
-  const aut=S.alunos.filter(a=>a.segment==='Autismo').length;
-  const dev=S.alunos.filter(a=>a.segment==='Desenvolvimento').length;
-  document.getElementById('aluno-stats').innerHTML=`
-    <div class="card"><div class="c-h"><span class="c-l">Total</span><div class="c-ic ig">🎓</div></div><div class="c-v">${total}</div><div class="c-d up">↑ alunos cadastrados</div></div>
-    <div class="card"><div class="c-h"><span class="c-l">ABA</span><span class="tag tp">${total?Math.round(aba/total*100):0}%</span></div><div class="c-v" style="color:#60a5fa">${aba}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>
-    <div class="card"><div class="c-h"><span class="c-l">Autismo</span><span class="tag tg">${total?Math.round(aut/total*100):0}%</span></div><div class="c-v" style="color:var(--green)">${aut}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>
-    <div class="card"><div class="c-h"><span class="c-l">Desenvolvimento</span><span class="tag tb">${total?Math.round(dev/total*100):0}%</span></div><div class="c-v" style="color:var(--cyan)">${dev}</div><div class="c-d" style="color:var(--muted)">alunos</div></div>`;
-}
-
-function renderTurmas(){
-  const grid=document.getElementById('turmas-grid');
-  const empty=document.getElementById('turmas-empty');
-  if(!S.turmas.length){grid.innerHTML='';grid.style.display='none';empty.style.display='block';return;}
-  grid.style.display='grid';empty.style.display='none';
-  grid.innerHTML=S.turmas.map(t=>{
-    const cnt=S.alunos.filter(a=>a.turma===t.name).length;
-    const pct=Math.round(cnt/t.max*100);
-    return `<div class="turma-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
-        <div class="turma-name">${t.name}</div>
-        <div style="display:flex;gap:5px"><button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="openM('turma','${t.id}')">✏</button><button class="btn br" style="padding:4px 8px;font-size:11px" onclick="delTurma('${t.id}')">🗑</button></div>
-      </div>
-      <div class="turma-info">${t.segment} · ${t.shift} · ${t.days}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-        <div style="flex:1;background:var(--s2);border-radius:10px;height:6px;margin-right:10px"><div style="height:100%;background:var(--accent);border-radius:10px;width:${Math.min(pct,100)}%;transition:width .4s"></div></div>
-        <span style="font-size:11px;color:var(--muted)">${cnt}/${t.max}</span>
-      </div>
-    </div>`}).join('');
-}
-function delTurma(id){confirm2('Excluir esta turma?',()=>{S.turmas=S.turmas.filter(t=>t.id!=id);save();renderTurmas();toast('Turma excluída','r');})}
-
-let _finView='bar', _finChartMain=null, _finChartDonut=null;
-
-function setFinView(type){
-  _finView=type;
-  document.getElementById('fin-btn-bar').className=type==='bar'?'btn bp':'btn bg';
-  document.getElementById('fin-btn-line').className=type==='line'?'btn bp':'btn bg';
-  renderFinCharts();
-}
-
-function renderFin(filter=''){
-  const list=S.financeiro.filter(f=>!filter||f.status===filter);
-  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+f.value,0);
-  const pend=S.financeiro.filter(f=>f.status==='Pendente').reduce((s,f)=>s+f.value,0);
-  const late=S.financeiro.filter(f=>f.status==='Atrasado').reduce((s,f)=>s+f.value,0);
-  const total=paid+pend+late;
-  document.getElementById('fin-cards').innerHTML=`
-    <div class="fc g"><div class="fc-l">✅ Recebido</div><div class="fc-v">${fmtVal(paid)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Pago').length} pagamentos</div></div>
-    <div class="fc y"><div class="fc-l">⏳ Pendente</div><div class="fc-v">${fmtVal(pend)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Pendente').length} cobranças</div></div>
-    <div class="fc r"><div class="fc-l">🚨 Atrasado</div><div class="fc-v">${fmtVal(late)}</div><div class="fc-s">${S.financeiro.filter(f=>f.status==='Atrasado').length} vencidos</div></div>
-    <div class="fc bl"><div class="fc-l">📊 Inadimplência</div><div class="fc-v">${total?Math.round((late/total)*100):0}%</div><div class="fc-s">Meta: abaixo de 5%</div></div>`;
-  document.getElementById('fin-tb').innerHTML=list.length?list.map(f=>`
-    <tr>
-      <td>${f.student}</td><td>${f.desc}</td><td>${f.due||'—'}</td>
-      <td><strong style="color:${f.status==='Pago'?'var(--green)':f.status==='Atrasado'?'var(--red)':'var(--yellow)'}">${fmtVal(f.value)}</strong></td>
-      <td>${stTag(f.status)}</td>
-      <td><div style="display:flex;gap:5px">
-        ${f.status!=='Pago'?`<button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="markPago('${f.id}')">✓ Pago</button>`:''}
-        <button class="btn bg" style="padding:4px 8px;font-size:11px" onclick="openM('fin','${f.id}')">✏</button>
-        <button class="btn br" style="padding:4px 8px;font-size:11px" onclick="delFin('${f.id}')">🗑</button>
-      </div></td>
-    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento</td></tr>';
-  renderFinCharts();
-}
-
-function renderFinCharts(){
-  if(typeof Chart==='undefined') return;
-  const months=[];
-  const now=new Date();
-  for(let i=5;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months.push({label:d.toLocaleString('pt-BR',{month:'short',year:'2-digit'}),key:`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`,pago:0,pendente:0,atrasado:0});
-  }
-  S.financeiro.forEach(f=>{
-    if(!f.due) return;
-    const parts=f.due.split('/');
-    if(parts.length<3) return;
-    const key=`${parts[1]}/${parts[2]}`;
-    const m=months.find(m=>m.key===key);
-    if(!m) return;
-    if(f.status==='Pago') m.pago+=f.value;
-    else if(f.status==='Pendente') m.pendente+=f.value;
-    else if(f.status==='Atrasado') m.atrasado+=f.value;
-  });
-  const labels=months.map(m=>m.label);
-  const dsPago={label:'Recebido',data:months.map(m=>m.pago),backgroundColor:'rgba(16,185,129,.75)',borderColor:'#10b981',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#10b981',pointRadius:5,pointHoverRadius:7};
-  const dsPend={label:'Pendente',data:months.map(m=>m.pendente),backgroundColor:'rgba(245,158,11,.75)',borderColor:'#f59e0b',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#f59e0b',pointRadius:5,pointHoverRadius:7};
-  const dsLate={label:'Atrasado',data:months.map(m=>m.atrasado),backgroundColor:'rgba(239,68,68,.75)',borderColor:'#ef4444',borderWidth:2,borderRadius:6,fill:_finView==='line',tension:.4,pointBackgroundColor:'#ef4444',pointRadius:5,pointHoverRadius:7};
-  const chartOpts={responsive:true,maintainAspectRatio:false,animation:{duration:600,easing:'easeInOutQuart'},interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1f2937',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'#374151',borderWidth:1,padding:12,callbacks:{label:ctx=>' '+ctx.dataset.label+': R$ '+ctx.parsed.y.toFixed(2).replace('.',',')} }}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$ '+v.toLocaleString('pt-BR')},beginAtZero:true}}};
-  const mainCtx=document.getElementById('fin-chart-main');
-  if(_finChartMain) _finChartMain.destroy();
-  _finChartMain=new Chart(mainCtx,{type:_finView==='line'?'line':'bar',data:{labels,datasets:_finView==='line'?[dsPago,dsPend,dsLate]:[{...dsPago,stack:'s'},{...dsPend,stack:'s'},{...dsLate,stack:'s'}]},options:{...chartOpts,plugins:{...chartOpts.plugins,legend:{display:true,position:'top',labels:{color:'#94a3b8',boxWidth:12,padding:16,font:{size:11}}}}}});
-  // Donut
-  const paid=S.financeiro.filter(f=>f.status==='Pago').reduce((s,f)=>s+f.value,0);
-  const pend=S.financeiro.filter(f=>f.status==='Pendente').reduce((s,f)=>s+f.value,0);
-  const late=S.financeiro.filter(f=>f.status==='Atrasado').reduce((s,f)=>s+f.value,0);
-  const dCtx=document.getElementById('fin-chart-donut');
-  if(_finChartDonut) _finChartDonut.destroy();
-  _finChartDonut=new Chart(dCtx,{type:'doughnut',data:{labels:['Recebido','Pendente','Atrasado'],datasets:[{data:[paid,pend,late],backgroundColor:['rgba(16,185,129,.85)','rgba(245,158,11,.85)','rgba(239,68,68,.85)'],borderColor:['#10b981','#f59e0b','#ef4444'],borderWidth:2,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',animation:{duration:700,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1f2937',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'#374151',borderWidth:1,padding:12,callbacks:{label:ctx=>' '+ctx.label+': R$ '+ctx.parsed.toFixed(2).replace('.',',')} }}}}});
-  const total=paid+pend+late;
-  document.getElementById('fin-legend').innerHTML=[['#10b981','Recebido',paid],['#f59e0b','Pendente',pend],['#ef4444','Atrasado',late]].map(([c,l,v])=>`<div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="flex:1;font-size:12px;color:var(--sub)">${l}</span><span style="font-size:12px;font-weight:700;color:var(--text)">${total?Math.round(v/total*100):0}%</span></div>`).join('');
-}
-function markPago(id){const f=S.financeiro.find(f=>f.id==id);if(f){f.status='Pago';save();renderFin();toast('Pagamento confirmado!','g');}}
-function delFin(id){confirm2('Excluir este lançamento?',()=>{S.financeiro=S.financeiro.filter(f=>f.id!=id);save();renderFin();toast('Lançamento excluído','r');})}
-
-// ════════════════════════════════
-//  SETTINGS
-// ════════════════════════════════
-function loadCfg(){
-  const s=S.settings;
-  document.getElementById('cfg-name').value=s.name||'ABA Edu';
-  document.getElementById('cfg-slogan').value=s.slogan||'';
-  document.getElementById('cfg-logoic').value=s.logoic||'A';
-  document.getElementById('cfg-user').value=s.user||'Admin';
-  document.getElementById('cfg-role').value=s.role||'Administrador';
-  document.getElementById('cfg-av').value=s.av||'AK';
-  document.getElementById('cfg-clr-hex').value=s.accent||'#2563eb';
-  document.querySelectorAll('.clr-dot').forEach(d=>{d.classList.toggle('on',d.dataset.c===s.accent)});
-}
-function applySettings(){
-  const nm=document.getElementById('cfg-name').value||'ABA Edu';
-  const ic=document.getElementById('cfg-logoic').value.toUpperCase()||'A';
-  const slogan=document.getElementById('cfg-slogan').value;
-  const user=document.getElementById('cfg-user').value||'Admin';
-  const role=document.getElementById('cfg-role').value||'Administrador';
-  const avI=document.getElementById('cfg-av').value.toUpperCase()||'AK';
-  S.settings={...S.settings,name:nm,logoic:ic,slogan,user,role,av:avI};
-  save();
-  document.getElementById('logo-ic').textContent=ic;
-  document.getElementById('logo-nm').innerHTML=nm+' <b>Edu</b>';
-  document.getElementById('u-nm').textContent=user;
-  document.getElementById('u-rl').textContent=role;
-  document.getElementById('u-av').textContent=avI;
-  document.title=nm;
-}
-function pickClr(el){
-  document.querySelectorAll('.clr-dot').forEach(d=>d.classList.remove('on'));
-  el.classList.add('on');
-  const c=el.dataset.c;
-  setColor(c);
-  document.getElementById('cfg-clr-hex').value=c;
-}
-function setCustomClr(v){if(!/^#[0-9a-fA-F]{6}$/.test(v))return;setColor(v);document.querySelectorAll('.clr-dot').forEach(d=>d.classList.remove('on'));document.getElementById('cfg-clr-custom').value=v;}
-function setColor(c){document.documentElement.style.setProperty('--accent',c);document.documentElement.style.setProperty('--al',hexToRgba(c,.13));S.settings.accent=c;save();toast('Cor aplicada!','b')}
-function hexToRgba(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return `rgba(${r},${g},${b},${a})`}
-function exportData(){
-  const a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S,null,2));
-  a.download='aba-edu-dados.json';a.click();
-  toast('Dados exportados!','g');
-}
-function confirmClear(){confirm2('Resetar TODOS os dados do sistema? Esta ação não pode ser desfeita.',()=>{localStorage.removeItem('aba-state');location.reload();})}
-
-// ════════════════════════════════
-//  CHAT
-// ════════════════════════════════
-const chats=[
-  {nm:'Maria Silva',av:'ava',ini:'MS',st:'online',msgs:[{rx:true,t:'Olá! Gostaria de saber sobre os cursos.',ts:'14:32'},{rx:false,t:'Olá Maria! Temos ABA, Autismo e Desenvolvimento. Qual te interessa?',ts:'14:33'},{rx:true,t:'ABA! Quais horários disponíveis?',ts:'14:34'},{rx:false,t:'Turmas manhã (8h–12h) e tarde (14h–18h), 3x/semana.',ts:'14:35'},{rx:true,t:'Qual o valor e como me matriculo?',ts:'14:36'}]},
-  {nm:'João Pedro',av:'avb',ini:'JP',st:'online',msgs:[{rx:true,t:'Quando começa a próxima turma de ABA?',ts:'10:15'},{rx:false,t:'A próxima turma começa em 01/07. Quer garantir sua vaga?',ts:'10:17'},{rx:true,t:'Sim! Me envie o link do formulário.',ts:'10:18'}]},
-  {nm:'Ana Beatriz',av:'avc',ini:'AB',st:'offline',msgs:[{rx:true,t:'Preciso de informações sobre o curso de Autismo.',ts:'Ontem'}]},
-  {nm:'Carlos Melo',av:'avd',ini:'CM',st:'offline',msgs:[{rx:false,t:'Seu pagamento foi confirmado. Obrigado!',ts:'1h'},{rx:true,t:'Ok, obrigado pela informação!',ts:'1h'}]},
-  {nm:'Fernanda Lima',av:'ave',ini:'FL',st:'offline',msgs:[{rx:true,t:'Qual o valor da mensalidade?',ts:'2h'}]}
-];
-let activeChat=null;
-const autoReplies=['Obrigado! Vou pensar e entro em contato.','Qual a forma de pagamento?','Posso visitar antes de matricular?','Tem vaga para o mês que vem?','Vocês aceitam plano de saúde?','Perfeito, me manda mais detalhes.'];
-let rIdx=0;
-function renderChatList(){
-  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
-  document.getElementById('cl-list').innerHTML=chats.map((c,i)=>{
-    const col=avC[(c.nm.charCodeAt(0)||0)%avC.length];
-    const last=c.msgs[c.msgs.length-1];
-    return `<div class="wa-ci" onclick="selChat(${i},this)">
-      <div class="wa-av" style="background:${col}">${c.ini}</div>
-      <div class="wa-ci-info">
-        <div class="wa-ci-top"><span class="wa-ci-nm">${c.nm}</span><span class="wa-ci-ts">${last.ts}</span></div>
-        <div class="wa-ci-bot"><span class="wa-ci-pv">${last.t}</span></div>
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent=chats.length);
-}
-function selChat(idx,el){
-  document.querySelectorAll('.wa-ci').forEach(c=>c.classList.remove('on'));
-  if(el) el.classList.add('on');
-  activeChat=idx; activeJid=null;
-  const c=chats[idx]; if(!c) return;
-  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
-  const col=avC[(c.nm.charCodeAt(0)||0)%avC.length];
-  const cavEl=document.getElementById('cav');
-  cavEl.textContent=c.ini; cavEl.style.background=col;
-  document.getElementById('cnm').textContent=c.nm;
-  document.getElementById('cst').textContent='Demo';
-  document.getElementById('cst').style.color='#8696a0';
-  document.getElementById('wa-empty-screen').style.display='none';
-  document.getElementById('wa-chat-panel').style.display='flex';
-  const msgs=document.getElementById('msgs');
-  msgs.innerHTML=c.msgs.map(m=>`<div class="wa-msg ${m.rx?'rx':'tx'}"><div class="wa-mb">${m.t}<div class="wa-mt"><span>${m.ts}</span>${!m.rx?'<span class="ck">✓✓</span>':''}</div></div></div>`).join('');
-  msgs.scrollTop=msgs.scrollHeight;
-}
-function sendMsg(e){
-  if(e.key!=='Enter'||e.shiftKey)return;
-  const inp=document.getElementById('minput');
-  const txt=inp.value.trim();if(!txt)return;
-  inp.value='';
-  const now=new Date();
-  const ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-  // WhatsApp real
-  if(typeof activeJid!=='undefined' && activeJid && typeof waOk!=='undefined' && waOk && typeof socket!=='undefined' && socket){
-    socket.emit('send-message',{jid:activeJid,text:txt});
-    // Mostra imediatamente (otimista)
-    if(!waChats[activeJid]) waChats[activeJid]={ jid:activeJid, msgs:[], unread:0 }
-    waChats[activeJid].msgs.push({ rx:false, text:txt, ts, _pending:true })
-    waChats[activeJid].lastMsg=txt; waChats[activeJid].lastTs=ts
-    appendChatMsg(false,txt,ts)
-    refreshWaList()
-    return;
-  }
-  if(typeof activeJid!=='undefined' && activeJid && !(typeof waOk!=='undefined' && waOk)){
-    toast('WhatsApp não conectado. Conecte primeiro.','y');return;
-  }
-  // Modo demo
-  if(activeChat===null){toast('Selecione uma conversa','y');return;}
-  const c=chats[activeChat];
-  c.msgs.push({rx:false,t:txt,ts});
-  appendChatMsg(false,txt,ts);
-  const ti=document.getElementById('typing');
-  ti.textContent=c.nm+' está digitando...';
-  setTimeout(()=>{
-    ti.textContent='';
-    const reply=autoReplies[rIdx++%autoReplies.length];
-    c.msgs.push({rx:true,t:reply,ts});
-    appendChatMsg(true,reply,ts);
-  },900+Math.random()*600);
-}
-function appendChatMsg(rx,text,ts){
-  const msgs=document.getElementById('msgs');
-  const d=document.createElement('div');
-  d.className='wa-msg '+(rx?'rx':'tx');
-  d.innerHTML=`<div class="wa-mb">${text}<div class="wa-mt"><span>${ts}</span>${!rx?'<span class="ck">✓✓</span>':''}</div></div>`;
-  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
-}
-
-// ════════════════════════════════
-//  SETUP WIZARD
-// ════════════════════════════════
-let curStep=1;const totSteps=7;
-function buildSteps(){
-  const ind=document.getElementById('setup-stps');ind.innerHTML='';
-  for(let i=1;i<=totSteps;i++){
-    const d=document.createElement('div');
-    d.className='sd'+(i<curStep?' dn':i===curStep?' on':'');
-    d.textContent=i<curStep?'✓':i;ind.appendChild(d);
-    if(i<totSteps){const l=document.createElement('div');l.className='sl'+(i<curStep?' dn':'');ind.appendChild(l);}
-  }
-  document.getElementById('setup-ctr').textContent=curStep+' / '+totSteps;
-  document.getElementById('setup-prev').style.visibility=curStep===1?'hidden':'visible';
-  document.getElementById('setup-next').textContent=curStep===totSteps?'✓ Concluir':'Próximo →';
-  document.getElementById('setup-sub').textContent='Passo '+curStep+' de '+totSteps;
-}
-function setupStep(d){
-  if(curStep+d<1)return;
-  if(curStep+d>totSteps){closeM('setup');toast('Configuração salva!','g');return}
-  document.getElementById('stp'+curStep).classList.remove('on');
-  curStep+=d;
-  document.getElementById('stp'+curStep).classList.add('on');
-  buildSteps();
-}
-function selOpt(el){el.closest('.opt-g').querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));el.classList.add('on')}
-
-// ════════════════════════════════
-//  CONFIRM DIALOG
-// ════════════════════════════════
-function confirm2(msg,cb){
-  document.getElementById('cf-msg').textContent=msg;
-  document.getElementById('cf-ok').onclick=()=>{cb();closeM('confirm')};
-  document.getElementById('ov-confirm').classList.remove('hide');
-}
-
-// ════════════════════════════════
-//  TOAST
-// ════════════════════════════════
-function toast(msg,type='b'){
-  const clrs={g:'var(--green)',r:'var(--red)',y:'var(--yellow)',b:'var(--accent)'};
-  const ics={g:'✅',r:'❌',y:'⚠️',b:'ℹ️'};
-  const el=document.createElement('div');
-  el.className='toast';
-  el.style.borderLeft=`3px solid ${clrs[type]}`;
-  el.innerHTML=`<span style="font-size:17px">${ics[type]}</span><span style="flex:1">${msg}</span><button class="toast-x" onclick="this.parentElement.remove()">✕</button>`;
-  document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),200)},3500);
-}
-function showNotifs(){
-  toast('3 novas mensagens no chat','b');
-  toast('Pagamento de Isabela Cruz vencido','y');
-  toast('2 leads aguardam resposta','b');
-  document.getElementById('nd').style.display='none';
-}
-function gSearch(v){
-  if(!v)return;
-  const pages=['contatos','alunos'];
-  pages.forEach(pg=>document.querySelectorAll(`#pg-${pg} tbody tr`).forEach(r=>{
-    r.style.display=r.textContent.toLowerCase().includes(v.toLowerCase())?'':'none';
-  }));
-}
-
-// ════════════════════════════════
-//  WHATSAPP via Socket.io
-// ════════════════════════════════
-let socket = null
-let waOk   = false
-let activeJid = null   // JID do contato WhatsApp selecionado (null = mock)
-let waChats = {}       // { jid: { name, phone, msgs:[], unread } }
-
-function initSocket(){
-  if(typeof io === 'undefined') return // Socket.io não disponível (aberto como arquivo)
-  try {
-    socket = io('http://localhost:3000', { timeout: 3000 })
-
-    socket.on('connect', () => {
-      toast('Servidor ABA Edu conectado','g')
+  const now    = new Date()
+  const months = []
+  for (let i=5; i>=0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1)
+    months.push({
+      label: d.toLocaleDateString('pt-BR',{month:'short'}),
+      key:   `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
     })
-    socket.on('connect_error', () => {
-      // Servidor offline — modo demo
-    })
-
-    socket.on('wa-status', ({ connected, phone }) => {
-      waOk = connected
-      const led  = document.getElementById('wa-led')
-      const stxt = document.getElementById('wa-status-txt')
-      const ptxt = document.getElementById('wa-phone-txt')
-      const cBtn = document.getElementById('wa-connect-btn')
-      const dBtn = document.getElementById('wa-disconnect-btn')
-      if(connected){
-        led.style.background   = '#00a884'
-        led.style.boxShadow    = '0 0 0 3px rgba(0,168,132,.25)'
-        stxt.textContent       = 'Conectado'
-        stxt.style.color       = '#00a884'
-        ptxt.textContent       = phone ? `+${phone}` : ''
-        cBtn.style.display     = 'none'
-        dBtn.style.display     = ''
-        // Fechar QR modal e mostrar sucesso
-        document.getElementById('qr-waiting').style.display='none'
-        document.getElementById('qr-box').style.display='none'
-        document.getElementById('qr-done').style.display=''
-        document.getElementById('qr-phone').textContent=phone?`Número: +${phone}`:'Conectado com sucesso'
-        document.getElementById('qr-sub').textContent='Conectado!'
-        toast('WhatsApp conectado com sucesso!','g')
-        refreshWaList()
-      } else {
-        led.style.background   = '#555'
-        led.style.boxShadow    = 'none'
-        stxt.textContent       = 'Desconectado'
-        stxt.style.color       = '#8696a0'
-        ptxt.textContent       = ''
-        cBtn.style.display     = ''
-        dBtn.style.display     = 'none'
-      }
-    })
-
-    socket.on('qr', (dataUrl) => {
-      document.getElementById('qr-waiting').style.display='none'
-      document.getElementById('qr-box').style.display=''
-      document.getElementById('qr-done').style.display='none'
-      document.getElementById('qr-img').src=dataUrl
-      document.getElementById('qr-sub').textContent='Escaneie com seu WhatsApp'
-      document.getElementById('ov-qr').classList.remove('hide')
-    })
-
-    socket.on('qr-done', () => {
-      document.getElementById('qr-waiting').style.display='none'
-      document.getElementById('qr-box').style.display='none'
-      document.getElementById('qr-done').style.display=''
-    })
-
-    // Nova mensagem do WhatsApp real
-    socket.on('new-message', ({ jid, name, phone, text, ts }) => {
-      if(!waChats[jid]) waChats[jid]={ jid, name, phone, msgs:[], unread:0 }
-      waChats[jid].msgs.push({ rx:true, text, ts })
-      waChats[jid].lastMsg = text
-      waChats[jid].lastTs  = ts
-      if(activeJid!==jid) waChats[jid].unread=(waChats[jid].unread||0)+1
-      else appendChatMsg(true, text, ts)
-      refreshWaList()
-      toast(`💬 ${name}: ${text.substring(0,40)}...`,'b')
-      document.getElementById('nb-cht').textContent=
-        Object.values(waChats).reduce((s,c)=>s+(c.unread||0),0)||'0'
-    })
-
-    socket.on('contacts-update', (list) => {
-      list.forEach(c=>{
-        if(!waChats[c.jid]) waChats[c.jid]={ ...c, msgs:[], unread:0 }
-        else { waChats[c.jid].name=c.name; waChats[c.jid].phone=c.phone }
-      })
-      refreshWaList()
-    })
-
-    socket.on('message-history', ({ jid, messages: msgs }) => {
-      if(waChats[jid]) waChats[jid].msgs=msgs
-      if(activeJid===jid) renderWaMsgs(jid)
-    })
-
-    socket.on('message-sent', ({ jid, text, ts }) => {
-      if(!waChats[jid]) waChats[jid]={ jid, msgs:[], unread:0 }
-      // Remove o _pending e confirma com o ts do servidor
-      const idx = waChats[jid].msgs.findIndex(m=>m._pending && m.text===text)
-      if(idx>=0) { waChats[jid].msgs[idx]._pending=false; waChats[jid].msgs[idx].ts=ts }
-      else waChats[jid].msgs.push({ rx:false, text, ts })
-    })
-
-    socket.on('send-error', (msg) => toast('Erro ao enviar: '+msg,'r'))
-
-  } catch(e){}
-}
-
-function openQR(){
-  document.getElementById('qr-waiting').style.display=''
-  document.getElementById('qr-box').style.display='none'
-  document.getElementById('qr-done').style.display='none'
-  document.getElementById('qr-sub').textContent='Gerando QR Code...'
-  document.getElementById('ov-qr').classList.remove('hide')
-}
-
-function waLogout(){
-  if(socket) socket.emit('wa-logout')
-  waOk=false; activeJid=null; waChats={}
-  refreshWaList()
-  toast('WhatsApp desconectado','y')
-}
-
-function refreshWaList(){
-  const waList=Object.values(waChats);
-  const cl=document.getElementById('cl-list');
-  if(waOk && !waList.length){
-    cl.innerHTML=`<div style="padding:40px 20px;text-align:center"><div style="font-size:40px;margin-bottom:12px;opacity:.3">💬</div><div style="color:#8696a0;font-size:13px;line-height:1.7">Nenhuma conversa ainda.<br>Clique em ✏ para iniciar.</div></div>`;
-    document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent='0');
-    return;
   }
-  if(!waOk && !waList.length){ renderChatList(); return; }
-  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
-  const items=waList.map(c=>{
-    const nm=c.name||c.phone||c.jid;
-    const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    const col=avC[(nm.charCodeAt(0)||0)%avC.length];
-    return `<div class="wa-ci ${activeJid===c.jid?'on':''}" data-jid="${c.jid}" onclick="selWaChat('${c.jid}',this)">
-      <div class="wa-av" style="background:${col}">${ini}</div>
-      <div class="wa-ci-info">
-        <div class="wa-ci-top"><span class="wa-ci-nm">${nm}</span><span class="wa-ci-ts">${c.lastTs||''}</span></div>
-        <div class="wa-ci-bot"><span class="wa-ci-pv">${c.lastMsg||'Nova conversa'}</span>${c.unread?`<span class="wa-ci-unr">${c.unread}</span>`:''}</div>
-      </div>
-    </div>`;
-  }).join('');
-  cl.innerHTML=items;
-  document.getElementById('chat-count')&&(document.getElementById('chat-count').textContent=waList.length);
+
+  const rec  = months.map(m=>data.filter(l=>l.tipo==='receita'&&l.created_at?.startsWith(m.key)).reduce((s,l)=>s+Number(l.valor),0))
+  const desp = months.map(m=>data.filter(l=>l.tipo==='despesa'&&l.created_at?.startsWith(m.key)).reduce((s,l)=>s+Number(l.valor),0))
+
+  const ctx = document.getElementById('chart-fin')
+  if (ctx) {
+    if (window._chartFin) window._chartFin.destroy()
+    window._chartFin = new Chart(ctx, {
+      type:'bar',
+      data:{labels:months.map(m=>m.label),datasets:[
+        {label:'Receita',data:rec,backgroundColor:'#10b981',borderRadius:4},
+        {label:'Despesa',data:desp,backgroundColor:'#ef4444',borderRadius:4},
+      ]},
+      options:{plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}},responsive:true}
+    })
+  }
+
+  const mesKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  const recMes  = data.filter(l=>l.tipo==='receita'&&l.created_at?.startsWith(mesKey)).reduce((s,l)=>s+Number(l.valor),0)
+  const despMes = data.filter(l=>l.tipo==='despesa'&&l.created_at?.startsWith(mesKey)).reduce((s,l)=>s+Number(l.valor),0)
+  const ctx2 = document.getElementById('chart-fin-donut')
+  if (ctx2) {
+    if (window._chartFinDonut) window._chartFinDonut.destroy()
+    window._chartFinDonut = new Chart(ctx2, {
+      type:'doughnut',
+      data:{labels:['Receita','Despesa'],datasets:[{data:[recMes||0,despMes||0],backgroundColor:['#10b981','#ef4444'],borderWidth:0}]},
+      options:{plugins:{legend:{position:'bottom'}},responsive:true,cutout:'65%'}
+    })
+  }
 }
 
-function selWaChat(jid,el){
-  document.querySelectorAll('.wa-ci').forEach(c=>c.classList.remove('on'));
-  if(el) el.classList.add('on');
-  activeJid=jid; activeChat=null;
-  const c=waChats[jid]; if(!c) return;
-  c.unread=0;
-  const nm=c.name||c.phone||jid;
-  const ini=nm.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-  const avC=['#d97706','#7c3aed','#0891b2','#059669','#dc2626','#db2777','#2563eb','#16a34a'];
-  const col=avC[(nm.charCodeAt(0)||0)%avC.length];
-  const cavEl=document.getElementById('cav');
-  cavEl.textContent=ini; cavEl.style.background=col;
-  document.getElementById('cnm').textContent=nm;
-  document.getElementById('cst').textContent=`📱 +${c.phone||jid.replace('@s.whatsapp.net','')}`;
-  document.getElementById('cst').style.color='#00a884';
-  document.getElementById('wa-empty-screen').style.display='none';
-  document.getElementById('wa-chat-panel').style.display='flex';
-  if(socket) socket.emit('get-messages',jid);
-  else renderWaMsgs(jid);
+function roleLabel(r) { return {admin:'Administrador',terapeuta:'Terapeuta',recepcao:'Recepção'}[r]||r }
+function statusBadge(s) {
+  const m = {agendada:'badge-blue',realizada:'badge-green',falta:'badge-yellow',cancelada:'badge-red'}
+  return `<span class="badge ${m[s]||'badge-gray'}">${s||'–'}</span>`
 }
-
-function renderWaMsgs(jid){
-  const c=waChats[jid];if(!c)return;
-  const msgs=document.getElementById('msgs');
-  msgs.innerHTML=c.msgs.map(m=>`<div class="wa-msg ${m.rx?'rx':'tx'}"><div class="wa-mb">${m.text}<div class="wa-mt"><span>${m.ts}</span>${!m.rx?'<span class="ck">✓✓</span>':''}</div></div></div>`).join('');
-  msgs.scrollTop=msgs.scrollHeight;
+function clearForm(ids) { ids.forEach(id => { document.getElementById(id).value='' }) }
+function toast(msg, type='') {
+  const el = document.getElementById('toast')
+  el.textContent=msg; el.className='show'+(type?' '+type:'')
+  clearTimeout(window._tt); window._tt=setTimeout(()=>{ el.className='' },3000)
 }
-
-function appendMsg(rx, text, ts){ appendChatMsg(rx, text, ts) }
-
-function filterChats(v){
-  document.querySelectorAll('#cl-list .wa-ci').forEach(el=>{
-    el.style.display=el.textContent.toLowerCase().includes((v||'').toLowerCase())?'':'none';
-  });
-}
-
-function iniciarConversa(){
-  const num = document.getElementById('nc-num').value.replace(/\D/g,'').trim()
-  const msg = document.getElementById('nc-msg').value.trim()
-  if(!num){ toast('Informe o número','r'); return }
-  if(!msg){ toast('Informe a mensagem','r'); return }
-  if(!waOk || !socket){ toast('WhatsApp não está conectado','r'); return }
-  const jid = num + '@s.whatsapp.net'
-  // Cria/atualiza contato na lista
-  if(!waChats[jid]) waChats[jid]={ jid, name:'+'+num, phone:num, msgs:[], unread:0 }
-  socket.emit('send-message', { jid, text:msg })
-  waChats[jid].lastMsg = msg
-  waChats[jid].lastTs  = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
-  closeM('nova-conversa')
-  document.getElementById('nc-num').value=''
-  document.getElementById('nc-msg').value=''
-  refreshWaList()
-  // Abre a conversa
-  setTimeout(()=>{
-    const el = document.querySelector(`[data-jid="${jid}"]`)
-    selWaChat(jid, el)
-  }, 100)
-  toast('Mensagem enviada para +'+num,'g')
-}
-
-// sendMsg já está definido acima com suporte a WhatsApp + demo
-
-// ════════════════════════════════
-//  INIT
-// ════════════════════════════════
-(function init(){
-  const s=S.settings;
-  document.documentElement.style.setProperty('--accent',s.accent||'#2563eb');
-  document.documentElement.style.setProperty('--al',hexToRgba(s.accent||'#2563eb',.13));
-  document.getElementById('logo-ic').textContent=s.logoic||'A';
-  document.getElementById('logo-nm').innerHTML=(s.name||'ABA')+' <b>Edu</b>';
-  document.getElementById('u-nm').textContent=s.user||'Admin';
-  document.getElementById('u-rl').textContent=s.role||'Administrador';
-  document.getElementById('u-av').textContent=s.av||'AK';
-  document.title=(s.name||'ABA')+' Edu';
-  renderChatList();
-  updateDash();
-  setTimeout(animChart,200);
-  document.querySelectorAll('.ov').forEach(ov=>{
-    ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.add('hide')});
-  });
-})();
-</script>
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- Socket.io client (carregado apenas quando servidor está rodando) -->
-<script>
-  // Tenta carregar Socket.io do servidor local
-  const s=document.createElement('script')
-  s.src='http://localhost:3000/socket.io/socket.io.js'
-  s.onload=()=>{ if(typeof initSocket==='function') initSocket() }
-  document.head.appendChild(s)
 </script>
 </body>
 </html>
