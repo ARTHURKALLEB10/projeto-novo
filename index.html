@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Clínica ABA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -223,6 +222,9 @@ tr:hover td{background:#f9fafb}
     </div>
     <button class="btn-login" id="btn-login">Entrar</button>
     <div id="login-error"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="entrarDemo()" style="background:none;border:none;color:var(--teal);font-size:.82rem;cursor:pointer;text-decoration:underline">Ver demonstração (sem login)</button>
+    </div>
   </div>
 </div>
 
@@ -593,21 +595,63 @@ let allProfiles    = []
 let editingId      = null
 let chatTarget     = null
 let waCurrentJid   = null
-const socket       = io()
+const socket       = (typeof io !== 'undefined') ? io() : { on:()=>{}, emit:()=>{} }
 
 // ─── BOOT ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})
-  checkSession()
   document.querySelectorAll('.nav-item[data-page]').forEach(item =>
     item.addEventListener('click', () => navigateTo(item.dataset.page)))
-  setupWA()
+  // Carrega Socket.io dinamicamente para não travar a página
+  const s = document.createElement('script')
+  s.src = '/socket.io/socket.io.js'
+  s.onload = () => {
+    window._socket = io()
+    setupWA(window._socket)
+  }
+  s.onerror = () => setupWA({ on:()=>{}, emit:()=>{} })
+  document.head.appendChild(s)
+  checkSession()
 })
 
 async function checkSession() {
-  const { data: { session } } = await sb.auth.getSession()
-  if (session) await enterApp(session.user)
+  try {
+    const { data: { session } } = await sb.auth.getSession()
+    if (session) await enterApp(session.user)
+  } catch(e) {}
+}
+
+function entrarDemo() {
+  currentUser    = { id: 'demo', email: ADMIN_MASTER }
+  currentProfile = { id: 'demo', email: ADMIN_MASTER, nome: 'Admin Demo', role: 'admin', ativo: true }
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'flex'
+  document.getElementById('sb-nome').textContent = 'Admin Demo'
+  document.getElementById('sb-role').textContent = 'Administrador'
+  document.getElementById('sb-avatar').textContent = 'A'
+  document.querySelectorAll('.admin-only').forEach(el => el.style.removeProperty('display'))
+  allPacientes = [
+    {id:'p1',nome:'João Silva',responsavel:'Maria Silva',telefone:'(11) 99999-0001',diagnostico:'TEA',ativo:true},
+    {id:'p2',nome:'Ana Costa',responsavel:'Pedro Costa',telefone:'(11) 99999-0002',diagnostico:'TDAH',ativo:true},
+    {id:'p3',nome:'Lucas Souza',responsavel:'Carla Souza',telefone:'(11) 99999-0003',diagnostico:'TEA',ativo:true},
+  ]
+  allProfiles = [currentProfile,
+    {id:'t1',nome:'Dra. Fernanda',role:'terapeuta',email:'fernanda@aba.com',ativo:true},
+    {id:'t2',nome:'Dr. Ricardo',role:'terapeuta',email:'ricardo@aba.com',ativo:true},
+  ]
+  const hoje = new Date().toISOString().split('T')[0]
+  allSessoes = [
+    {id:'s1',paciente_id:'p1',terapeuta_id:'t1',inicio:`${hoje}T08:00:00`,fim:`${hoje}T09:00:00`,status:'agendada'},
+    {id:'s2',paciente_id:'p2',terapeuta_id:'t2',inicio:`${hoje}T09:00:00`,fim:`${hoje}T10:00:00`,status:'realizada'},
+    {id:'s3',paciente_id:'p3',terapeuta_id:'t1',inicio:`${hoje}T10:00:00`,fim:`${hoje}T11:00:00`,status:'agendada'},
+  ]
+  allTurmas = [
+    {id:'tu1',nome:'Turma A — Manhã',terapeuta_id:'t1',ativa:true},
+    {id:'tu2',nome:'Turma B — Tarde',terapeuta_id:'t2',ativa:true},
+  ]
+  renderDashboard()
+  toast('Modo demonstração ativo','success')
 }
 
 // ─── AUTH ────────────────────────────────────────────────────
@@ -1102,7 +1146,8 @@ async function sendInternalMsg() {
 }
 
 // ─── WHATSAPP ────────────────────────────────────────────────
-function setupWA() {
+function setupWA(sk) {
+  if (sk) Object.assign(socket, sk)
   socket.on('wa-status', ({ connected, phone, waiting }) => {
     const badge = document.getElementById('wa-status-badge')
     const btn   = document.getElementById('wa-connect-btn')

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Clínica ABA — Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#ccfbf1;--teal-mid:#14b8a6;--sidebar-w:240px;--bg:#f0fdf9;--surface:#fff;--border:#d1fae5;--text:#134e4a;--text-muted:#6b7280;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;--radius:10px;--shadow:0 1px 4px rgba(0,0,0,.08)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--teal-dark);color:#fff;display:flex;flex-direction:column;z-index:100}
+.sidebar-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sidebar-brand .brand-name{font-size:1.25rem;font-weight:800}
+.sidebar-brand .brand-sub{font-size:.72rem;opacity:.65;margin-top:2px}
+.sidebar-user{padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.12)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--teal-mid);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+.user-nome{font-size:.85rem;font-weight:600}
+.user-role{font-size:.7rem;opacity:.6;text-transform:uppercase;letter-spacing:.06em}
+nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-section{padding:10px 18px 4px;font-size:.65rem;opacity:.5;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;transition:background .15s;font-size:.9rem;font-weight:500;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.08)}
+.nav-item.active{background:rgba(255,255,255,.14);border-left-color:#fff}
+.nav-item .icon{width:18px;text-align:center}
+.sidebar-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,.12)}
+.btn-logout{width:100%;padding:8px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:6px;font-size:.82rem;font-weight:600}
+#main{margin-left:var(--sidebar-w);height:100vh;overflow-y:auto;flex:1}
+.topbar{position:sticky;top:0;z-index:90;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1.1rem;font-weight:700}
+.topbar-date{font-size:.8rem;color:var(--text-muted)}
+.page-content{padding:24px;max-width:1300px}
+.section{display:none}.section.active{display:block}
+.cards-row{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:24px}
+.card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-stat .icon-wrap{font-size:1.4rem;margin-bottom:6px}
+.card-stat .label{font-size:.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.card-stat .value{font-size:1.9rem;font-weight:800;color:var(--teal)}
+.card-stat .sub{font-size:.78rem;color:var(--text-muted)}
+.chart-row{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin-top:16px}
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.chart-card h4{font-size:.88rem;font-weight:700;margin-bottom:14px}
+.session-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f9fafb;border-radius:8px;margin-bottom:8px}
+.session-time{font-size:.78rem;font-weight:700;color:var(--teal);min-width:48px}
+.session-name{font-size:.88rem;font-weight:600}
+.session-ter{font-size:.76rem;color:var(--text-muted)}
+.table-wrap{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.table-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.table-head h3{font-size:.95rem;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{background:#f0fdf9;text-align:left;padding:10px 14px;font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;font-size:.88rem;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9fafb}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:600}
+.badge-green{background:#d1fae5;color:#065f46}.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-yellow{background:#fef3c7;color:#92400e}.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f3f4f6;color:#374151}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:7px;font-size:.85rem;font-weight:600;transition:all .2s;cursor:pointer}
+.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:var(--teal-dark)}
+.btn-secondary{background:#f3f4f6;color:var(--text)}.btn-secondary:hover{background:#e5e7eb}
+.btn-sm{padding:5px 11px;font-size:.78rem}.btn-icon{padding:6px 8px}
+.fin-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.fin-card{background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.fin-card .fc-label{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.fin-card .fc-value{font-size:1.7rem;font-weight:800;margin-top:4px}
+.fin-card.receita .fc-value{color:var(--success)}.fin-card.despesa .fc-value{color:var(--danger)}.fin-card.saldo .fc-value{color:var(--teal)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.cal-day-head{background:#f0fdf9;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+.cal-day{background:#fff;min-height:80px;padding:5px;font-size:.75rem}
+.cal-day.today{background:#f0fdf9}
+.cal-day-num{font-weight:600;color:var(--text-muted);margin-bottom:3px}
+.cal-day.today .cal-day-num{background:var(--teal);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem}
+.cal-event{background:var(--teal);color:#fff;border-radius:4px;padding:2px 5px;margin-bottom:2px;font-size:.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-event.realizada{background:#10b981}.cal-event.falta{background:#f59e0b}.cal-event.cancelada{background:#ef4444}
+.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cal-nav h3{font-size:1rem;font-weight:700;min-width:160px;text-align:center}
+.admin-panel{background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:16px;margin-bottom:20px}
+.admin-panel h3{font-size:.9rem;font-weight:700;color:#856404;margin-bottom:12px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="sidebar-brand"><div class="brand-name">ABA</div><div class="brand-sub">Clínica de Terapias</div></div>
+    <div class="sidebar-user">
+      <div class="avatar">A</div>
+      <div><div class="user-nome">Admin Master</div><div class="user-role">Administrador</div></div>
+    </div>
+    <nav>
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" data-page="dashboard"><span class="icon">📊</span>Dashboard</div>
+      <div class="nav-item" data-page="agenda"><span class="icon">📅</span>Agenda</div>
+      <div class="nav-section">Clínica</div>
+      <div class="nav-item" data-page="pacientes"><span class="icon">🧑‍⚕️</span>Pacientes</div>
+      <div class="nav-item" data-page="turmas"><span class="icon">👥</span>Turmas</div>
+      <div class="nav-section">Comunicação</div>
+      <div class="nav-item" data-page="chat"><span class="icon">💬</span>Chat Interno</div>
+      <div class="nav-item" data-page="whatsapp"><span class="icon">📱</span>WhatsApp</div>
+      <div class="nav-section">Gestão</div>
+      <div class="nav-item" data-page="financeiro"><span class="icon">💰</span>Financeiro</div>
+      <div class="nav-item" data-page="usuarios"><span class="icon">⚙️</span>Usuários</div>
+    </nav>
+    <div class="sidebar-footer"><button class="btn-logout">Sair</button></div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <span class="topbar-date" id="topbar-date"></span>
+    </div>
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="page-dashboard">
+        <div class="admin-panel">
+          <h3>🔐 Histórico de Acessos — Admin Master</h3>
+          <table><thead><tr><th>Usuário</th><th>Papel</th><th>Data/Hora</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Admin Master</strong><br><small>cronograma@universoaba.com.br</small></td><td><span class="badge badge-blue">admin</span></td><td>12/06/2026 09:30</td></tr>
+            <tr><td><strong>Dra. Fernanda</strong><br><small>fernanda@aba.com</small></td><td><span class="badge badge-blue">terapeuta</span></td><td>12/06/2026 08:00</td></tr>
+          </tbody></table>
+        </div>
+        <div class="cards-row">
+          <div class="card card-stat"><div class="icon-wrap">📅</div><div class="label">Sessões hoje</div><div class="value">5</div><div class="sub">agendadas</div></div>
+          <div class="card card-stat"><div class="icon-wrap">✅</div><div class="label">Realizadas</div><div class="value">2</div><div class="sub">hoje</div></div>
+          <div class="card card-stat"><div class="icon-wrap">🧑‍⚕️</div><div class="label">Pacientes ativos</div><div class="value">12</div><div class="sub">cadastrados</div></div>
+          <div class="card card-stat"><div class="icon-wrap">💰</div><div class="label">Receita do mês</div><div class="value" style="font-size:1.4rem">R$ 8.400</div><div class="sub">recebido</div></div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-card">
+            <h4>Sessões da semana</h4>
+            <canvas id="chart-semana" height="160"></canvas>
+          </div>
+          <div class="chart-card">
+            <h4>Próximas sessões hoje</h4>
+            <div class="session-item"><span class="session-time">08:00</span><div><div class="session-name">João Silva</div><div class="session-ter">Dra. Fernanda</div></div><span class="badge badge-green" style="margin-left:auto">Realizada</span></div>
+            <div class="session-item"><span class="session-time">09:00</span><div><div class="session-name">Ana Costa</div><div class="session-ter">Dr. Ricardo</div></div><span class="badge badge-green" style="margin-left:auto">Realizada</span></div>
+            <div class="session-item"><span class="session-time">10:00</span><div><div class="session-name">Lucas Souza</div><div class="session-ter">Dra. Fernanda</div></div><span class="badge badge-blue" style="margin-left:auto">Agendada</span></div>
+            <div class="session-item"><span class="session-time">11:00</span><div><div class="session-name">Beatriz Lima</div><div class="session-ter">Dr. Ricardo</div></div><span class="badge badge-blue" style="margin-left:auto">Agendada</span></div>
+            <div class="session-item"><span class="session-time">14:00</span><div><div class="session-name">Pedro Alves</div><div class="session-ter">Dra. Fernanda</div></div><span class="badge badge-blue" style="margin-left:auto">Agendada</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PACIENTES -->
+      <section class="section" id="page-pacientes">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Pacientes</h3><button class="btn btn-primary btn-sm">+ Novo paciente</button></div>
+          <table><thead><tr><th>Nome</th><th>Responsável</th><th>Telefone</th><th>Diagnóstico</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong style="color:var(--teal);cursor:pointer">João Silva</strong></td><td>Maria Silva</td><td>(11) 99999-0001</td><td>TEA</td><td><span class="badge badge-green">Ativo</span></td><td><button class="btn btn-secondary btn-sm btn-icon">✏️</button></td></tr>
+            <tr><td><strong style="color:var(--teal);cursor:pointer">Ana Costa</strong></td><td>Pedro Costa</td><td>(11) 99999-0002</td><td>TDAH</td><td><span class="badge badge-green">Ativo</span></td><td><button class="btn btn-secondary btn-sm btn-icon">✏️</button></td></tr>
+            <tr><td><strong style="color:var(--teal);cursor:pointer">Lucas Souza</strong></td><td>Carla Souza</td><td>(11) 99999-0003</td><td>TEA</td><td><span class="badge badge-green">Ativo</span></td><td><button class="btn btn-secondary btn-sm btn-icon">✏️</button></td></tr>
+            <tr><td><strong style="color:var(--teal);cursor:pointer">Beatriz Lima</strong></td><td>José Lima</td><td>(11) 99999-0004</td><td>Síndrome de Down</td><td><span class="badge badge-green">Ativo</span></td><td><button class="btn btn-secondary btn-sm btn-icon">✏️</button></td></tr>
+            <tr><td><strong style="color:var(--teal);cursor:pointer">Pedro Alves</strong></td><td>Sandra Alves</td><td>(11) 99999-0005</td><td>TEA</td><td><span class="badge badge-green">Ativo</span></td><td><button class="btn btn-secondary btn-sm btn-icon">✏️</button></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- TURMAS -->
+      <section class="section" id="page-turmas">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Turmas / Grupos</h3><button class="btn btn-primary btn-sm">+ Nova turma</button></div>
+          <table><thead><tr><th>Nome</th><th>Terapeuta</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Turma A — Manhã</strong></td><td>Dra. Fernanda</td><td><span class="badge badge-green">Ativa</span></td><td><button class="btn btn-secondary btn-sm btn-icon">👥</button></td></tr>
+            <tr><td><strong>Turma B — Tarde</strong></td><td>Dr. Ricardo</td><td><span class="badge badge-green">Ativa</span></td><td><button class="btn btn-secondary btn-sm btn-icon">👥</button></td></tr>
+            <tr><td><strong>Turma C — Avançado</strong></td><td>Dra. Fernanda</td><td><span class="badge badge-green">Ativa</span></td><td><button class="btn btn-secondary btn-sm btn-icon">👥</button></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- AGENDA -->
+      <section class="section" id="page-agenda">
+        <div class="cal-nav">
+          <button class="btn btn-secondary btn-sm" onclick="calPrev()">‹</button>
+          <h3 id="cal-label"></h3>
+          <button class="btn btn-secondary btn-sm" onclick="calNext()">›</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto">+ Nova sessão</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="table-wrap" style="margin-top:16px">
+          <div class="table-head"><h3>Sessões do mês</h3></div>
+          <table><thead><tr><th>Data/Hora</th><th>Paciente</th><th>Terapeuta</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>12/06 08:00</td><td>João Silva</td><td>Dra. Fernanda</td><td><span class="badge badge-green">Realizada</span></td></tr>
+            <tr><td>12/06 09:00</td><td>Ana Costa</td><td>Dr. Ricardo</td><td><span class="badge badge-green">Realizada</span></td></tr>
+            <tr><td>12/06 10:00</td><td>Lucas Souza</td><td>Dra. Fernanda</td><td><span class="badge badge-blue">Agendada</span></td></tr>
+            <tr><td>13/06 08:00</td><td>Beatriz Lima</td><td>Dr. Ricardo</td><td><span class="badge badge-blue">Agendada</span></td></tr>
+            <tr><td>13/06 09:00</td><td>Pedro Alves</td><td>Dra. Fernanda</td><td><span class="badge badge-blue">Agendada</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section class="section" id="page-chat">
+        <div style="display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 120px);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden">
+          <div style="border-right:1px solid var(--border);overflow-y:auto">
+            <div style="padding:12px 14px;cursor:pointer;background:var(--teal-light);border-bottom:1px solid #f3f4f6"><div style="font-size:.88rem;font-weight:600">Dra. Fernanda</div><div style="font-size:.76rem;color:var(--text-muted)">Terapeuta</div></div>
+            <div style="padding:12px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6"><div style="font-size:.88rem;font-weight:600">Dr. Ricardo</div><div style="font-size:.76rem;color:var(--text-muted)">Terapeuta</div></div>
+            <div style="padding:12px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6"><div style="font-size:.88rem;font-weight:600">Recepção</div><div style="font-size:.76rem;color:var(--text-muted)">Recepção</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700">Dra. Fernanda</div>
+            <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px">
+              <div style="max-width:70%;padding:9px 13px;border-radius:12px;border-bottom-left-radius:3px;background:#f3f4f6;font-size:.88rem">Bom dia! A sessão das 10h do Lucas está confirmada?<div style="font-size:.68rem;opacity:.65;margin-top:3px">08:15</div></div>
+              <div style="max-width:70%;padding:9px 13px;border-radius:12px;border-bottom-right-radius:3px;background:var(--teal);color:#fff;font-size:.88rem;align-self:flex-end">Sim, confirmada! O responsável confirmou ontem.<div style="font-size:.68rem;opacity:.65;margin-top:3px;text-align:right">08:17</div></div>
+              <div style="max-width:70%;padding:9px 13px;border-radius:12px;border-bottom-left-radius:3px;background:#f3f4f6;font-size:.88rem">Ótimo! Obrigada 😊<div style="font-size:.68rem;opacity:.65;margin-top:3px">08:18</div></div>
+            </div>
+            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+              <input style="flex:1;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;outline:none" placeholder="Mensagem…"/>
+              <button class="btn btn-primary btn-sm">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WHATSAPP -->
+      <section class="section" id="page-whatsapp">
+        <div style="display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 120px);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden">
+          <div style="border-right:1px solid var(--border);overflow-y:auto">
+            <div style="padding:12px 14px;cursor:pointer;background:var(--teal-light);border-bottom:1px solid #f3f4f6"><div style="font-size:.88rem;font-weight:600">Maria Silva</div><div style="font-size:.76rem;color:var(--text-muted)">Confirmo a sessão de amanhã</div></div>
+            <div style="padding:12px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6"><div style="font-size:.88rem;font-weight:600">Pedro Costa</div><div style="font-size:.76rem;color:var(--text-muted)">Obrigado pelo atendimento!</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px"><span style="font-size:.85rem">🟢 Conectado: +5511999990000</span></div>
+            <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px">
+              <div style="max-width:70%;padding:9px 13px;border-radius:12px;border-bottom-left-radius:3px;background:#f3f4f6;font-size:.88rem">Boa tarde! Confirmo a sessão de amanhã às 10h.<div style="font-size:.68rem;opacity:.65;margin-top:3px">14:30</div></div>
+              <div style="max-width:70%;padding:9px 13px;border-radius:12px;border-bottom-right-radius:3px;background:#25d366;color:#fff;font-size:.88rem;align-self:flex-end">Perfeito! Estará aguardando. Até amanhã!<div style="font-size:.68rem;opacity:.65;margin-top:3px;text-align:right">14:32</div></div>
+            </div>
+            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+              <input style="flex:1;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;outline:none" placeholder="Mensagem…"/>
+              <button class="btn btn-primary btn-sm">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section class="section" id="page-financeiro">
+        <div class="fin-summary">
+          <div class="fin-card receita"><div class="fc-label">Receita do mês</div><div class="fc-value">R$ 8.400,00</div></div>
+          <div class="fin-card despesa"><div class="fc-label">Despesas do mês</div><div class="fc-value">R$ 1.200,00</div></div>
+          <div class="fin-card saldo"><div class="fc-label">Saldo</div><div class="fc-value">R$ 7.200,00</div></div>
+        </div>
+        <div class="chart-row" style="margin-bottom:20px">
+          <div class="chart-card"><h4>Receita × Despesa (6 meses)</h4><canvas id="chart-fin" height="180"></canvas></div>
+          <div class="chart-card"><h4>Distribuição do mês</h4><canvas id="chart-donut" height="180"></canvas></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head"><h3>Lançamentos</h3><button class="btn btn-primary btn-sm">+ Novo lançamento</button></div>
+          <table><thead><tr><th>Data</th><th>Descrição</th><th>Paciente</th><th>Tipo</th><th>Valor</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>01/06</td><td>Sessão individual</td><td>João Silva</td><td><span class="badge badge-green">receita</span></td><td><strong>R$ 350,00</strong></td><td><span class="badge badge-green">Pago</span></td></tr>
+            <tr><td>02/06</td><td>Sessão individual</td><td>Ana Costa</td><td><span class="badge badge-green">receita</span></td><td><strong>R$ 350,00</strong></td><td><span class="badge badge-green">Pago</span></td></tr>
+            <tr><td>05/06</td><td>Aluguel da sala</td><td>–</td><td><span class="badge badge-red">despesa</span></td><td><strong>R$ 1.200,00</strong></td><td><span class="badge badge-green">Pago</span></td></tr>
+            <tr><td>10/06</td><td>Sessão individual</td><td>Lucas Souza</td><td><span class="badge badge-green">receita</span></td><td><strong>R$ 350,00</strong></td><td><span class="badge badge-yellow">Pendente</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- USUÁRIOS -->
+      <section class="section" id="page-usuarios">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Usuários</h3><button class="btn btn-primary btn-sm">+ Novo usuário</button></div>
+          <table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Admin Master</strong></td><td>cronograma@universoaba.com.br</td><td><span class="badge badge-blue">Administrador</span></td><td><span class="badge badge-green">Ativo</span></td></tr>
+            <tr><td><strong>Dra. Fernanda</strong></td><td>fernanda@aba.com</td><td><span class="badge badge-blue">Terapeuta</span></td><td><span class="badge badge-green">Ativo</span></td></tr>
+            <tr><td><strong>Dr. Ricardo</strong></td><td>ricardo@aba.com</td><td><span class="badge badge-blue">Terapeuta</span></td><td><span class="badge badge-green">Ativo</span></td></tr>
+            <tr><td><strong>Recepção</strong></td><td>recepcao@aba.com</td><td><span class="badge badge-gray">Recepção</span></td><td><span class="badge badge-green">Ativo</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// Data e navegação
+document.getElementById('topbar-date').textContent =
+  new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})
+
+document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'))
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+    item.classList.add('active')
+    document.getElementById('page-'+item.dataset.page).classList.add('active')
+    const titles={dashboard:'Dashboard',pacientes:'Pacientes',turmas:'Turmas',agenda:'Agenda',chat:'Chat Interno',whatsapp:'WhatsApp',financeiro:'Financeiro',usuarios:'Usuários'}
+    document.getElementById('page-title').textContent = titles[item.dataset.page]||item.dataset.page
+    if(item.dataset.page==='agenda') renderCal()
+    if(item.dataset.page==='financeiro') renderCharts()
+  })
+})
+
+// Calendário
+let calY = new Date().getFullYear(), calM = new Date().getMonth()
+function renderCal(){
+  const label = new Date(calY,calM).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})
+  document.getElementById('cal-label').textContent = label.charAt(0).toUpperCase()+label.slice(1)
+  const grid=document.getElementById('cal-grid'), dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+  let h=dias.map(d=>`<div class="cal-day-head">${d}</div>`).join('')
+  const first=new Date(calY,calM,1).getDay(), total=new Date(calY,calM+1,0).getDate()
+  const today=new Date().toISOString().split('T')[0]
+  for(let i=0;i<first;i++) h+=`<div class="cal-day" style="background:#f9fafb"><div class="cal-day-num" style="color:#d1d5db">${new Date(calY,calM,0).getDate()-first+i+1}</div></div>`
+  for(let d=1;d<=total;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const isT=ds===today
+    const evs = [12,13].includes(d) ? `<div class="cal-event ${d===12?'realizada':''}">João Silva</div>` : ''
+    h+=`<div class="cal-day${isT?' today':''}"><div class="cal-day-num">${d}</div>${evs}</div>`
+  }
+  const rem=42-first-total
+  for(let i=1;i<=rem;i++) h+=`<div class="cal-day" style="background:#f9fafb"><div class="cal-day-num" style="color:#d1d5db">${i}</div></div>`
+  grid.innerHTML=h
+}
+function calPrev(){calM===0?(calM=11,calY--):calM--;renderCal()}
+function calNext(){calM===11?(calM=0,calY++):calM++;renderCal()}
+
+// Gráficos
+function renderCharts(){
+  // Barras
+  const c1=document.getElementById('chart-fin')
+  if(c1&&!c1._done){
+    c1._done=true
+    const ctx=c1.getContext('2d')
+    const meses=['Jan','Fev','Mar','Abr','Mai','Jun']
+    const rec=[5200,6100,5800,7200,7800,8400]
+    const desp=[1100,1200,1100,1300,1200,1200]
+    const W=c1.offsetWidth||400, H=180
+    c1.width=W;c1.height=H
+    ctx.clearRect(0,0,W,H)
+    const bW=30,gap=20,groupW=bW*2+8,startX=40
+    const maxV=Math.max(...rec)+1000
+    meses.forEach((m,i)=>{
+      const x=startX+i*(groupW+gap)
+      const h1=Math.round((rec[i]/maxV)*(H-40))
+      const h2=Math.round((desp[i]/maxV)*(H-40))
+      ctx.fillStyle='#10b981';ctx.fillRect(x,H-h1-20,bW,h1)
+      ctx.fillStyle='#ef4444';ctx.fillRect(x+bW+4,H-h2-20,bW,h2)
+      ctx.fillStyle='#6b7280';ctx.font='10px sans-serif';ctx.textAlign='center'
+      ctx.fillText(m,x+bW,H-4)
+    })
+  }
+  // Donut simples
+  const c2=document.getElementById('chart-donut')
+  if(c2&&!c2._done){
+    c2._done=true
+    const ctx=c2.getContext('2d'), W=c2.offsetWidth||300, H=180
+    c2.width=W;c2.height=H
+    const cx=W/2,cy=H/2-10,r=60
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,0,Math.PI*2*(8400/9600));ctx.fillStyle='#10b981';ctx.fill()
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,Math.PI*2*(8400/9600),Math.PI*2);ctx.fillStyle='#ef4444';ctx.fill()
+    ctx.beginPath();ctx.arc(cx,cy,35,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill()
+    ctx.fillStyle='#134e4a';ctx.font='bold 11px sans-serif';ctx.textAlign='center'
+    ctx.fillText('87.5%',cx,cy-2);ctx.fillText('receita',cx,cy+12)
+  }
+}
+
+// Inicializar
+renderCal()
+setTimeout(renderCharts, 100)
+</script>
+</body>
+</html>
